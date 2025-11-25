@@ -1,6 +1,11 @@
+'use client';
+
+import { useTranslation } from 'react-i18next';
 import Image from "next/image";
 
 export default function Home() {
+  const { t, i18n } = useTranslation();
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
@@ -14,24 +19,30 @@ export default function Home() {
         />
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+            {t('title')}
           </h1>
+          <div className="flex gap-4">
+            <button onClick={() => i18n.changeLanguage('en')} disabled={i18n.language.startsWith('en')}>EN</button>
+            <button onClick={() => i18n.changeLanguage('pt')} disabled={i18n.language.startsWith('pt')}>PT</button>
+            <button onClick={() => i18n.changeLanguage('es')} disabled={i18n.language.startsWith('es')}>ES</button>
+            <button onClick={() => i18n.changeLanguage('fr')} disabled={i18n.language.startsWith('fr')}>FR</button>
+          </div>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
+            {t('description.part1')}{" "}
             <a
               href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
               className="font-medium text-zinc-950 dark:text-zinc-50"
             >
-              Templates
+              {t('description.part2')}
             </a>{" "}
-            or the{" "}
+            {t('description.part3')}{" "}
             <a
               href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
               className="font-medium text-zinc-950 dark:text-zinc-50"
             >
-              Learning
+              {t('description.part4')}
             </a>{" "}
-            center.
+            {t('description.part5')}
           </p>
         </div>
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
@@ -48,7 +59,7 @@ export default function Home() {
               width={16}
               height={16}
             />
-            Deploy Now
+            {t('deploy')}
           </a>
           <a
             className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
@@ -56,7 +67,7 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Documentation
+            {t('docs')}
           </a>
         </div>
       </main>
