@@ -1,10 +1,25 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import ReactiveGridBackground from '@/components/Reactivegridbackground';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import { gsap } from 'gsap';
+import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import type { IconType } from 'react-icons';
-import { SiNextdotjs, SiTypescript, SiFramer, SiReact, SiTailwindcss, SiGreensock } from 'react-icons/si';
+import {
+  SiNextdotjs,
+  SiTypescript,
+  SiFramer,
+  SiReact,
+  SiTailwindcss,
+  SiGreensock,
+  SiPrisma,
+  SiSupabase,
+  SiNodedotjs,
+} from 'react-icons/si';
+import { HiArrowRight, HiLink } from 'react-icons/hi2';
+import { useTheme } from '@/components/ThemeProvider';
+
+gsap.registerPlugin(ScrambleTextPlugin);
 
 type LanguageCode = 'PT' | 'EN' | 'ES' | 'FR';
 
@@ -15,10 +30,12 @@ interface ProjectsSectionProps {
 interface Project {
   id: string;
   name: string;
-  shortDescription: string;
-  longDescription: string;
+  tagline: string;
+  description: string;
   role: string;
+  year: string;
   techs: string[];
+  link?: string;
 }
 
 const techIconMap: Record<string, IconType> = {
@@ -28,239 +45,365 @@ const techIconMap: Record<string, IconType> = {
   'Framer Motion': SiFramer,
   React: SiReact,
   'Tailwind CSS': SiTailwindcss,
+  Prisma: SiPrisma,
+  Supabase: SiSupabase,
+  'Node.js': SiNodedotjs,
 };
 
 const projects: Project[] = [
   {
-    id: 'immersive-portfolio',
-    name: 'Immersive Portfolio',
-    shortDescription: 'Navegação em rede hexagonal com transições cinematográficas.',
-    longDescription:
-      'Uma experiência de portfólio pensada como um playground interativo, unindo animações, microinterações e storytelling visual para apresentar seus projetos de forma memorável.',
-    role: 'Product / Frontend',
-    techs: ['Next.js', 'TypeScript', 'GSAP', 'Framer Motion'],
+    id: 'arkly',
+    name: 'Arkly',
+    tagline: 'Multi-tenant SaaS Platform',
+    description: 'Master panel for creating and managing specialized vertical CRMs. Features role-based access control, internationalization, and sophisticated data relationships.',
+    role: 'Full Stack Developer',
+    year: '2024',
+    techs: ['Next.js', 'TypeScript', 'Prisma', 'Supabase'],
   },
   {
-    id: 'creative-dashboard',
-    name: 'Creative Dashboard',
-    shortDescription: 'Painel com foco em microinterações e feedback visual.',
-    longDescription:
-      'Interface de dashboard com ênfase em estados, feedback instantâneo e sensação de fluidez, usando animações suaves e hierarquia visual clara para dados complexos.',
-    role: 'UI / Frontend',
-    techs: ['React', 'Tailwind CSS', 'Framer Motion'],
+    id: 'cleantrack',
+    name: 'CleanTrack',
+    tagline: 'Cleaning Service Management',
+    description: 'Comprehensive platform with team management, scheduling systems, inspection workflows, and real-time messaging.',
+    role: 'Full Stack Developer',
+    year: '2024',
+    techs: ['Next.js', 'TypeScript', 'Prisma', 'Tailwind CSS'],
   },
   {
-    id: 'storytelling-landing',
-    name: 'Storytelling Landing',
-    shortDescription: 'Landing page narrativa com foco em scroll e ritmo.',
-    longDescription:
-      'Uma landing que se comporta como um pequeno filme interativo, usando seções coreografadas, transições entre blocos e elementos reativos ao movimento do usuário.',
-    role: 'Experience Design',
-    techs: ['Next.js', 'GSAP', 'Design System'],
+    id: 'portfolio',
+    name: 'This Portfolio',
+    tagline: 'Immersive Experience',
+    description: 'Hexagonal network navigation with cinematic transitions, reactive backgrounds, and multi-language support.',
+    role: 'Design & Development',
+    year: '2024',
+    techs: ['Next.js', 'GSAP', 'Framer Motion', 'TypeScript'],
   },
   {
-    id: 'experimental-lab',
-    name: 'Experimental Lab',
-    shortDescription: 'Coleção de experimentos visuais e interativos.',
-    longDescription:
-      'Um espaço de experimentação para testar novas ideias de UI, animação e interação, antes de levá-las para produtos reais ou estudos de caso mais completos.',
-    role: 'Exploration',
-    techs: ['Canvas', 'Shaders', 'Prototyping'],
+    id: 'realestate',
+    name: 'Real Estate CRM',
+    tagline: 'Construction Sales Platform',
+    description: 'Property management system with sales tracking, unit inventory control, and comprehensive lead management.',
+    role: 'Frontend Developer',
+    year: '2023',
+    techs: ['React', 'TypeScript', 'Tailwind CSS', 'Node.js'],
   },
 ];
 
-const sectionCopy: Record<
-  LanguageCode,
-  {
-    eyebrow: string;
-    title: string;
-    description: string;
-    spotlightLabel: string;
-    galleryLabel: string;
-  }
-> = {
+const sectionCopy: Record<LanguageCode, {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  viewProject: string;
+  techStack: string;
+}> = {
   PT: {
-    eyebrow: 'Galeria',
-    title: 'Projetos em destaque',
-    description:
-      'Uma coleção de projetos pensados para explorar animação, narrativa e experiências digitais imersivas. Passe o mouse pelos cards para navegar pela galeria.',
-    spotlightLabel: 'Projeto em foco',
-    galleryLabel: 'Outros projetos da galeria',
+    eyebrow: 'Trabalhos',
+    title: 'Projetos',
+    subtitle: 'Uma seleção de trabalhos que representam minha jornada em criar experiências digitais.',
+    viewProject: 'Ver projeto',
+    techStack: 'Stack',
   },
   EN: {
-    eyebrow: 'Gallery',
-    title: 'Featured projects',
-    description:
-      'A collection of projects designed to explore motion, storytelling and immersive digital experiences. Hover the cards to browse the gallery.',
-    spotlightLabel: 'Project in focus',
-    galleryLabel: 'Other projects in the gallery',
+    eyebrow: 'Work',
+    title: 'Projects',
+    subtitle: 'A selection of work that represents my journey in crafting digital experiences.',
+    viewProject: 'View project',
+    techStack: 'Stack',
   },
   ES: {
-    eyebrow: 'Galería',
-    title: 'Proyectos destacados',
-    description:
-      'Una colección de proyectos pensados para explorar animación, narrativa y experiencias digitales inmersivas. Pasa el cursor sobre las tarjetas para navegar.',
-    spotlightLabel: 'Proyecto en foco',
-    galleryLabel: 'Otros proyectos de la galería',
+    eyebrow: 'Trabajos',
+    title: 'Proyectos',
+    subtitle: 'Una selección de trabajos que representan mi viaje en crear experiencias digitales.',
+    viewProject: 'Ver proyecto',
+    techStack: 'Stack',
   },
   FR: {
-    eyebrow: 'Galerie',
-    title: 'Projets en vedette',
-    description:
-      "Une collection de projets pensés pour explorer l'animation, la narration et les expériences numériques immersives. Survolez les cartes pour parcourir la galerie.",
-    spotlightLabel: 'Projet en focus',
-    galleryLabel: 'Autres projets de la galerie',
+    eyebrow: 'Travaux',
+    title: 'Projets',
+    subtitle: "Une sélection de travaux qui représentent mon parcours dans la création d'expériences digitales.",
+    viewProject: 'Voir le projet',
+    techStack: 'Stack',
   },
 };
 
-export default function ProjectsSection({ language = 'EN' }: ProjectsSectionProps) {
-  const [activeId, setActiveId] = useState<string>(projects[0]?.id);
-  const activeProject = projects.find(p => p.id === activeId) ?? projects[0];
-  const currentLanguage: LanguageCode = language ?? 'EN';
-  const copy = sectionCopy[currentLanguage];
+function ProjectCard({
+  project,
+  isActive,
+  onHover,
+  index,
+  copy,
+  primaryColor
+}: {
+  project: Project;
+  isActive: boolean;
+  onHover: () => void;
+  index: number;
+  copy: typeof sectionCopy['EN'];
+  primaryColor: string;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLHeadingElement>(null);
+
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const springX = useSpring(x, { stiffness: 150, damping: 15 });
+  const springY = useSpring(y, { stiffness: 150, damping: 15 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    x.set((e.clientX - centerX) * 0.05);
+    y.set((e.clientY - centerY) * 0.05);
+  }, [x, y]);
+
+  const handleMouseLeave = useCallback(() => {
+    x.set(0);
+    y.set(0);
+  }, [x, y]);
+
+  useEffect(() => {
+    if (isActive && nameRef.current) {
+      gsap.fromTo(nameRef.current,
+        { opacity: 0.7 },
+        {
+          opacity: 1,
+          duration: 0.4,
+          scrambleText: {
+            text: project.name,
+            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            revealDelay: 0.2,
+            speed: 0.5,
+          },
+        }
+      );
+    }
+  }, [isActive, project.name]);
 
   return (
-    <main className="relative w-screen h-screen overflow-hidden">
-      <ReactiveGridBackground />
+    <motion.div
+      ref={cardRef}
+      className="relative group cursor-pointer"
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      onMouseEnter={onHover}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        x: springX,
+        y: springY,
+      }}
+    >
+      <motion.div
+        className="absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background: `linear-gradient(135deg, ${primaryColor}30 0%, transparent 50%, ${primaryColor}20 100%)`,
+        }}
+      />
 
-      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center w-full h-full px-6 sm:px-10 gap-10 lg:gap-16">
-        <motion.section
-          initial={{ opacity: 0, y: 24 }}
+      <div className="relative rounded-2xl border border-border-subtle bg-surface-soft/80 backdrop-blur-sm overflow-hidden">
+        <div
+          className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{ backgroundColor: primaryColor }}
+        />
+
+        <div className="p-6 sm:p-8">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <motion.span
+                className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground-subtle"
+                animate={{ opacity: isActive ? 1 : 0.6 }}
+              >
+                {project.year} — {project.role}
+              </motion.span>
+              <h3
+                ref={nameRef}
+                className="text-2xl sm:text-3xl font-light tracking-tight text-foreground mt-1"
+              >
+                {project.name}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">{project.tagline}</p>
+            </div>
+
+            <motion.div
+              className="w-10 h-10 rounded-full border border-border-subtle flex items-center justify-center"
+              animate={{
+                borderColor: isActive ? primaryColor : 'hsl(var(--border-subtle))',
+                scale: isActive ? 1.1 : 1,
+              }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.div
+                animate={{ x: isActive ? 2 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <HiArrowRight
+                  className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors"
+                />
+              </motion.div>
+            </motion.div>
+          </div>
+
+          <AnimatePresence>
+            {isActive && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                  {project.description}
+                </p>
+
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-[9px] tracking-[0.2em] uppercase text-muted-foreground-subtle">
+                    {copy.techStack}
+                  </span>
+                  <div className="h-px flex-1 bg-border-subtle" />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {project.techs.map(tech => {
+                    const Icon = techIconMap[tech];
+                    return (
+                      <span
+                        key={tech}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface text-[10px] tracking-[0.15em] uppercase text-muted-foreground border border-border-subtle"
+                      >
+                        {Icon && <Icon className="w-3.5 h-3.5" style={{ color: primaryColor }} />}
+                        {tech}
+                      </span>
+                    );
+                  })}
+                </div>
+
+                {project.link && (
+                  <motion.a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-5 text-xs tracking-[0.15em] uppercase hover:text-foreground transition-colors"
+                    style={{ color: primaryColor }}
+                    whileHover={{ x: 4 }}
+                  >
+                    {copy.viewProject}
+                    <HiLink className="w-3.5 h-3.5" />
+                  </motion.a>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <motion.div
+          className="absolute bottom-0 left-0 w-full h-px"
+          style={{ backgroundColor: primaryColor }}
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: isActive ? 1 : 0 }}
+          transition={{ duration: 0.4 }}
+        />
+      </div>
+    </motion.div>
+  );
+}
+
+export default function ProjectsSection({ language = 'EN' }: ProjectsSectionProps) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const copy = sectionCopy[language];
+
+  const { primaryRgb } = useTheme();
+  const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
+
+  useEffect(() => {
+    if (titleRef.current) {
+      gsap.fromTo(titleRef.current,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: 1.2,
+          delay: 0.3,
+          scrambleText: {
+            text: copy.title,
+            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            revealDelay: 0.4,
+            speed: 0.3,
+          },
+        }
+      );
+    }
+  }, [copy.title]);
+
+  return (
+    <div className="relative w-full min-h-screen py-16 sm:py-24 px-6 sm:px-10">
+      <div className="max-w-4xl mx-auto">
+        <motion.header
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="max-w-xl text-center lg:text-left text-white"
+          className="mb-16 sm:mb-20"
         >
-          <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-white/50 mb-4">
-            {copy.eyebrow} · Projects
-          </p>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-5">
-            {copy.title}
-          </h2>
-          <p className="text-sm sm:text-base text-white/70 leading-relaxed mb-6">
-            {copy.description}
-          </p>
-
-          <span className="inline-flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase text-white/40 mb-3">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9b5cff]" />
-            {copy.spotlightLabel}
+          <span className="text-[10px] tracking-[0.4em] uppercase text-muted-foreground-subtle">
+            {copy.eyebrow}
           </span>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeProject.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3 }}
-              className="rounded-3xl border border-white/12 bg-white/5 bg-linear-to-b from-white/5 via-white/2 to-transparent shadow-[0_18px_60px_rgba(0,0,0,0.6)] backdrop-blur-md p-5 sm:p-6"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                <h3 className="text-lg sm:text-xl font-medium">{activeProject.name}</h3>
-                <span className="text-[10px] uppercase tracking-[0.2em] text-white/50">
-                  {activeProject.role}
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-white/70 mb-4">
-                {activeProject.longDescription}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {activeProject.techs.map(tech => {
-                  const Icon = techIconMap[tech];
-                  return (
-                    <span
-                      key={tech}
-                      className="px-3 py-1 rounded-full border border-white/15 bg-white/5 text-[10px] tracking-[0.12em] uppercase text-white/60 inline-flex items-center gap-1.5"
-                    >
-                      {Icon && <Icon className="w-3.5 h-3.5" />}
-                      <span>{tech}</span>
-                    </span>
-                  );
-                })}
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </motion.section>
+          <h2
+            ref={titleRef}
+            className="text-5xl sm:text-6xl md:text-7xl font-extralight tracking-tight text-foreground mt-3"
+          >
+            {copy.title}
+          </h2>
 
-        <motion.section
-          initial={{ opacity: 0, y: 24, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.1 }}
-          className="w-full max-w-xl"
-        >
-          <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/40 mb-3 text-center lg:text-left">
-            {copy.galleryLabel}
+          <div
+            className="w-16 h-px mt-6"
+            style={{ backgroundColor: `${primaryColor}66` }}
+          />
+
+          <p className="text-sm sm:text-base text-muted-foreground max-w-lg mt-6 leading-relaxed">
+            {copy.subtitle}
           </p>
+        </motion.header>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-            {projects.map(project => {
-              const isActive = project.id === activeId;
+        <div className="space-y-4 sm:space-y-6">
+          {projects.map((project, index) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              isActive={activeId === project.id}
+              onHover={() => setActiveId(project.id)}
+              index={index}
+              copy={copy}
+              primaryColor={primaryColor}
+            />
+          ))}
+        </div>
 
-              return (
-                <motion.button
-                  key={project.id}
-                  type="button"
-                  onMouseEnter={() => setActiveId(project.id)}
-                  onFocus={() => setActiveId(project.id)}
-                  onClick={() => setActiveId(project.id)}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  transition={{ duration: 0.25 }}
-                  className="relative group text-left"
-                >
-                  <motion.div
-                    className="absolute -inset-0.5 rounded-2xl bg-linear-to-br from-[#9b5cff40] via-transparent to-[#5cd9ff40] opacity-0 group-hover:opacity-100"
-                    animate={{ opacity: isActive ? 1 : 0 }}
-                    transition={{ duration: 0.25 }}
-                  />
-
-                  <div className="relative rounded-2xl border border-white/10 bg-[#04040a]/80 backdrop-blur-md px-4 py-4 sm:px-4 sm:py-4 shadow-[0_10px_40px_rgba(0,0,0,0.75)] overflow-hidden">
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <div className="flex-1">
-                        <h4 className="text-sm sm:text-base font-medium text-white mb-1">
-                          {project.name}
-                        </h4>
-                        <p className="text-[11px] sm:text-xs text-white/60">
-                          {project.shortDescription}
-                        </p>
-                      </div>
-                      <motion.span
-                        className="mt-0.5 text-[9px] uppercase tracking-[0.2em] text-white/40"
-                        animate={{
-                          opacity: isActive ? 1 : 0.4,
-                          y: isActive ? 0 : 2,
-                        }}
-                      >
-                        {isActive ? 'AGORA' : 'VER'}
-                      </motion.span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1.5 mt-1">
-                      {project.techs.slice(0, 3).map(tech => {
-                        const IconSmall = techIconMap[tech];
-                        return (
-                          <span
-                            key={tech}
-                            className="px-2 py-0.5 rounded-full bg-white/5 text-[9px] tracking-[0.15em] uppercase text-white/50 inline-flex items-center gap-1"
-                          >
-                            {IconSmall && <IconSmall className="w-3 h-3" />}
-                            <span>{tech}</span>
-                          </span>
-                        );
-                      })}
-                    </div>
-
-                    <motion.div
-                      className="absolute inset-px rounded-2xl border border-[#9b5cff] pointer-events-none"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: isActive ? 0.35 : 0 }}
-                      transition={{ duration: 0.25 }}
-                    />
-                  </div>
-                </motion.button>
-              );
-            })}
-          </div>
-        </motion.section>
+        <motion.div
+          className="flex justify-center gap-2 mt-12"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+        >
+          {projects.map((project) => (
+            <motion.button
+              key={project.id}
+              onClick={() => setActiveId(project.id)}
+              className="w-2 h-2 rounded-full transition-colors"
+              animate={{
+                backgroundColor: activeId === project.id ? primaryColor : 'hsl(var(--muted-foreground-subtle))',
+                scale: activeId === project.id ? 1.3 : 1,
+              }}
+              whileHover={{ scale: 1.4 }}
+              transition={{ duration: 0.2 }}
+            />
+          ))}
+        </motion.div>
       </div>
-    </main>
+    </div>
   );
 }

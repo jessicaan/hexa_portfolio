@@ -7,6 +7,7 @@ import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { useRef, useEffect, useState, useCallback } from 'react';
 import type { ReactElement } from 'react';
 import ReactiveGridBackground from '@/components/Reactivegridbackground';
+import { useTheme } from '@/components/ThemeProvider';
 
 gsap.registerPlugin(ScrambleTextPlugin);
 
@@ -113,7 +114,10 @@ const flagPaths: Record<string, ReactElement> = {
   ),
 };
 
-function StylizedFlag({ country, isHovered }: { country: string; isHovered: boolean }) {
+function StylizedFlag({ country, isHovered, primaryRgb }: { country: string; isHovered: boolean; primaryRgb: { r: number; g: number; b: number } }) {
+  const glowColor = `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.4)`;
+  const innerGlow = `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.3)`;
+
   return (
     <div className="relative w-16 h-16 sm:w-20 sm:h-20">
       <motion.div
@@ -124,7 +128,7 @@ function StylizedFlag({ country, isHovered }: { country: string; isHovered: bool
         }}
         transition={{ duration: 0.4 }}
         style={{
-          background: 'radial-gradient(circle, rgba(155,92,255,0.4) 0%, transparent 70%)',
+          background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`,
           filter: 'blur(20px)',
         }}
       />
@@ -134,7 +138,7 @@ function StylizedFlag({ country, isHovered }: { country: string; isHovered: bool
         className="w-full h-full rounded-2xl overflow-hidden"
         style={{
           filter: isHovered
-            ? 'drop-shadow(0 0 30px rgba(155,92,255,0.5))'
+            ? `drop-shadow(0 0 30px ${glowColor})`
             : 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))',
         }}
         animate={{
@@ -177,7 +181,7 @@ function StylizedFlag({ country, isHovered }: { country: string; isHovered: bool
         className="absolute inset-0 rounded-2xl pointer-events-none"
         animate={{
           boxShadow: isHovered
-            ? 'inset 0 0 30px rgba(155,92,255,0.3)'
+            ? `inset 0 0 30px ${innerGlow}`
             : 'inset 0 0 0px transparent',
         }}
         transition={{ duration: 0.3 }}
@@ -199,6 +203,9 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
   const exploreRef = useRef<HTMLButtonElement>(null);
   const lineRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [showExplore, setShowExplore] = useState(false);
+
+  const { primaryRgb, theme } = useTheme();
+  const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
 
   const handleLineClick = useCallback((_lineIndex: number, clickPosition: { x: number; y: number }) => {
     setShockwave({ position: clickPosition });
@@ -416,17 +423,17 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
         className="w-full h-full"
       >
-        <HexaNode size={75} color="#9b5cffc8" glowColor="#8b5cf688" onLineClick={handleLineClick}>
-          <div className="text-white font-['Geist'] pointer-events-auto flex flex-col items-center justify-center">
+        <HexaNode size={75} onLineClick={handleLineClick}>
+          <div className="text-foreground font-['Geist'] pointer-events-auto flex flex-col items-center justify-center">
 
             <div className="relative mb-8 sm:mb-10">
               <motion.div
                 className="absolute -inset-20 opacity-30"
                 animate={{
                   background: [
-                    'radial-gradient(circle at 50% 50%, rgba(155,92,255,0.15) 0%, transparent 50%)',
-                    'radial-gradient(circle at 50% 50%, rgba(155,92,255,0.25) 0%, transparent 60%)',
-                    'radial-gradient(circle at 50% 50%, rgba(155,92,255,0.15) 0%, transparent 50%)',
+                    `radial-gradient(circle at 50% 50%, rgba(${primaryRgb.r},${primaryRgb.g},${primaryRgb.b},0.15) 0%, transparent 50%)`,
+                    `radial-gradient(circle at 50% 50%, rgba(${primaryRgb.r},${primaryRgb.g},${primaryRgb.b},0.25) 0%, transparent 60%)`,
+                    `radial-gradient(circle at 50% 50%, rgba(${primaryRgb.r},${primaryRgb.g},${primaryRgb.b},0.15) 0%, transparent 50%)`,
                   ],
                 }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -434,18 +441,23 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
 
               <div
                 ref={el => { lineRefs.current[0] = el; }}
-                className="absolute -top-6 left-1/2 -translate-x-1/2 w-24 h-px bg-linear-to-r from-transparent via-white/30 to-transparent origin-center"
+                className="absolute -top-6 left-1/2 -translate-x-1/2 w-24 h-px origin-center"
+                style={{
+                  background: `linear-gradient(to right, transparent, rgba(${primaryRgb.r},${primaryRgb.g},${primaryRgb.b},0.3), transparent)`
+                }}
               />
 
               <div
                 ref={greetingRef}
                 className="text-6xl sm:text-7xl md:text-8xl font-extralight tracking-tight text-center select-none"
                 style={{
-                  background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.7) 100%)',
+                  backgroundImage: theme === 'dark'
+                    ? 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.7) 100%)'
+                    : 'linear-gradient(180deg, #1a1a1a 0%, rgba(26,26,26,0.7) 100%)',
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
                   color: 'transparent',
-                  textShadow: '0 0 80px rgba(155,92,255,0.3)',
+                  textShadow: `0 0 80px rgba(${primaryRgb.r},${primaryRgb.g},${primaryRgb.b},0.3)`,
                 }}
               >
                 {languages[0].greeting}
@@ -453,13 +465,16 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
 
               <div
                 ref={el => { lineRefs.current[1] = el; }}
-                className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-36 h-px bg-linear-to-r from-transparent via-white/20 to-transparent origin-center"
+                className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-36 h-px origin-center"
+                style={{
+                  background: `linear-gradient(to right, transparent, rgba(${primaryRgb.r},${primaryRgb.g},${primaryRgb.b},0.2), transparent)`
+                }}
               />
             </div>
 
             <motion.p
               ref={descriptionRef}
-              className="text-[10px] sm:text-xs tracking-[0.25em] uppercase text-white/50 mb-10 sm:mb-12 text-center max-w-xs sm:max-w-sm"
+              className="text-[10px] sm:text-xs tracking-[0.25em] uppercase text-muted-foreground-subtle mb-10 sm:mb-12 text-center max-w-xs sm:max-w-sm"
             >
               {languages[0].description}
             </motion.p>
@@ -484,12 +499,14 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
                     <StylizedFlag
                       country={lang.country}
                       isHovered={hoveredLang === index || activeGreeting === index}
+                      primaryRgb={primaryRgb}
                     />
 
                     <AnimatePresence>
                       {selectedLang === index && (
                         <motion.div
-                          className="absolute -inset-2 rounded-3xl border-2 border-[#9b5cff]"
+                          className="absolute -inset-2 rounded-3xl border-2"
+                          style={{ borderColor: primaryColor }}
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.8 }}
@@ -509,13 +526,14 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
                     <span className="text-[10px] tracking-[0.3em] font-medium">
                       {lang.code}
                     </span>
-                    <span className="text-[8px] tracking-[0.15em] text-white/40 font-light">
+                    <span className="text-[8px] tracking-[0.15em] text-muted-foreground-subtle font-light">
                       {lang.name}
                     </span>
                   </motion.div>
 
                   <motion.div
-                    className="mt-2 w-5 h-px bg-[#9b5cff]"
+                    className="mt-2 w-5 h-px"
+                    style={{ backgroundColor: primaryColor }}
                     initial={{ scaleX: 0 }}
                     animate={{
                       scaleX: hoveredLang === index || activeGreeting === index ? 1 : 0,
@@ -537,7 +555,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
                   key={index}
                   className="w-1 h-1 rounded-full cursor-pointer"
                   animate={{
-                    backgroundColor: activeGreeting === index ? '#9b5cff' : 'rgba(255,255,255,0.2)',
+                    backgroundColor: activeGreeting === index ? primaryColor : 'rgba(255,255,255,0.2)',
                     scale: activeGreeting === index ? 1.4 : 1,
                   }}
                   transition={{ duration: 0.3 }}
@@ -554,7 +572,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.5 }}
-                  className="text-[9px] sm:text-[10px] tracking-[0.2em] text-white/30 text-center max-w-xs"
+                  className="text-[9px] sm:text-[10px] tracking-[0.2em] text-muted-foreground-subtle text-center max-w-xs"
                 >
                   {languages[0].tip}
                 </motion.p>
@@ -569,7 +587,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                   transition={{ duration: 0.5 }}
-                  className="mt-8 px-8 py-3 bg-transparent border border-[#9b5cff40] text-white/70 text-xs tracking-[0.3em] rounded-sm hover:border-[#9b5cff] hover:text-white hover:bg-[#9b5cff10] transition-all duration-300"
+                  className="mt-8 px-8 py-3 bg-transparent border border-primary/30 text-muted-foreground text-xs tracking-[0.3em] rounded-sm hover:border-primary hover:text-foreground hover:bg-primary/10 transition-all duration-300"
                   onClick={() => {
                     const index = selectedLang ?? activeGreeting;
                     const lang = languages[index];
