@@ -14,7 +14,7 @@ interface HexaNodeProps {
 
 export default function HexaNode({
   size = 90,
-  color = '#7c43d847',
+  color = '#51ebff46',
   glowColor = '#370e791a',
   onLineClick,
   children

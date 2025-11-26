@@ -8,7 +8,7 @@ interface HexaLineProps {
     direction: { x: number; y: number };
     length?: number;
     color?: string;
-    onClick?: (event: React.MouseEvent, point: { x: number; y: number }) => void;
+    onClick?: (event: React.MouseEvent | React.PointerEvent, point: { x: number; y: number }) => void;
     index?: number;
 }
 
@@ -16,7 +16,7 @@ export default function HexaLine({
     startVertex,
     direction,
     length = 200,
-    color = '#9b5cff',
+    color = '#00f1dd',
     onClick,
     index = 0
 }: HexaLineProps) {
@@ -81,11 +81,11 @@ export default function HexaLine({
         const state = { time: 0 };
 
         const totalDuration = 4.8;
-        const segments = 40;
+        const segments = 80;
         const initialAmplitude = 18;
         const damping = 3.5;
         const waveSpeed = 26;
-        const frequency = 8;
+        const frequency = 18;
         const spatialDecay = 2;
 
         const tl = gsap.timeline({
@@ -129,7 +129,7 @@ export default function HexaLine({
         });
     }, [startVertex.x, startVertex.y, dx, dy, lineLength, buildPath, getBasePath]);
 
-    const handleClick = useCallback((e: React.MouseEvent<SVGPathElement>) => {
+    const handlePointerDown = useCallback((e: React.PointerEvent<SVGPathElement>) => {
         if (!pathRef.current || !containerRef.current) return;
 
         const svg = containerRef.current;
@@ -177,7 +177,7 @@ export default function HexaLine({
                     strokeWidth="20"
                     fill="none"
                     className="pointer-events-auto cursor-crosshair"
-                    onClick={handleClick}
+                    onPointerDown={handlePointerDown}
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                 />

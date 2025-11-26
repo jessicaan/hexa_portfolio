@@ -19,7 +19,7 @@ interface ReactiveGridBackgroundProps {
 
 export default function ReactiveGridBackground({
     gridSize = 40,
-    gridColor = '#5903e281',
+    gridColor = '#ae83ff6a',
     shockwave
 }: ReactiveGridBackgroundProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -73,6 +73,10 @@ export default function ReactiveGridBackground({
 
             const currentTime = Date.now() / 1000;
 
+            const idleWaveAmplitude = 10;
+            const idleWaveSpeed = 1.2;
+            const idleWaveFrequency = 0.003;
+
             gridPointsRef.current.forEach((row) => {
                 row.forEach((point) => {
                     const returnSpeed = 0.1;
@@ -107,8 +111,15 @@ export default function ReactiveGridBackground({
                         }
                     }
 
-                    point.x = point.baseX + point.offsetX;
-                    point.y = point.baseY + point.offsetY;
+                    const idleOffsetX =
+                        Math.sin(point.baseY * idleWaveFrequency + currentTime * idleWaveSpeed) *
+                        idleWaveAmplitude;
+                    const idleOffsetY =
+                        Math.cos(point.baseX * idleWaveFrequency + currentTime * idleWaveSpeed) *
+                        idleWaveAmplitude;
+
+                    point.x = point.baseX + point.offsetX + idleOffsetX;
+                    point.y = point.baseY + point.offsetY + idleOffsetY;
                 });
             });
 

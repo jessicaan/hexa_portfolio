@@ -19,9 +19,10 @@
     "i18next-http-backend": "^3.0.2",
     "next": "16.0.4",
     "react": "19.2.0",
-    "react-dom": "19.2.0",
     "react-country-flag": "^3.1.0",
+    "react-dom": "19.2.0",
     "react-i18next": "^16.3.5",
+    "react-icons": "^5.5.0",
     "three": "^0.181.2",
     "three-stdlib": "^2.36.1"
   },
