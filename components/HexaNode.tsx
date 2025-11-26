@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, ReactNode } from 'react';
 import { gsap } from 'gsap';
 import HexaLine from './HexaLine';
 
@@ -9,13 +9,15 @@ interface HexaNodeProps {
   color?: string;
   glowColor?: string;
   onLineClick?: (lineIndex: number, clickPosition: { x: number; y: number }) => void;
+  children?: ReactNode;
 }
 
 export default function HexaNode({
   size = 90,
   color = '#7c43d847',
   glowColor = '#370e791a',
-  onLineClick
+  onLineClick,
+  children
 }: HexaNodeProps) {
   const hexRef = useRef<SVGPolygonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -155,6 +157,11 @@ export default function HexaNode({
           }}
         />
       </svg>
+
+      {/* Content to be rendered inside the hexagon */}
+      <div className="absolute inset-0 flex items-center justify-center w-full h-full pointer-events-none">
+        {children}
+      </div>
     </div>
   );
 }

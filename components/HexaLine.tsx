@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import { gsap } from 'gsap';
 
 interface HexaLineProps {
@@ -21,6 +21,8 @@ export default function HexaLine({
     index = 0
 }: HexaLineProps) {
     const pathRef = useRef<SVGPathElement>(null);
+    const visiblePathRef = useRef<SVGPathElement>(null);
+    const [isHovered, setIsHovered] = useState(false);
     const containerRef = useRef<SVGSVGElement>(null);
     const animationRef = useRef<gsap.core.Timeline | null>(null);
 
@@ -54,18 +56,21 @@ export default function HexaLine({
     }, [startVertex.x, startVertex.y, endX, endY]);
 
     useEffect(() => {
-        if (!pathRef.current) return;
-        pathRef.current.setAttribute('d', getBasePath());
+        if (!pathRef.current || !visiblePathRef.current) return;
+        const basePath = getBasePath();
+        pathRef.current.setAttribute('d', basePath);
+        visiblePathRef.current.setAttribute('d', basePath);
     }, [getBasePath]);
 
     const animateStringVibration = useCallback((clickPoint: { x: number; y: number }) => {
-        if (!pathRef.current) return;
+        if (!pathRef.current || !visiblePathRef.current) return;
 
         if (animationRef.current) {
             animationRef.current.kill();
         }
 
         const path = pathRef.current;
+        const visiblePath = visiblePathRef.current;
 
         const cx = clickPoint.x - startVertex.x;
         const cy = clickPoint.y - startVertex.y;
@@ -75,22 +80,19 @@ export default function HexaLine({
 
         const state = { time: 0 };
 
-        // ══════════════════════════════════════════════════════════════
-        // CONFIGURAÇÕES DA ANIMAÇÃO - altere esses valores para ajustar
-        // ══════════════════════════════════════════════════════════════
-
-        const totalDuration = 4.8;      // Duração total da animação em segundos
-        const segments = 40;            // Quantidade de pontos na linha (mais = curva mais suave)
-
-        const initialAmplitude = 18;    // Amplitude máxima da distorção em pixels
-        const damping = 3.5;            // Velocidade que a vibração perde força (maior = para mais rápido)
-        const waveSpeed = 26;           // Velocidade de propagação da onda ao longo do tempo
-        const frequency = 8;            // Quantidade de ondas visíveis na linha (maior = mais ondulações)
-        const spatialDecay = 2;         // Concentração da onda no ponto clicado (maior = mais localizada)
+        const totalDuration = 4.8;
+        const segments = 40;
+        const initialAmplitude = 18;
+        const damping = 3.5;
+        const waveSpeed = 26;
+        const frequency = 8;
+        const spatialDecay = 2;
 
         const tl = gsap.timeline({
             onComplete: () => {
-                path.setAttribute('d', getBasePath());
+                const basePath = getBasePath();
+                path.setAttribute('d', basePath);
+                visiblePath.setAttribute('d', basePath);
             }
         });
 
@@ -105,27 +107,24 @@ export default function HexaLine({
                 const amplitude = initialAmplitude * Math.exp(-damping * t);
 
                 if (amplitude < 0.1) {
-                    path.setAttribute('d', getBasePath());
+                    const basePath = getBasePath();
+                    path.setAttribute('d', basePath);
+                    visiblePath.setAttribute('d', basePath);
                     return;
                 }
 
                 const pathData = buildPath((segmentT) => {
                     const distFromClick = Math.abs(segmentT - clickT);
-
                     const boundaryFactor = Math.sin(segmentT * Math.PI);
-
                     const spatialEnvelope = Math.exp(-spatialDecay * distFromClick);
-
                     const phase = (segmentT - clickT) * frequency * Math.PI;
                     const timePhase = t * waveSpeed;
-
-                    // Onda principal + harmônico secundário (0.3 = intensidade do segundo harmônico)
                     const wave = Math.sin(phase - timePhase) + 0.3 * Math.sin(phase * 2 - timePhase * 1.5);
-
                     return amplitude * spatialEnvelope * boundaryFactor * wave;
                 }, segments);
 
                 path.setAttribute('d', pathData);
+                visiblePath.setAttribute('d', pathData);
             }
         });
     }, [startVertex.x, startVertex.y, dx, dy, lineLength, buildPath, getBasePath]);
@@ -171,18 +170,29 @@ export default function HexaLine({
                 </filter>
             </defs>
 
-            <path
-                ref={pathRef}
-                stroke={color}
-                strokeWidth="2"
-                fill="none"
-                filter={`url(#glow-line-${index})`}
-                className="pointer-events-auto cursor-crosshair transition-all hover:stroke-[3px]"
-                onClick={handleClick}
-                style={{
-                    filter: `drop-shadow(0 0 10px ${color})`
-                }}
-            />
+            <g>
+                <path
+                    ref={pathRef}
+                    stroke="transparent"
+                    strokeWidth="20"
+                    fill="none"
+                    className="pointer-events-auto cursor-crosshair"
+                    onClick={handleClick}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                />
+                <path
+                    ref={visiblePathRef}
+                    stroke={color}
+                    strokeWidth={isHovered ? "3" : "2"}
+                    fill="none"
+                    filter={`url(#glow-line-${index})`}
+                    className="pointer-events-none transition-all"
+                    style={{
+                        filter: `drop-shadow(0 0 10px ${color})`
+                    }}
+                />
+            </g>
         </svg>
     );
 }
