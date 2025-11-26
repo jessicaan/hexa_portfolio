@@ -2,12 +2,12 @@
 
 import { useRef, useEffect, useCallback, useState } from 'react';
 import { gsap } from 'gsap';
+import { useTheme } from './ThemeProvider';
 
 interface HexaLineProps {
     startVertex: { x: number; y: number };
     direction: { x: number; y: number };
     length?: number;
-    color?: string;
     onClick?: (event: React.MouseEvent | React.PointerEvent, point: { x: number; y: number }) => void;
     index?: number;
 }
@@ -16,7 +16,6 @@ export default function HexaLine({
     startVertex,
     direction,
     length = 200,
-    color = '#00f1dd',
     onClick,
     index = 0
 }: HexaLineProps) {
@@ -25,6 +24,14 @@ export default function HexaLine({
     const [isHovered, setIsHovered] = useState(false);
     const containerRef = useRef<SVGSVGElement>(null);
     const animationRef = useRef<gsap.core.Timeline | null>(null);
+
+    const { primaryRgb, theme } = useTheme();
+
+    const getLineColor = useCallback(() => {
+        const { r, g, b } = primaryRgb;
+        const isDark = theme === 'dark';
+        return `rgba(${r}, ${g}, ${b}, ${isDark ? 0.9 : 0.85})`;
+    }, [primaryRgb, theme]);
 
     const endX = startVertex.x + direction.x * length;
     const endY = startVertex.y + direction.y * length;
@@ -154,6 +161,8 @@ export default function HexaLine({
         };
     }, []);
 
+    const lineColor = getLineColor();
+
     return (
         <svg
             ref={containerRef}
@@ -183,13 +192,13 @@ export default function HexaLine({
                 />
                 <path
                     ref={visiblePathRef}
-                    stroke={color}
-                    strokeWidth={isHovered ? "3" : "2"}
+                    stroke={lineColor}
+                    strokeWidth={isHovered ? '3' : '2'}
                     fill="none"
                     filter={`url(#glow-line-${index})`}
-                    className="pointer-events-none transition-all"
+                    className="pointer-events-none transition-all duration-300"
                     style={{
-                        filter: `drop-shadow(0 0 10px ${color})`
+                        filter: `drop-shadow(0 0 10px ${lineColor})`
                     }}
                 />
             </g>

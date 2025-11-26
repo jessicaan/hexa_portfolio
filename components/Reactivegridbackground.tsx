@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
+import { useTheme } from './ThemeProvider';
 
 interface GridPoint {
     x: number;
@@ -13,13 +14,11 @@ interface GridPoint {
 
 interface ReactiveGridBackgroundProps {
     gridSize?: number;
-    gridColor?: string;
     shockwave?: { position: { x: number; y: number } } | null;
 }
 
 export default function ReactiveGridBackground({
     gridSize = 40,
-    gridColor = '#ae83ff6a',
     shockwave
 }: ReactiveGridBackgroundProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -32,6 +31,19 @@ export default function ReactiveGridBackground({
         active: boolean;
     } | null>(null);
 
+    const { theme, primaryRgb } = useTheme();
+
+    const getThemeColors = useCallback(() => {
+        const isDark = theme === 'dark';
+        const { r, g, b } = primaryRgb;
+
+        return {
+            background: isDark ? 'hsl(240 10% 3%)' : 'hsl(0 0% 98%)',
+            grid: `rgba(${r}, ${g}, ${b}, ${isDark ? 0.42 : 0.35})`,
+            gridLight: `rgba(${r}, ${g}, ${b}, ${isDark ? 0.15 : 0.12})`,
+        };
+    }, [theme, primaryRgb]);
+
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -39,9 +51,12 @@ export default function ReactiveGridBackground({
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
+        let colors = getThemeColors();
+
         const resizeCanvas = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            colors = getThemeColors();
             initGrid();
         };
 
@@ -68,11 +83,12 @@ export default function ReactiveGridBackground({
         };
 
         const animate = () => {
-            ctx.fillStyle = '#000';
+            colors = getThemeColors();
+
+            ctx.fillStyle = colors.background;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const currentTime = Date.now() / 1000;
-
             const idleWaveAmplitude = 10;
             const idleWaveSpeed = 1.2;
             const idleWaveFrequency = 0.003;
@@ -123,9 +139,8 @@ export default function ReactiveGridBackground({
                 });
             });
 
-            ctx.strokeStyle = gridColor;
+            ctx.strokeStyle = colors.gridLight;
             ctx.lineWidth = 1;
-            ctx.globalAlpha = 0.15;
 
             for (let i = 0; i < gridPointsRef.current.length; i++) {
                 for (let j = 0; j < gridPointsRef.current[i].length - 1; j++) {
@@ -151,13 +166,11 @@ export default function ReactiveGridBackground({
                 }
             }
 
-            ctx.globalAlpha = 1;
-
             gridPointsRef.current.forEach((row) => {
                 row.forEach((point) => {
                     ctx.beginPath();
                     ctx.arc(point.x, point.y, 1.5, 0, Math.PI * 2);
-                    ctx.fillStyle = gridColor;
+                    ctx.fillStyle = colors.grid;
                     ctx.fill();
                 });
             });
@@ -175,7 +188,7 @@ export default function ReactiveGridBackground({
                 cancelAnimationFrame(animationFrameRef.current);
             }
         };
-    }, [gridSize, gridColor]);
+    }, [gridSize, getThemeColors]);
 
     useEffect(() => {
         if (shockwave) {
@@ -191,8 +204,8 @@ export default function ReactiveGridBackground({
     return (
         <canvas
             ref={canvasRef}
-            className="absolute inset-0 w-full h-full -z-10"
-            style={{ background: '#000' }}
+            className="absolute inset-0 w-full h-full -z-10 transition-colors duration-500"
+            style={{ background: 'var(--background)' }}
         />
     );
 }

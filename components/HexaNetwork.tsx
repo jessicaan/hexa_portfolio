@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState, useCallback, ReactNode } from 'react';
 import ReactiveParticlesBackground from './ReactiveParticlesBackground';
 import { gsap } from 'gsap';
+import { useTheme } from './ThemeProvider';
 
 interface NetworkNode {
     id: string;
@@ -16,13 +17,6 @@ interface HexaNetworkAdvancedProps {
     nodes: NetworkNode[];
     initialNode?: string;
     nodeRadius?: number;
-    colors?: {
-        line?: string;
-        node?: string;
-        nodeFill?: string;
-        glow?: string;
-        activeGlow?: string;
-    };
     onNodeChange?: (nodeId: string) => void;
     transitionToNode?: {
         targetId: string;
@@ -36,17 +30,24 @@ export default function HexaNetworkAdvanced({
     nodes,
     initialNode,
     nodeRadius = 120,
-    colors = {},
     onNodeChange,
     transitionToNode
 }: HexaNetworkAdvancedProps) {
-    const {
-        line: lineColor = '#c9a227',
-        node: nodeStroke = '#333',
-        nodeFill = 'rgba(10, 10, 15, 0.95)',
-        glow = '#7c43d8',
-        activeGlow = '#9b5cff'
-    } = colors;
+    const { theme, primaryRgb } = useTheme();
+
+    const getColors = useCallback(() => {
+        const { r, g, b } = primaryRgb;
+        const isDark = theme === 'dark';
+
+        return {
+            line: `rgb(${r}, ${g}, ${b})`,
+            nodeStroke: isDark ? '#333' : '#ccc',
+            nodeFill: isDark ? 'rgba(10, 10, 15, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+            glow: `rgb(${r}, ${g}, ${b})`,
+            activeGlow: `rgb(${Math.min(r + 50, 255)}, ${Math.min(g + 50, 255)}, ${Math.min(b + 50, 255)})`,
+            text: isDark ? '#fff' : '#1a1a1a',
+        };
+    }, [primaryRgb, theme]);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const transformRef = useRef<HTMLDivElement>(null);
@@ -325,8 +326,10 @@ export default function HexaNetworkAdvanced({
         }
     }
 
+    const colors = getColors();
+
     return (
-        <div ref={containerRef} className="fixed inset-0 w-screen h-screen overflow-hidden bg-[#030305]">
+        <div ref={containerRef} className="fixed inset-0 w-screen h-screen overflow-hidden bg-background transition-colors duration-500">
             <ReactiveParticlesBackground shockwave={shockwave} />
 
             <div ref={transformRef} style={{ transformOrigin: '0 0' }}>
@@ -361,12 +364,12 @@ export default function HexaNetworkAdvanced({
                             <path
                                 key={key}
                                 d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`}
-                                stroke={lineColor}
+                                stroke={colors.line}
                                 strokeWidth="0.8"
                                 opacity="0.18"
                                 fill="none"
                                 filter="url(#line-soft)"
-                                className="pointer-events-none"
+                                className="pointer-events-none transition-colors duration-300"
                             />
                         );
                     })}
@@ -386,15 +389,15 @@ export default function HexaNetworkAdvanced({
                                 <path
                                     ref={el => { if (el) linesRef.current.set(key, el); }}
                                     d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`}
-                                    stroke={lineColor}
+                                    stroke={colors.line}
                                     strokeWidth="1.5"
                                     fill="none"
                                     filter="url(#line-soft)"
-                                    className="pointer-events-none"
+                                    className="pointer-events-none transition-colors duration-300"
                                     opacity="0.6"
                                 />
-                                <circle cx={start.x} cy={start.y} r="4" fill="transparent" stroke={glow} strokeWidth="1" opacity="0.4" />
-                                <circle cx={end.x} cy={end.y} r="4" fill="transparent" stroke={glow} strokeWidth="1" opacity="0.4" />
+                                <circle cx={start.x} cy={start.y} r="4" fill="transparent" stroke={colors.glow} strokeWidth="1" opacity="0.4" className="transition-colors duration-300" />
+                                <circle cx={end.x} cy={end.y} r="4" fill="transparent" stroke={colors.glow} strokeWidth="1" opacity="0.4" className="transition-colors duration-300" />
                             </g>
                         );
                     })}
@@ -413,22 +416,23 @@ export default function HexaNetworkAdvanced({
                             >
                                 <polygon
                                     points={hexPoints(node.position.x, node.position.y, nodeRadius)}
-                                    fill={nodeFill}
-                                    stroke={isActive ? activeGlow : isHovered ? glow : nodeStroke}
+                                    fill={colors.nodeFill}
+                                    stroke={isActive ? colors.activeGlow : isHovered ? colors.glow : colors.nodeStroke}
                                     strokeWidth={isActive ? 2 : isHovered ? 1.5 : 1}
                                     filter={isActive || isHovered ? 'url(#hex-glow)' : undefined}
+                                    className="transition-all duration-300"
                                 />
                                 <text
                                     x={node.position.x}
                                     y={node.position.y}
                                     textAnchor="middle"
                                     dominantBaseline="middle"
-                                    fill="#fff"
+                                    fill={colors.text}
                                     fontSize="16"
                                     fontWeight="300"
                                     letterSpacing="0.1em"
                                     opacity={viewState === 'network' || viewState === 'zooming-out' ? 1 : 0}
-                                    className="pointer-events-none select-none transition-opacity duration-300"
+                                    className="pointer-events-none select-none transition-all duration-300"
                                 >
                                     {node.label}
                                 </text>

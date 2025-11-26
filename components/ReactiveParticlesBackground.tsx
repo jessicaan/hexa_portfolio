@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
+import { useTheme } from './ThemeProvider';
 
 interface Particle {
   x: number;
@@ -15,13 +16,11 @@ interface Particle {
 
 interface ReactiveParticlesBackgroundProps {
   particleCount?: number;
-  particleColor?: string;
   shockwave?: { position: { x: number; y: number } } | null;
 }
 
 export default function ReactiveParticlesBackground({
   particleCount = 60,
-  particleColor = '#9b5cff',
   shockwave
 }: ReactiveParticlesBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,16 +33,15 @@ export default function ReactiveParticlesBackground({
     active: boolean;
   } | null>(null);
 
-  const hexToRgb = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : { r: 155, g: 92, b: 255 };
-  };
+  const { theme, primaryRgb } = useTheme();
 
-  const rgb = useMemo(() => hexToRgb(particleColor), [particleColor]);
+  const getThemeColors = useCallback(() => {
+    const isDark = theme === 'dark';
+    return {
+      bg: isDark ? 'rgba(8, 8, 12, 0.12)' : 'rgba(250, 250, 252, 0.12)',
+      particle: primaryRgb,
+    };
+  }, [theme, primaryRgb]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -51,6 +49,8 @@ export default function ReactiveParticlesBackground({
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    let colors = getThemeColors();
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -77,7 +77,10 @@ export default function ReactiveParticlesBackground({
     };
 
     const animate = () => {
-      ctx.fillStyle = 'rgba(3, 3, 5, 0.15)';
+      colors = getThemeColors();
+      const { r, g, b } = colors.particle;
+
+      ctx.fillStyle = colors.bg;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const currentTime = Date.now() / 1000;
@@ -126,7 +129,7 @@ export default function ReactiveParticlesBackground({
 
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${particle.opacity})`;
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${particle.opacity})`;
         ctx.fill();
       });
 
@@ -143,7 +146,7 @@ export default function ReactiveParticlesBackground({
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -163,7 +166,7 @@ export default function ReactiveParticlesBackground({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [particleCount, rgb]);
+  }, [particleCount, getThemeColors]);
 
   useEffect(() => {
     if (shockwave) {
@@ -179,7 +182,7 @@ export default function ReactiveParticlesBackground({
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full"
+      className="absolute inset-0 w-full h-full transition-opacity duration-500"
       style={{ background: 'transparent' }}
     />
   );

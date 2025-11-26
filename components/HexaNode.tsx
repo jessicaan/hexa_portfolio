@@ -1,21 +1,18 @@
 'use client';
 
-import { useRef, useEffect, useState, ReactNode } from 'react';
+import { useRef, useEffect, useState, ReactNode, useCallback } from 'react';
 import { gsap } from 'gsap';
 import HexaLine from './HexaLine';
+import { useTheme } from './ThemeProvider';
 
 interface HexaNodeProps {
   size?: number;
-  color?: string;
-  glowColor?: string;
   onLineClick?: (lineIndex: number, clickPosition: { x: number; y: number }) => void;
   children?: ReactNode;
 }
 
 export default function HexaNode({
   size = 90,
-  color = '#51ebff46',
-  glowColor = '#370e791a',
   onLineClick,
   children
 }: HexaNodeProps) {
@@ -24,7 +21,19 @@ export default function HexaNode({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [vertices, setVertices] = useState<Array<{ x: number; y: number }>>([]);
 
-  // Track viewport size so geometry scales with the screen
+  const { theme, primaryRgb } = useTheme();
+
+  const getColors = useCallback(() => {
+    const { r, g, b } = primaryRgb;
+    const isDark = theme === 'dark';
+
+    return {
+      primary: `rgba(${r}, ${g}, ${b}, ${isDark ? 0.6 : 0.7})`,
+      glow: `rgba(${r}, ${g}, ${b}, ${isDark ? 0.35 : 0.25})`,
+      fill: isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.6)',
+    };
+  }, [primaryRgb, theme]);
+
   useEffect(() => {
     const updateDimensions = () => {
       const vw = window.innerWidth;
@@ -38,7 +47,6 @@ export default function HexaNode({
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  // Recalculate the hexagon vertices whenever size or viewport changes
   useEffect(() => {
     if (dimensions.width === 0 || dimensions.height === 0) return;
 
@@ -58,7 +66,6 @@ export default function HexaNode({
     setVertices(calculatedVertices);
   }, [dimensions, size]);
 
-  // Add a subtle tilt effect that follows the mouse
   useEffect(() => {
     if (!hexRef.current || !containerRef.current) return;
 
@@ -84,7 +91,6 @@ export default function HexaNode({
     };
   }, []);
 
-  // Unit vector for each line that extends from a vertex
   const getLineDirection = (index: number) => {
     const angle = (Math.PI / 3) * index - Math.PI / 2;
     return {
@@ -93,7 +99,6 @@ export default function HexaNode({
     };
   };
 
-  // Bubble line clicks (with hit position) up to the parent
   const handleLineClick = (lineIndex: number) => (
     event: React.MouseEvent,
     point: { x: number; y: number }
@@ -103,9 +108,10 @@ export default function HexaNode({
     }
   };
 
-  if (vertices.length === 0) return null; // Wait for geometry before rendering
+  if (vertices.length === 0) return null;
 
   const points = vertices.map(v => `${v.x},${v.y}`).join(' ');
+  const colors = getColors();
 
   return (
     <div
@@ -113,7 +119,6 @@ export default function HexaNode({
       className="fixed inset-0 w-screen h-screen overflow-hidden"
       style={{ perspective: '1000px' }}
     >
-      {/* Six rays coming out of each vertex */}
       {vertices.map((vertex, index) => (
         <HexaLine
           key={index}
@@ -121,19 +126,16 @@ export default function HexaNode({
           startVertex={vertex}
           direction={getLineDirection(index)}
           length={Math.max(dimensions.width, dimensions.height)}
-          color={color}
           onClick={handleLineClick(index)}
         />
       ))}
 
-      {/* Central hexagon with glow and tilt */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{ overflow: 'visible' }}
       >
         <defs>
-          {/* Blur + merge to create the glow */}
-          <filter id="hexagon-glow" x="-50%" y="-50%" width="50%" height="50%">
+          <filter id="hexagon-glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="8" result="coloredBlur" />
             <feMerge>
               <feMergeNode in="coloredBlur" />
@@ -146,19 +148,19 @@ export default function HexaNode({
         <polygon
           ref={hexRef}
           points={points}
-          fill="rgba(0, 0, 0, 0.6)"
-          stroke={color}
+          fill={colors.fill}
+          stroke={colors.primary}
           strokeWidth="3"
           filter="url(#hexagon-glow)"
+          className="transition-colors duration-300"
           style={{
-            filter: `drop-shadow(0 0 20px ${glowColor})`,
+            filter: `drop-shadow(0 0 20px ${colors.glow})`,
             transformOrigin: 'center center',
             transformStyle: 'preserve-3d'
           }}
         />
       </svg>
 
-      {/* Content to be rendered inside the hexagon */}
       <div className="absolute inset-0 flex items-center justify-center w-full h-full pointer-events-none">
         {children}
       </div>
