@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactiveGridBackground from '@/components/Reactivegridbackground';
+import { useTheme } from '@/components/ThemeProvider';
 import type { IconType } from 'react-icons';
 import {
   SiTypescript,
@@ -56,7 +57,7 @@ const skillCategories: SkillCategory[] = [
     label: 'Frontend Craft',
     emphasis: 'Interfaces vivas e performáticas',
     description:
-      'Construo interfaces focadas em sensação de fluidez, leitura confortável e respostas rápidas — do esqueleto de layout até as microinterações.',
+      'Construo interfaces focadas em sensação de fluidez, leitura confortável e respostas rápidas – do esqueleto de layout até as microinterações.',
     skills: [
       { name: 'TypeScript', level: 'advanced', iconKey: 'TypeScript' },
       { name: 'React', level: 'advanced', iconKey: 'React' },
@@ -125,7 +126,7 @@ const skillsCopy: Record<
     eyebrow: 'Skills',
     title: 'Pilha, craft e forma de pensar',
     description:
-      'Mais do que listar tecnologias, aqui está como eu gosto de projetar e construir experiências digitais — da base técnica ao cuidado visual.',
+      'Mais do que listar tecnologias, aqui está como eu gosto de projetar e construir experiências digitais – da base técnica ao cuidado visual.',
     legendTitle: 'Nível de familiaridade',
     levels: {
       advanced: 'Avançado',
@@ -137,7 +138,7 @@ const skillsCopy: Record<
     eyebrow: 'Skills',
     title: 'Stack, craft and mindset',
     description:
-      'More than a list of technologies, this is how I like to design and build digital experiences — from technical foundation to visual polish.',
+      'More than a list of technologies, this is how I like to design and build digital experiences – from technical foundation to visual polish.',
     legendTitle: 'Level of familiarity',
     levels: {
       advanced: 'Advanced',
@@ -149,7 +150,7 @@ const skillsCopy: Record<
     eyebrow: 'Skills',
     title: 'Stack, craft y forma de pensar',
     description:
-      'Más que una lista de tecnologías, es cómo me gusta diseñar y construir experiencias digitales, de la base técnica al cuidado visual.',
+      'Más que una lista de tecnologías, es como me gusta diseñar y construir experiencias digitales, de la base técnica al cuidado visual.',
     legendTitle: 'Nivel de familiaridad',
     levels: {
       advanced: 'Avanzado',
@@ -161,11 +162,11 @@ const skillsCopy: Record<
     eyebrow: 'Compétences',
     title: 'Stack, craft et manière de penser',
     description:
-      'Plus qu’une liste de technologies, voici ma façon de concevoir et construire des expériences numériques, du socle technique au soin visuel.',
+      "Plus qu'une liste de technologies, voici ma façon de concevoir et construire des expériences numériques, du socle technique au soin visuel.",
     legendTitle: 'Niveau de familiarité',
     levels: {
       advanced: 'Avancé',
-      comfortable: 'À l’aise',
+      comfortable: 'À l\'aise',
       exploring: 'En exploration',
     },
   },
@@ -179,6 +180,9 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
   const currentLanguage: LanguageCode = language ?? 'EN';
   const copy = skillsCopy[currentLanguage];
 
+  const { primaryRgb, theme } = useTheme();
+  const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
+
   return (
     <main className="relative w-screen h-screen overflow-hidden">
       <ReactiveGridBackground />
@@ -188,15 +192,15 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="max-w-xl text-center lg:text-left text-white"
+          className="max-w-xl text-center lg:text-left text-foreground"
         >
-          <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-white/50 mb-4">
+          <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground-subtle mb-4">
             {copy.eyebrow} · Stack
           </p>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-5">
             {copy.title}
           </h2>
-          <p className="text-sm sm:text-base text-white/70 leading-relaxed mb-6">
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">
             {copy.description}
           </p>
 
@@ -206,7 +210,7 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
               return (
                 <span
                   key={skill.name}
-                  className="px-3 py-1 rounded-full border border-white/15 bg-white/5 text-[10px] tracking-[0.18em] uppercase text-white/60 inline-flex items-center gap-1.5"
+                  className="px-3 py-1 rounded-full border border-border-subtle bg-surface-soft text-[10px] tracking-[0.18em] uppercase text-muted-foreground inline-flex items-center gap-1.5"
                 >
                   {Icon && <Icon className="w-3.5 h-3.5" />}
                   <span>{skill.name}</span>
@@ -216,16 +220,19 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
           </div>
 
           <div className="mt-4">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-white/40 mb-2">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground-subtle mb-2">
               {copy.legendTitle}
             </p>
-            <div className="flex flex-wrap gap-3 text-[10px] text-white/50">
+            <div className="flex flex-wrap gap-3 text-[10px] text-muted-foreground-subtle">
               {(['advanced', 'comfortable', 'exploring'] as SkillLevel[]).map(level => (
                 <div key={level} className="flex items-center gap-2">
-                  <div className="w-10 h-[3px] rounded-full bg-white/10 overflow-hidden">
+                  <div className="w-10 h-[3px] rounded-full bg-surface-soft overflow-hidden">
                     <div
-                      className="h-full bg-linear-to-r from-[#9b5cff] to-[#5cd9ff]"
-                      style={{ width: levelVisual[level] }}
+                      className="h-full"
+                      style={{
+                        width: levelVisual[level],
+                        background: `linear-gradient(to right, ${primaryColor}, hsl(var(--secondary)))`,
+                      }}
                     />
                   </div>
                   <span className="tracking-[0.18em] uppercase">{copy.levels[level]}</span>
@@ -241,19 +248,22 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
-              className="mt-6 rounded-3xl border border-white/10 bg-white/5 shadow-[0_18px_60px_rgba(0,0,0,0.6)] backdrop-blur-md p-5 sm:p-6"
+              className="mt-6 rounded-3xl border border-border-subtle bg-surface-soft backdrop-blur-md p-5 sm:p-6"
+              style={{
+                boxShadow: `0 18px 60px rgba(0,0,0,${theme === 'dark' ? 0.6 : 0.15})`,
+              }}
             >
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.28em] text-white/40 mb-1">
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground-subtle mb-1">
                     {activeCategory.label}
                   </p>
-                  <p className="text-sm sm:text-base text-white font-medium">
+                  <p className="text-sm sm:text-base text-foreground font-medium">
                     {activeCategory.emphasis}
                   </p>
                 </div>
               </div>
-              <p className="text-xs sm:text-sm text-white/70 leading-relaxed mb-4">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4">
                 {activeCategory.description}
               </p>
 
@@ -266,17 +276,20 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
                       className="flex items-center justify-between gap-3 text-xs sm:text-sm"
                     >
                       <div className="flex items-center gap-2">
-                        {Icon && <Icon className="w-4 h-4 text-[#9b5cff]" />}
-                        <span className="text-white/90">{skill.name}</span>
+                        {Icon && <Icon className="w-4 h-4" style={{ color: primaryColor }} />}
+                        <span className="text-foreground">{skill.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-24 h-[3px] rounded-full bg-white/10 overflow-hidden">
+                        <div className="w-24 h-[3px] rounded-full bg-surface-soft overflow-hidden">
                           <div
-                            className="h-full bg-linear-to-r from-[#9b5cff] to-[#5cd9ff]"
-                            style={{ width: levelVisual[skill.level] }}
+                            className="h-full"
+                            style={{
+                              width: levelVisual[skill.level],
+                              background: `linear-gradient(to right, ${primaryColor}, hsl(var(--secondary)))`,
+                            }}
                           />
                         </div>
-                        <span className="text-[10px] uppercase tracking-[0.18em] text-white/50">
+                        <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground-subtle">
                           {copy.levels[skill.level]}
                         </span>
                       </div>
@@ -294,14 +307,14 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="w-full max-w-xl"
         >
-          <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/40 mb-3 text-center lg:text-left">
+          <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle mb-3 text-center lg:text-left">
             {currentLanguage === 'PT'
               ? 'Áreas de foco'
               : currentLanguage === 'ES'
-              ? 'Áreas de foco'
-              : currentLanguage === 'FR'
-              ? "Axes d'attention"
-              : 'Focus areas'}
+                ? 'Áreas de foco'
+                : currentLanguage === 'FR'
+                  ? "Axes d'attention"
+                  : 'Focus areas'}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
@@ -320,23 +333,31 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
                   className="relative group text-left"
                 >
                   <motion.div
-                    className="absolute -inset-0.5 rounded-2xl bg-linear-to-br from-[#9b5cff40] via-transparent to-[#5cd9ff40] opacity-0 group-hover:opacity-100"
+                    className="absolute -inset-0.5 rounded-2xl opacity-0 group-hover:opacity-100"
+                    style={{
+                      background: `linear-gradient(to bottom right, ${primaryColor}40, transparent, hsl(var(--secondary) / 0.4))`,
+                    }}
                     animate={{ opacity: isActive ? 1 : 0 }}
                     transition={{ duration: 0.25 }}
                   />
 
-                  <div className="relative rounded-2xl border border-white/10 bg-[#04040a]/80 backdrop-blur-md px-4 py-4 sm:px-4 sm:py-4 shadow-[0_10px_40px_rgba(0,0,0,0.75)] overflow-hidden">
+                  <div
+                    className="relative rounded-2xl border border-border-subtle bg-surface-soft backdrop-blur-md px-4 py-4 sm:px-4 sm:py-4 overflow-hidden"
+                    style={{
+                      boxShadow: `0 10px 40px rgba(0,0,0,${theme === 'dark' ? 0.75 : 0.15})`,
+                    }}
+                  >
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="flex-1">
-                        <p className="text-[11px] uppercase tracking-[0.28em] text-white/40 mb-1">
+                        <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground-subtle mb-1">
                           {category.label}
                         </p>
-                        <p className="text-[11px] sm:text-xs text-white/60">
+                        <p className="text-[11px] sm:text-xs text-muted-foreground">
                           {category.emphasis}
                         </p>
                       </div>
                       <motion.span
-                        className="mt-0.5 text-[9px] uppercase tracking-[0.2em] text-white/40"
+                        className="mt-0.5 text-[9px] uppercase tracking-[0.2em] text-muted-foreground-subtle"
                         animate={{
                           opacity: isActive ? 1 : 0.4,
                           y: isActive ? 0 : 2,
@@ -346,17 +367,17 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
                           ? currentLanguage === 'PT'
                             ? 'AGORA'
                             : currentLanguage === 'ES'
-                            ? 'AHORA'
-                            : currentLanguage === 'FR'
-                            ? 'ICI'
-                            : 'NOW'
+                              ? 'AHORA'
+                              : currentLanguage === 'FR'
+                                ? 'ICI'
+                                : 'NOW'
                           : currentLanguage === 'PT'
-                          ? 'VER'
-                          : currentLanguage === 'ES'
-                          ? 'VER'
-                          : currentLanguage === 'FR'
-                          ? 'VOIR'
-                          : 'VIEW'}
+                            ? 'VER'
+                            : currentLanguage === 'ES'
+                              ? 'VER'
+                              : currentLanguage === 'FR'
+                                ? 'VOIR'
+                                : 'VIEW'}
                       </motion.span>
                     </div>
 
@@ -366,7 +387,7 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
                         return (
                           <span
                             key={skill.name}
-                            className="px-2 py-0.5 rounded-full bg-white/5 text-[9px] tracking-[0.15em] uppercase text-white/50 inline-flex items-center gap-1"
+                            className="px-2 py-0.5 rounded-full bg-surface-soft text-[9px] tracking-[0.15em] uppercase text-muted-foreground-subtle inline-flex items-center gap-1"
                           >
                             {Icon && <Icon className="w-3 h-3" />}
                             <span>{skill.name}</span>
@@ -376,7 +397,8 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
                     </div>
 
                     <motion.div
-                      className="absolute inset-px rounded-2xl border border-[#9b5cff] pointer-events-none"
+                      className="absolute inset-px rounded-2xl border pointer-events-none"
+                      style={{ borderColor: primaryColor }}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: isActive ? 0.35 : 0 }}
                       transition={{ duration: 0.25 }}
@@ -391,4 +413,3 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
     </main>
   );
 }
-

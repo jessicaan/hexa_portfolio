@@ -4,6 +4,7 @@ import { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
+import { useTheme } from './ThemeProvider';
 
 gsap.registerPlugin(ScrambleTextPlugin);
 
@@ -27,6 +28,7 @@ export default function SectionNav({
 }: SectionNavProps) {
     const labelRefs = useRef<Map<string, HTMLSpanElement>>(new Map());
     const prevActiveRef = useRef(activeId);
+    const { primaryRgb } = useTheme();
 
     const activeIndex = items.findIndex(n => n.id === activeId);
 
@@ -52,6 +54,9 @@ export default function SectionNav({
         }
     }, [activeId, items]);
 
+    const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
+    const primaryColorSoft = `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.2)`;
+
     return (
         <AnimatePresence>
             {visible && (
@@ -60,7 +65,7 @@ export default function SectionNav({
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 30 }}
                     transition={{ duration: 0.5 }}
-                    className="fixed right-8 top-1/2 -translate-y-1/2 z-50 flex flex-col items-end"
+                    className="fixed right-8 top-1/2 -translate-y-1/2 z-50 flex flex-col items-end text-muted-foreground-subtle"
                 >
                     {items.map((item, index) => {
                         const isActive = item.id === activeId;
@@ -75,11 +80,17 @@ export default function SectionNav({
                                 >
                                     <motion.span
                                         ref={el => { if (el) labelRefs.current.set(item.id, el); }}
-                                        className="text-[10px] tracking-[0.25em] uppercase"
+                                        className="text-[10px] tracking-[0.25em] uppercase transition-colors duration-300"
+                                        style={{
+                                            color: isActive
+                                                ? 'hsl(var(--foreground))'
+                                                : isPast
+                                                    ? primaryColor
+                                                    : 'hsl(var(--muted-foreground-subtle))'
+                                        }}
                                         animate={{
                                             opacity: isActive ? 1 : 0.3,
                                             x: isActive ? 0 : 8,
-                                            color: isActive ? '#ffffff' : isPast ? '#9b5cff' : '#ffffff',
                                         }}
                                         whileHover={{ opacity: 1, x: 0 }}
                                         transition={{ duration: 0.3 }}
@@ -89,14 +100,19 @@ export default function SectionNav({
 
                                     <div className="relative">
                                         <motion.div
-                                            className="w-2.5 h-2.5 rounded-full border-[1.5px]"
+                                            className="w-2.5 h-2.5 rounded-full border-[1.5px] transition-colors duration-300"
+                                            style={{
+                                                borderColor: isActive || isPast ? primaryColor : 'hsl(var(--border-subtle))',
+                                                backgroundColor: isActive
+                                                    ? primaryColor
+                                                    : isPast
+                                                        ? primaryColorSoft
+                                                        : 'transparent'
+                                            }}
                                             animate={{
-                                                borderColor: isActive ? '#9b5cff' : isPast ? '#9b5cff' : '#ffffff30',
-                                                backgroundColor: isActive ? '#9b5cff' : isPast ? '#9b5cff60' : 'transparent',
                                                 scale: isActive ? 1.3 : 1,
                                             }}
                                             whileHover={{
-                                                borderColor: '#9b5cff',
                                                 scale: 1.4,
                                             }}
                                             transition={{ duration: 0.3 }}
@@ -104,7 +120,8 @@ export default function SectionNav({
 
                                         {isActive && (
                                             <motion.div
-                                                className="absolute inset-0 rounded-full bg-[#9b5cff]"
+                                                className="absolute inset-0 rounded-full"
+                                                style={{ backgroundColor: primaryColor }}
                                                 initial={{ scale: 1, opacity: 0.5 }}
                                                 animate={{
                                                     scale: [1, 2.5, 1],
@@ -122,12 +139,13 @@ export default function SectionNav({
 
                                 {!isLast && (
                                     <div className="flex justify-end pr-1">
-                                        <motion.div
-                                            className="w-px h-6"
-                                            animate={{
-                                                backgroundColor: index < activeIndex ? '#5cd9ff5f' : '#ffffff15',
+                                        <div
+                                            className="w-px h-6 transition-colors duration-300"
+                                            style={{
+                                                backgroundColor: index < activeIndex
+                                                    ? primaryColorSoft
+                                                    : 'hsl(var(--border-subtle))'
                                             }}
-                                            transition={{ duration: 0.3 }}
                                         />
                                     </div>
                                 )}
