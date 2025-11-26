@@ -314,6 +314,17 @@ export default function HexaNetworkAdvanced({
         });
     });
 
+    const synapseConnections: Array<{ key: string; from: NetworkNode; to: NetworkNode }> = [];
+
+    for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+            const from = nodes[i];
+            const to = nodes[j];
+            const key = `synapse-${from.id}--${to.id}`;
+            synapseConnections.push({ key, from, to });
+        }
+    }
+
     return (
         <div ref={containerRef} className="fixed inset-0 w-screen h-screen overflow-hidden bg-[#030305]">
             <ReactiveParticlesBackground shockwave={shockwave} />
@@ -343,6 +354,22 @@ export default function HexaNetworkAdvanced({
                             </feMerge>
                         </filter>
                     </defs>
+
+                    {synapseConnections.map(({ key, from, to }) => {
+                        const { start, end } = getConnectionEndpoints(from, to);
+                        return (
+                            <path
+                                key={key}
+                                d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`}
+                                stroke={lineColor}
+                                strokeWidth="0.8"
+                                opacity="0.18"
+                                fill="none"
+                                filter="url(#line-soft)"
+                                className="pointer-events-none"
+                            />
+                        );
+                    })}
 
                     {connections.map(({ key, from, to }) => {
                         const { start, end } = getConnectionEndpoints(from, to);
