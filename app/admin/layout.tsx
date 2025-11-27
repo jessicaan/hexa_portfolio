@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <RequireAuth>
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-background via-surface to-background text-foreground">
+      <div className="min-h-screen relative overflow-hidden bg-linear-to-br from-background via-surface to-background text-foreground">
         <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-primary/25 blur-[140px]" />
         <div className="pointer-events-none absolute right-[-10%] top-1/3 h-96 w-96 rounded-full bg-secondary/20 blur-[160px]" />
         <div className="pointer-events-none absolute left-1/3 bottom-[-10%] h-72 w-72 rounded-full bg-accent/15 blur-[120px]" />

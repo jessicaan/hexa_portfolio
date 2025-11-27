@@ -33,7 +33,7 @@ export default function AdminSidebar() {
     <aside className="relative">
       <div className="sticky top-6 space-y-4">
         <div className="overflow-hidden rounded-2xl border border-border-subtle/60 bg-surface/70 backdrop-blur-2xl shadow-[0_20px_80px_rgba(0,0,0,0.4)]">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-secondary/15 pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-br from-primary/15 via-transparent to-secondary/15 pointer-events-none" />
           <div className="relative p-4">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -55,28 +55,25 @@ export default function AdminSidebar() {
                     <Link
                       href={item.href}
                       prefetch={false}
-                      className={`group flex items-center justify-between rounded-xl border px-3 py-3 text-sm transition-all ${
-                        isActive
+                      className={`group flex items-center justify-between rounded-xl border px-3 py-3 text-sm transition-all ${isActive
                           ? 'border-primary/60 bg-primary/10 text-foreground shadow-glow'
                           : 'border-border-subtle/70 bg-background/50 text-muted-foreground hover:border-primary/50 hover:text-foreground'
-                      } ${item.disabled ? 'opacity-60 pointer-events-none' : ''}`}
+                        } ${item.disabled ? 'opacity-60 pointer-events-none' : ''}`}
                     >
                       <span className="flex items-center gap-3">
                         <span
-                          className={`flex items-center justify-center rounded-lg border border-border-subtle/70 p-2 ${
-                            isActive ? 'bg-primary/20 text-foreground' : 'bg-surface text-muted-foreground'
-                          }`}
+                          className={`flex items-center justify-center rounded-lg border border-border-subtle/70 p-2 ${isActive ? 'bg-primary/20 text-foreground' : 'bg-surface text-muted-foreground'
+                            }`}
                         >
                           <Icon className="w-4 h-4" />
                         </span>
                         <span className="tracking-wide">{item.label}</span>
                       </span>
                       <span
-                        className={`text-[10px] uppercase tracking-[0.2em] rounded-full px-2 py-1 border ${
-                          item.badge === 'Live'
+                        className={`text-[10px] uppercase tracking-[0.2em] rounded-full px-2 py-1 border ${item.badge === 'Live'
                             ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-200'
                             : 'border-border-subtle/70 bg-surface-soft text-muted-foreground-subtle'
-                        }`}
+                          }`}
                       >
                         {item.badge}
                       </span>
