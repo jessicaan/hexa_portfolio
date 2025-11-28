@@ -16,28 +16,15 @@ import {
   SiFigma,
   SiGit,
 } from 'react-icons/si';
-
-type LanguageCode = 'PT' | 'EN' | 'ES' | 'FR';
+import type { SkillsContent, SkillCategory } from '@/lib/content/schema';
+import type { LanguageCode } from '@/app/i18n';
 
 interface SkillsSectionProps {
-  language?: LanguageCode;
+  content: SkillsContent;
+  language: LanguageCode;
 }
 
-type SkillLevel = 'advanced' | 'comfortable' | 'exploring';
-
-interface SkillItem {
-  name: string;
-  level: SkillLevel;
-  iconKey?: string;
-}
-
-interface SkillCategory {
-  id: string;
-  label: string;
-  emphasis: string;
-  description: string;
-  skills: SkillItem[];
-}
+type SkillLevel = 1 | 2 | 3 | 4 | 5;
 
 const skillIconMap: Record<string, IconType> = {
   TypeScript: SiTypescript,
@@ -51,65 +38,12 @@ const skillIconMap: Record<string, IconType> = {
   Git: SiGit,
 };
 
-const skillCategories: SkillCategory[] = [
-  {
-    id: 'frontend-craft',
-    label: 'Frontend Craft',
-    emphasis: 'Interfaces vivas e performáticas',
-    description:
-      'Construo interfaces focadas em sensação de fluidez, leitura confortável e respostas rápidas – do esqueleto de layout até as microinterações.',
-    skills: [
-      { name: 'TypeScript', level: 'advanced', iconKey: 'TypeScript' },
-      { name: 'React', level: 'advanced', iconKey: 'React' },
-      { name: 'Next.js', level: 'advanced', iconKey: 'Next.js' },
-      { name: 'JavaScript', level: 'advanced', iconKey: 'JavaScript' },
-    ],
-  },
-  {
-    id: 'design-systems',
-    label: 'Design Systems',
-    emphasis: 'Coerência visual e semântica',
-    description:
-      'Trabalho com componentes reutilizáveis, tokens, hierarquia visual e acessibilidade para que cada tela pareça parte do mesmo universo.',
-    skills: [
-      { name: 'Tailwind CSS', level: 'advanced', iconKey: 'Tailwind CSS' },
-      { name: 'Design tokens', level: 'comfortable' },
-      { name: 'Component libraries', level: 'comfortable' },
-      { name: 'A11y mindset', level: 'comfortable' },
-    ],
-  },
-  {
-    id: 'motion',
-    label: 'Motion & Interactions',
-    emphasis: 'Experiências que respondem ao usuário',
-    description:
-      'Uso animações para guiar atenção, explicar mudanças de estado e dar personalidade às interfaces, sem perder performance.',
-    skills: [
-      { name: 'Framer Motion', level: 'advanced', iconKey: 'Framer Motion' },
-      { name: 'GSAP', level: 'advanced', iconKey: 'GSAP' },
-      { name: 'Microinteractions', level: 'comfortable' },
-      { name: 'Scroll storytelling', level: 'comfortable' },
-    ],
-  },
-  {
-    id: 'product',
-    label: 'Product & Collaboration',
-    emphasis: 'Do rascunho ao lançamento',
-    description:
-      'Gosto de participar de todo o ciclo: entender problema, prototipar, validar com pessoas reais e evoluir o produto em ciclos curtos.',
-    skills: [
-      { name: 'Figma', level: 'comfortable', iconKey: 'Figma' },
-      { name: 'Prototipação rápida', level: 'comfortable' },
-      { name: 'Git workflow', level: 'comfortable', iconKey: 'Git' },
-      { name: 'Code reviews', level: 'comfortable' },
-    ],
-  },
-];
-
 const levelVisual: Record<SkillLevel, string> = {
-  advanced: '100%',
-  comfortable: '70%',
-  exploring: '45%',
+  1: '20%',
+  2: '40%',
+  3: '60%',
+  4: '80%',
+  5: '100%',
 };
 
 const skillsCopy: Record<
@@ -122,66 +56,112 @@ const skillsCopy: Record<
     levels: Record<SkillLevel, string>;
   }
 > = {
-  PT: {
+  pt: {
     eyebrow: 'Skills',
     title: 'Pilha, craft e forma de pensar',
     description:
       'Mais do que listar tecnologias, aqui está como eu gosto de projetar e construir experiências digitais – da base técnica ao cuidado visual.',
     legendTitle: 'Nível de familiaridade',
     levels: {
-      advanced: 'Avançado',
-      comfortable: 'Confortável',
-      exploring: 'Explorando',
+      1: 'Iniciante',
+      2: 'Intermediário',
+      3: 'Avançado',
+      4: 'Expert',
+      5: 'Mestre',
     },
   },
-  EN: {
+  en: {
     eyebrow: 'Skills',
     title: 'Stack, craft and mindset',
     description:
       'More than a list of technologies, this is how I like to design and build digital experiences – from technical foundation to visual polish.',
     legendTitle: 'Level of familiarity',
     levels: {
-      advanced: 'Advanced',
-      comfortable: 'Comfortable',
-      exploring: 'Exploring',
+      1: 'Beginner',
+      2: 'Intermediate',
+      3: 'Advanced',
+      4: 'Expert',
+      5: 'Master',
     },
   },
-  ES: {
+  es: {
     eyebrow: 'Skills',
     title: 'Stack, craft y forma de pensar',
     description:
       'Más que una lista de tecnologías, es como me gusta diseñar y construir experiencias digitales, de la base técnica al cuidado visual.',
     legendTitle: 'Nivel de familiaridad',
     levels: {
-      advanced: 'Avanzado',
-      comfortable: 'Cómodo',
-      exploring: 'Explorando',
+      1: 'Principiante',
+      2: 'Intermedio',
+      3: 'Avanzado',
+      4: 'Experto',
+      5: 'Maestro',
     },
   },
-  FR: {
+  fr: {
     eyebrow: 'Compétences',
     title: 'Stack, craft et manière de penser',
     description:
       "Plus qu'une liste de technologies, voici ma façon de concevoir et construire des expériences numériques, du socle technique au soin visuel.",
     legendTitle: 'Niveau de familiarité',
     levels: {
-      advanced: 'Avancé',
-      comfortable: 'À l\'aise',
-      exploring: 'En exploration',
+      1: 'Débutant',
+      2: 'Intermédiaire',
+      3: 'Avancé',
+      4: 'Expert',
+      5: 'Maître',
     },
   },
 };
 
-export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
-  const [activeCategoryId, setActiveCategoryId] = useState<string>(skillCategories[0]?.id);
-  const activeCategory =
-    skillCategories.find(category => category.id === activeCategoryId) ?? skillCategories[0];
+export default function SkillsSection({ content, language }: SkillsSectionProps) {
+  // Normalize categories/skills to avoid undefined crashes when data is missing
+  const normalizedCategories = Array.isArray(content.categories)
+    ? content.categories.map(category => ({
+        ...category,
+        skills: Array.isArray(category.skills) ? category.skills : [],
+      }))
+    : [];
 
-  const currentLanguage: LanguageCode = language ?? 'EN';
-  const copy = skillsCopy[currentLanguage];
-
+  const [activeCategoryId, setActiveCategoryId] = useState<string>(normalizedCategories[0]?.name ?? '');
+  
+  const copy = skillsCopy[language];
   const { primaryRgb, theme } = useTheme();
   const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
+
+  const translation = language === 'pt' ? null : content.translations[language];
+  const categories = normalizedCategories.map((c, i) => {
+    const translated = translation?.categories?.[i];
+    const baseSkills = Array.isArray(c.skills) ? c.skills : [];
+    const translatedSkills = Array.isArray(translated?.skills) ? translated.skills : [];
+
+    return {
+      ...c,
+      name: translated?.name || c.name,
+      skills: baseSkills.map((s, j) => {
+        const translatedSkill = translatedSkills?.[j];
+        return {
+          ...s,
+          name: translatedSkill?.name || s.name,
+        };
+      }),
+    };
+  });
+
+  const activeCategory = categories.find(category => category.name === activeCategoryId) ?? categories[0] ?? { name: '', skills: [] };
+  const summary = translation?.summary || content.summary;
+
+  // If there's no data, render a friendly placeholder instead of crashing
+  if (!categories.length) {
+    return (
+      <main className="relative w-screen h-screen overflow-hidden">
+        <ReactiveGridBackground />
+        <div className="relative z-10 flex items-center justify-center w-full h-full px-6 text-center">
+          <p className="text-muted-foreground">Nenhuma skill cadastrada ainda.</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
@@ -201,12 +181,12 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
             {copy.title}
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">
-            {copy.description}
+            {summary}
           </p>
 
           <div className="flex flex-wrap items-center gap-3 mb-4">
             {activeCategory.skills.slice(0, 4).map(skill => {
-              const Icon = skill.iconKey ? skillIconMap[skill.iconKey] : undefined;
+              const Icon = skillIconMap[skill.name];
               return (
                 <span
                   key={skill.name}
@@ -224,7 +204,7 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
               {copy.legendTitle}
             </p>
             <div className="flex flex-wrap gap-3 text-[10px] text-muted-foreground-subtle">
-              {(['advanced', 'comfortable', 'exploring'] as SkillLevel[]).map(level => (
+              {([1, 2, 3, 4, 5] as SkillLevel[]).map(level => (
                 <div key={level} className="flex items-center gap-2">
                   <div className="w-10 h-[3px] rounded-full bg-surface-soft overflow-hidden">
                     <div
@@ -243,7 +223,7 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
 
           <AnimatePresence mode="wait">
             <motion.div
-              key={activeCategory.id}
+              key={activeCategory.name}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -256,20 +236,14 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground-subtle mb-1">
-                    {activeCategory.label}
-                  </p>
-                  <p className="text-sm sm:text-base text-foreground font-medium">
-                    {activeCategory.emphasis}
+                    {activeCategory.name}
                   </p>
                 </div>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4">
-                {activeCategory.description}
-              </p>
 
               <div className="space-y-3">
                 {activeCategory.skills.map(skill => {
-                  const Icon = skill.iconKey ? skillIconMap[skill.iconKey] : undefined;
+                  const Icon = skillIconMap[skill.name];
                   return (
                     <div
                       key={skill.name}
@@ -284,13 +258,13 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
                           <div
                             className="h-full"
                             style={{
-                              width: levelVisual[skill.level],
+                              width: levelVisual[skill.level as SkillLevel],
                               background: `linear-gradient(to right, ${primaryColor}, hsl(var(--secondary)))`,
                             }}
                           />
                         </div>
                         <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground-subtle">
-                          {copy.levels[skill.level]}
+                          {copy.levels[skill.level as SkillLevel]}
                         </span>
                       </div>
                     </div>
@@ -308,26 +282,26 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
           className="w-full max-w-xl"
         >
           <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle mb-3 text-center lg:text-left">
-            {currentLanguage === 'PT'
+            {language === 'pt'
               ? 'Áreas de foco'
-              : currentLanguage === 'ES'
+              : language === 'es'
                 ? 'Áreas de foco'
-                : currentLanguage === 'FR'
+                : language === 'fr'
                   ? "Axes d'attention"
                   : 'Focus areas'}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-            {skillCategories.map(category => {
-              const isActive = category.id === activeCategoryId;
+            {categories.map(category => {
+              const isActive = category.name === activeCategoryId;
 
               return (
                 <motion.button
-                  key={category.id}
+                  key={category.name}
                   type="button"
-                  onMouseEnter={() => setActiveCategoryId(category.id)}
-                  onFocus={() => setActiveCategoryId(category.id)}
-                  onClick={() => setActiveCategoryId(category.id)}
+                  onMouseEnter={() => setActiveCategoryId(category.name)}
+                  onFocus={() => setActiveCategoryId(category.name)}
+                  onClick={() => setActiveCategoryId(category.name)}
                   whileHover={{ y: -6, scale: 1.02 }}
                   transition={{ duration: 0.25 }}
                   className="relative group text-left"
@@ -350,10 +324,7 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="flex-1">
                         <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground-subtle mb-1">
-                          {category.label}
-                        </p>
-                        <p className="text-[11px] sm:text-xs text-muted-foreground">
-                          {category.emphasis}
+                          {category.name}
                         </p>
                       </div>
                       <motion.span
@@ -364,18 +335,18 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
                         }}
                       >
                         {isActive
-                          ? currentLanguage === 'PT'
+                          ? language === 'pt'
                             ? 'AGORA'
-                            : currentLanguage === 'ES'
+                            : language === 'es'
                               ? 'AHORA'
-                              : currentLanguage === 'FR'
+                              : language === 'fr'
                                 ? 'ICI'
                                 : 'NOW'
-                          : currentLanguage === 'PT'
+                          : language === 'pt'
                             ? 'VER'
-                            : currentLanguage === 'ES'
+                            : language === 'es'
                               ? 'VER'
-                              : currentLanguage === 'FR'
+                              : language === 'fr'
                                 ? 'VOIR'
                                 : 'VIEW'}
                       </motion.span>
@@ -383,7 +354,7 @@ export default function SkillsSection({ language = 'EN' }: SkillsSectionProps) {
 
                     <div className="flex flex-wrap gap-1.5 mt-1">
                       {category.skills.slice(0, 3).map(skill => {
-                        const Icon = skill.iconKey ? skillIconMap[skill.iconKey] : undefined;
+                        const Icon = skillIconMap[skill.name];
                         return (
                           <span
                             key={skill.name}

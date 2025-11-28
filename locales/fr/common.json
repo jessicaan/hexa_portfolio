@@ -8,5 +8,18 @@
     "part5": "centre."
   },
   "deploy": "Déployer maintenant",
-  "docs": "Documentation"
+  "docs": "Documentation",
+  "about": {
+    "heading": "A propos de moi",
+    "summary": "Je suis un developpeur concentre sur la creation d'experiences numeriques immersives, melant animation, microinteractions et interfaces soignees pour raconter de belles histoires dans toutes les langues.",
+    "myStory": "Mon Histoire",
+    "highlights": "Points forts",
+    "videoPitch": "Pitch Vidéo",
+    "videoPlaceholder": {
+      "title": "Pitch Vidéo",
+      "description": "Ajoutez une vidéo verticale via le panneau"
+    },
+    "skills": "Compétences",
+    "language": "Français"
+  }
 }

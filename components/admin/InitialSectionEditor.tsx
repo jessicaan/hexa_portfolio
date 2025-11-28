@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState, useTransition, type ReactNode } from 'react';
-import { FiSave, FiLoader, FiGlobe, FiFilm, FiSliders, FiZap } from 'react-icons/fi';
+import { useState, useTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import TranslationEditor from '@/components/admin/TranslationEditor';
+import { FiSave, FiLoader, FiRefreshCw, FiZap } from 'react-icons/fi';
+import FileUploader from '@/components/admin/FileUploader';
 import {
   autoTranslateContent,
   saveInitialContent,
@@ -24,12 +24,6 @@ export default function InitialSectionEditor({ initial }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isSaving, startSave] = useTransition();
   const [isTranslating, startTranslate] = useTransition();
-
-  const languagesSelected = useMemo(() => new Set(form.languagesAvailable), [form.languagesAvailable]);
-
-  const updateField = (key: keyof InitialSectionContent, value: unknown) => {
-    setForm(prev => ({ ...prev, [key]: value } as InitialSectionContent));
-  };
 
   const toggleLanguage = (code: LanguageCode) => {
     setForm(prev => {
@@ -59,9 +53,9 @@ export default function InitialSectionEditor({ initial }: Props) {
     startSave(async () => {
       try {
         await saveInitialContent(form);
-        setMessage('Conteúdo salvo em /content/initial no Firebase.');
+        setMessage('Conteúdo salvo com sucesso.');
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Não foi possível salvar agora.');
+        setError(err instanceof Error ? err.message : 'Erro ao salvar.');
       }
     });
   };
@@ -83,69 +77,59 @@ export default function InitialSectionEditor({ initial }: Props) {
             ...translations,
           },
         }));
-        setMessage('Traduções preenchidas automaticamente.');
+        setMessage('Traduções geradas com sucesso.');
         setTab('translations');
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Não foi possível traduzir agora.');
+        setError(err instanceof Error ? err.message : 'Erro ao traduzir.');
       }
     });
   };
 
-  const statusBadge = form.updatedAt
-    ? `Última atualização: ${new Date(form.updatedAt).toLocaleString('pt-BR')}`
-    : 'Novo conteúdo';
-
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground-subtle">Initial Section</p>
-          <h1 className="text-2xl font-semibold text-foreground">Editar hero imersivo</h1>
-          <p className="text-xs text-muted-foreground">{statusBadge}</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground-subtle">Initial</p>
+          <h1 className="text-xl font-semibold text-foreground">Seção inicial</h1>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex gap-2">
           <button
             type="button"
             onClick={handleAutoTranslate}
-            className="inline-flex items-center gap-2 rounded-xl border border-border-subtle bg-surface-soft px-4 py-2 text-sm text-foreground hover:border-primary/60 hover:text-foreground transition-colors disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg border border-border-subtle bg-surface-soft px-3 py-2 text-sm hover:border-primary/60 transition-colors"
             disabled={isTranslating}
           >
-            {isTranslating ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiGlobe className="w-4 h-4" />}
-            Traduzir automaticamente
+            {isTranslating ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiRefreshCw className="w-4 h-4" />}
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-primary to-secondary px-4 py-2 text-sm font-semibold text-foreground shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-primary to-secondary px-3 py-2 text-sm font-semibold text-foreground shadow-glow hover:shadow-glow-lg transition-all"
             disabled={isSaving}
           >
             {isSaving ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiSave className="w-4 h-4" />}
-            {isSaving ? 'Salvando...' : 'Salvar'}
+            Salvar
           </button>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border-subtle/70 bg-surface/70 backdrop-blur-2xl shadow-[0_20px_70px_rgba(0,0,0,0.4)]">
-        <div className="flex items-center gap-3 border-b border-border-subtle/60 px-4">
+      <div className="rounded-xl border border-border-subtle/70 bg-surface/70 backdrop-blur-xl">
+        <div className="flex gap-3 border-b border-border-subtle/60 px-4">
           {['pt', 'translations'].map(value => (
             <button
               key={value}
-              onClick={() => setTab(value as 'pt' | 'translations')}
-              className={`relative px-4 py-3 text-sm transition-colors ${tab === value ? 'text-foreground' : 'text-muted-foreground'
-                }`}
+              onClick={() => setTab(value as any)}
+              className={`relative px-3 py-2.5 text-sm transition-colors ${tab === value ? 'text-foreground' : 'text-muted-foreground'}`}
             >
               {value === 'pt' ? 'Conteúdo PT' : 'Traduções'}
               {tab === value && (
-                <motion.div
-                  layoutId="admin-tab-pill"
-                  className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary"
-                />
+                <motion.div layoutId="initial-tab" className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary" />
               )}
             </button>
           ))}
         </div>
 
-        <div className="p-5">
+        <div className="p-4">
           <AnimatePresence mode="wait">
             {tab === 'pt' ? (
               <motion.div
@@ -153,93 +137,89 @@ export default function InitialSectionEditor({ initial }: Props) {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-5"
+                className="space-y-4"
               >
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field
+                  <Input
                     label="Headline"
                     value={form.headline}
-                    onChange={value => updateField('headline', value)}
-                    placeholder="Ex: Interfaces vivas e imersivas"
+                    onChange={value => setForm(prev => ({ ...prev, headline: value }))}
+                    placeholder="Título principal"
                   />
-                  <Field
+                  <Input
                     label="Subheadline"
                     value={form.subheadline}
-                    onChange={value => updateField('subheadline', value)}
-                    placeholder="Ex: Frontend com motion e microinterações"
+                    onChange={value => setForm(prev => ({ ...prev, subheadline: value }))}
+                    placeholder="Subtítulo"
                   />
                 </div>
 
-                <Field
+                <Input
                   label="Descrição"
                   value={form.description}
-                  onChange={value => updateField('description', value)}
-                  placeholder="Texto que aparece no hero explicando seu posicionamento."
+                  onChange={value => setForm(prev => ({ ...prev, description: value }))}
+                  placeholder="Descrição do hero"
                   multiline
                 />
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Field
-                    label="Hero video URL"
-                    value={form.heroVideoUrl}
-                    onChange={value => updateField('heroVideoUrl', value)}
-                    placeholder="https://cdn..."
-                    icon={<FiFilm className="w-4 h-4 text-muted-foreground" />}
-                  />
+                <FileUploader
+                  value={form.heroVideoUrl}
+                  onChange={url => setForm(prev => ({ ...prev, heroVideoUrl: url }))}
+                  accept="video/*"
+                  label="Vídeo do hero"
+                  folder="hero"
+                />
 
-                  <div className="rounded-xl border border-border-subtle/70 bg-background/60 p-3">
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground-subtle mb-2 flex items-center gap-2">
-                      <FiGlobe className="w-4 h-4" />
-                      Idiomas disponíveis
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {languageOptions.map(code => (
-                        <label
-                          key={code}
-                          className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${languagesSelected.has(code)
-                            ? 'border-primary/60 bg-primary/10 text-foreground'
-                            : 'border-border-subtle/70 bg-surface-soft text-muted-foreground hover:border-primary/40'
-                            }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={languagesSelected.has(code)}
-                            onChange={() => toggleLanguage(code)}
-                            className="accent-primary"
-                          />
-                          {code.toUpperCase()}
-                        </label>
-                      ))}
-                    </div>
+                <div className="rounded-lg border border-border-subtle/70 bg-background/60 p-3">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle mb-2">
+                    Idiomas disponíveis
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {languageOptions.map(code => (
+                      <label
+                        key={code}
+                        className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors cursor-pointer ${form.languagesAvailable.includes(code)
+                          ? 'border-primary/60 bg-primary/10 text-foreground'
+                          : 'border-border-subtle/70 bg-surface-soft text-muted-foreground hover:border-primary/40'
+                          }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={form.languagesAvailable.includes(code)}
+                          onChange={() => toggleLanguage(code)}
+                          className="accent-primary"
+                        />
+                        {code.toUpperCase()}
+                      </label>
+                    ))}
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-border-subtle/70 bg-background/60 p-4 space-y-3">
-                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground-subtle">
-                    <FiSliders className="w-4 h-4" />
-                    Background config
+                <div className="rounded-lg border border-border-subtle/70 bg-background/60 p-4 space-y-3">
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle">
+                    <FiZap className="w-4 h-4" />
+                    Configuração de background
                   </div>
                   <div className="grid gap-3 md:grid-cols-2">
-                    <Field
+                    <Input
                       label="Gradient from"
                       value={form.backgroundConfig.gradientFrom ?? ''}
                       onChange={value => updateBackground('gradientFrom', value)}
                       placeholder="hsl(var(--primary))"
                     />
-                    <Field
+                    <Input
                       label="Gradient to"
                       value={form.backgroundConfig.gradientTo ?? ''}
                       onChange={value => updateBackground('gradientTo', value)}
                       placeholder="hsl(var(--secondary))"
                     />
-                    <Field
+                    <Input
                       label="Glow color"
                       value={form.backgroundConfig.glowColor ?? ''}
                       onChange={value => updateBackground('glowColor', value)}
                       placeholder="hsl(var(--glow))"
                     />
-                    <Field
+                    <Input
                       label="Noise opacity"
                       type="number"
                       step="0.01"
@@ -247,7 +227,7 @@ export default function InitialSectionEditor({ initial }: Props) {
                       onChange={value => updateBackground('noiseOpacity', Number(value))}
                       placeholder="0.08"
                     />
-                    <Field
+                    <Input
                       label="Blur"
                       type="number"
                       value={form.backgroundConfig.blur?.toString() ?? '0'}
@@ -255,10 +235,6 @@ export default function InitialSectionEditor({ initial }: Props) {
                       placeholder="12"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground flex items-center gap-2">
-                    <FiZap className="w-4 h-4" />
-                    Esses valores são salvos como objeto em /content/initial.backgroundConfig.
-                  </p>
                 </div>
               </motion.div>
             ) : (
@@ -267,26 +243,53 @@ export default function InitialSectionEditor({ initial }: Props) {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
-                <TranslationEditor
-                  pt={{
-                    headline: form.headline,
-                    subheadline: form.subheadline,
-                    description: form.description,
-                  }}
-                  translations={form.translations}
-                  onChange={(translations) =>
-                    setForm(prev => ({ ...prev, translations: { ...prev.translations, ...translations } }))
-                  }
-                  onAutoTranslate={autoTranslateContent}
-                  fields={[
-                    { key: 'headline', label: 'Headline traduzido', placeholder: 'Headline' },
-                    { key: 'subheadline', label: 'Subheadline traduzido', placeholder: 'Subheadline' },
-                    { key: 'description', label: 'Descrição traduzida', placeholder: 'Descrição', multiline: true },
-                  ]}
-                />
+                {(['en', 'es', 'fr'] as const).map(lang => (
+                  <div key={lang} className="rounded-lg border border-border-subtle/70 bg-background/60 p-4 space-y-3">
+                    <h3 className="text-sm font-semibold text-foreground uppercase">{lang}</h3>
+                    <Input
+                      label="Headline"
+                      value={form.translations[lang]?.headline ?? ''}
+                      onChange={value =>
+                        setForm(prev => ({
+                          ...prev,
+                          translations: {
+                            ...prev.translations,
+                            [lang]: { ...prev.translations[lang], headline: value },
+                          },
+                        }))
+                      }
+                    />
+                    <Input
+                      label="Subheadline"
+                      value={form.translations[lang]?.subheadline ?? ''}
+                      onChange={value =>
+                        setForm(prev => ({
+                          ...prev,
+                          translations: {
+                            ...prev.translations,
+                            [lang]: { ...prev.translations[lang], subheadline: value },
+                          },
+                        }))
+                      }
+                    />
+                    <Input
+                      label="Descrição"
+                      value={form.translations[lang]?.description ?? ''}
+                      onChange={value =>
+                        setForm(prev => ({
+                          ...prev,
+                          translations: {
+                            ...prev.translations,
+                            [lang]: { ...prev.translations[lang], description: value },
+                          },
+                        }))
+                      }
+                      multiline
+                    />
+                  </div>
+                ))}
               </motion.div>
             )}
           </AnimatePresence>
@@ -296,24 +299,23 @@ export default function InitialSectionEditor({ initial }: Props) {
       <AnimatePresence>
         {message && (
           <motion.div
-            key="success"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100"
+            className="rounded-lg border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100"
           >
             {message}
           </motion.div>
         )}
       </AnimatePresence>
+
       <AnimatePresence>
         {error && (
           <motion.div
-            key="error"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100"
+            className="rounded-lg border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100"
           >
             {error}
           </motion.div>
@@ -323,49 +325,26 @@ export default function InitialSectionEditor({ initial }: Props) {
   );
 }
 
-interface FieldProps {
+interface InputProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  placeholder?: string;
   multiline?: boolean;
   type?: string;
-  step?: string;
-  icon?: ReactNode;
+  step?: string | number;
+  placeholder?: string;
 }
 
-function Field({ label, value, onChange, placeholder, multiline, type = 'text', step, icon }: FieldProps) {
-  const inputClass =
-    'w-full rounded-xl border border-border-subtle/70 bg-background/60 px-3 py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 transition';
-
-  if (multiline) {
-    return (
-      <label className="space-y-2 block">
-        <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle">{label}</span>
-        <textarea
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={`${inputClass} min-h-[120px]`}
-        />
-      </label>
-    );
-  }
-
+function Input({ label, value, onChange, multiline, type = 'text', step, placeholder }: InputProps) {
+  const className = "w-full rounded-lg border border-border-subtle/70 bg-background/60 px-3 py-2 text-sm";
   return (
     <label className="space-y-2 block">
       <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle">{label}</span>
-      <div className="relative">
-        {icon && <span className="absolute left-3 top-1/2 -translate-y-1/2">{icon}</span>}
-        <input
-          type={type}
-          step={step}
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={`${inputClass} ${icon ? 'pl-10' : ''}`}
-        />
-      </div>
+      {multiline ? (
+        <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={`${className} min-h-20`} />
+      ) : (
+        <input type={type} step={step} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={className} />
+      )}
     </label>
   );
 }

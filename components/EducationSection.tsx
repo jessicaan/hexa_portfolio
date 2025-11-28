@@ -1,99 +1,175 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactiveGridBackground from '@/components/Reactivegridbackground';
 import { useTheme } from '@/components/ThemeProvider';
-
-type LanguageCode = 'PT' | 'EN' | 'ES' | 'FR';
+import type { EducationContent, EducationItem } from '@/lib/content/schema';
+import type { LanguageCode } from '@/app/i18n';
 
 interface EducationSectionProps {
-  language?: LanguageCode;
+  language: LanguageCode;
+  content: EducationContent;
 }
 
-interface EducationEntry { period: string; title: string; institution: string; description: string; }
-interface CourseItem { id: string; title: string; platform: string; focus: string; status: 'completed' | 'in-progress'; }
-
-const educationTimeline: EducationEntry[] = [
-  { period: '2020 – 2024', title: 'Formação em Desenvolvimento Frontend', institution: 'Estudos focados em web moderna', description: 'Base sólida em HTML, CSS, JavaScript e frameworks modernos.' },
-  { period: '2022 – 2024', title: 'Especialização em Experiências Interativas', institution: 'Estudos independentes e projetos autorais', description: 'Projeto de interfaces com animações, microinterações e motion design.' },
-  { period: 'Em andamento', title: 'Estudos contínuos em UX, UI e produto', institution: 'Cursos, leituras e experimentos pessoais', description: 'Aprofundando decisões de design e arquitetura de informação.' },
-];
-
-const courses: CourseItem[] = [
-  { id: 'react-advanced', title: 'React Avançado e Patterns Modernos', platform: 'Online', focus: 'Arquitetura de componentes, estado, performance.', status: 'completed' },
-  { id: 'nextjs-ux', title: 'Next.js para Experiências de Produto', platform: 'Online', focus: 'Server components, roteamento, performance e DX.', status: 'completed' },
-  { id: 'motion-design', title: 'Motion Design para Interfaces', platform: 'Online', focus: 'Animações conscientes e microinterações.', status: 'in-progress' },
-  { id: 'design-systems', title: 'Design Systems na Prática', platform: 'Online', focus: 'Tokens, bibliotecas de componentes.', status: 'in-progress' },
-];
-
-const educationCopy: Record<LanguageCode, { eyebrow: string; title: string; description: string; timelineLabel: string; coursesLabel: string; status: { completed: string; 'in-progress': string }; }> = {
-  PT: { eyebrow: 'Educação & Cursos', title: 'Onde aprendi e continuo aprendendo', description: 'Um recorte da minha formação e dos cursos que ajudam a construir minha forma de pensar produtos digitais.', timelineLabel: 'Formação e trilha de estudo', coursesLabel: 'Cursos e imersões recentes', status: { completed: 'Concluído', 'in-progress': 'Em andamento' } },
-  EN: { eyebrow: 'Education & Courses', title: 'Where I learned and keep learning', description: 'A snapshot of my education and courses that shape how I think about digital products.', timelineLabel: 'Education and learning path', coursesLabel: 'Recent courses and immersions', status: { completed: 'Completed', 'in-progress': 'In progress' } },
-  ES: { eyebrow: 'Educación y cursos', title: 'Dónde aprendí y sigo aprendiendo', description: 'Un recorte de mi formación y de los cursos que influyen en cómo pienso productos digitales.', timelineLabel: 'Formación y ruta de aprendizaje', coursesLabel: 'Cursos e inmersiones recientes', status: { completed: 'Completado', 'in-progress': 'En progreso' } },
-  FR: { eyebrow: 'Éducation & cours', title: "Là où j'ai appris et j'apprends encore", description: 'Un aperçu de ma formation et des cours qui influencent ma manière de penser les produits numériques.', timelineLabel: "Parcours de formation et d'apprentissage", coursesLabel: 'Cours et immersions récentes', status: { completed: 'Terminé', 'in-progress': 'En cours' } },
+const educationCopy: Record<LanguageCode, {
+  eyebrow: string;
+  title: string;
+  description: string;
+  listLabel: string;
+  highlightsLabel: string;
+}> = {
+  pt: {
+    eyebrow: 'Educacao & Cursos',
+    title: 'Onde aprendi e continuo aprendendo',
+    description: 'Um recorte da minha formacao e dos cursos que ajudam a construir minha forma de pensar produtos digitais.',
+    listLabel: 'Formacao e trilha',
+    highlightsLabel: 'O que marcou esse periodo',
+  },
+  en: {
+    eyebrow: 'Education & Courses',
+    title: 'Where I learned and keep learning',
+    description: 'A snapshot of my education and courses that shape how I think about digital products.',
+    listLabel: 'Education and learning path',
+    highlightsLabel: 'What stood out',
+  },
+  es: {
+    eyebrow: 'Educacion y cursos',
+    title: 'Donde aprendi y sigo aprendiendo',
+    description: 'Un recorte de mi formacion y de los cursos que influyen en como pienso productos digitales.',
+    listLabel: 'Formacion y ruta de aprendizaje',
+    highlightsLabel: 'Lo que destaco',
+  },
+  fr: {
+    eyebrow: 'Education & cours',
+    title: 'Ou jai appris et ou j apprends encore',
+    description: 'Un apercu de ma formation et des cours qui influencent ma maniere de penser les produits numeriques.',
+    listLabel: 'Parcours et etudes',
+    highlightsLabel: 'Points forts',
+  },
 };
 
-export default function EducationSection({ language = 'EN' }: EducationSectionProps) {
-  const [activeCourseId, setActiveCourseId] = useState<string>(courses[0]?.id);
-  const activeCourse = courses.find(c => c.id === activeCourseId) ?? courses[0];
-  const copy = educationCopy[language ?? 'EN'];
+export default function EducationSection({ language, content }: EducationSectionProps) {
+  // Ensure we always have copy, falling back to EN for unknown codes
+  const copy = educationCopy[language] ?? educationCopy.en;
+  const [activeIndex, setActiveIndex] = useState(0);
   const { primaryRgb, theme } = useTheme();
   const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
+
+  const translation =
+    language === 'pt'
+      ? null
+      : content.translations[language as Exclude<LanguageCode, 'pt'>];
+
+  const education = useMemo(() => {
+    const baseList = content.education?.length
+      ? content.education
+      : translation?.education ?? [];
+
+    return baseList.map((item, idx) => {
+      const translated = translation?.education?.[idx];
+      const highlights = (translated?.highlights && translated.highlights.length > 0)
+        ? translated.highlights
+        : item.highlights;
+
+      return {
+        institution: translated?.institution || item.institution,
+        course: translated?.course || item.course,
+        period: translated?.period || item.period,
+        description: translated?.description || item.description,
+        highlights: highlights ?? [],
+      } as EducationItem;
+    });
+  }, [content.education, translation]);
+
+  const summary = translation?.summary || content.summary || copy.description;
+  const activeEducation = education[activeIndex] ?? education[0];
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
       <ReactiveGridBackground />
       <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center w-full h-full px-6 sm:px-10 gap-10 lg:gap-16">
-        <motion.section initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="max-w-xl text-center lg:text-left text-foreground">
+        <motion.section
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="max-w-xl text-center lg:text-left text-foreground"
+        >
           <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground-subtle mb-4">{copy.eyebrow}</p>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-5">{copy.title}</h2>
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">{copy.description}</p>
-          <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle mb-3">{copy.timelineLabel}</p>
-          <div className="space-y-4">
-            {educationTimeline.map((entry, index) => (
-              <motion.div key={entry.title} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: index * 0.05 }} className="flex gap-3">
-                <div className="mt-1"><div className="w-1 h-8 rounded-full" style={{ background: `linear-gradient(to bottom, ${primaryColor}, hsl(var(--secondary)))` }} /></div>
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground-subtle mb-1">{entry.period}</p>
-                  <p className="text-sm sm:text-base text-foreground font-medium">{entry.title}</p>
-                  <p className="text-[11px] sm:text-xs text-muted-foreground">{entry.institution}</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">{entry.description}</p>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-4">{copy.title}</h2>
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">{summary}</p>
+          <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle mb-3">{copy.listLabel}</p>
+          <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-1">
+            {education.map((entry, index) => (
+              <motion.button
+                key={`${entry.institution}-${entry.course}-${index}`}
+                type="button"
+                onClick={() => setActiveIndex(index)}
+                onMouseEnter={() => setActiveIndex(index)}
+                whileHover={{ x: 4 }}
+                className="w-full text-left"
+              >
+                <div
+                  className={`flex gap-3 rounded-2xl border px-4 py-3 transition-colors ${
+                    activeIndex === index
+                      ? 'border-primary/60 bg-primary/10'
+                      : 'border-border-subtle bg-surface-soft hover:border-primary/40'
+                  }`}
+                >
+                  <div className="mt-1">
+                    <div className="w-1 h-8 rounded-full" style={{ background: `linear-gradient(to bottom, ${primaryColor}, hsl(var(--secondary)))` }} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground-subtle mb-1">{entry.period}</p>
+                    <p className="text-sm sm:text-base text-foreground font-medium">{entry.course}</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground">{entry.institution}</p>
+                  </div>
                 </div>
-              </motion.div>
+              </motion.button>
             ))}
           </div>
         </motion.section>
-        <motion.section initial={{ opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.8, delay: 0.1 }} className="w-full max-w-xl">
-          <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle mb-3 text-center lg:text-left">{copy.coursesLabel}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-5">
-            {courses.map(course => {
-              const isActive = course.id === activeCourseId;
-              return (
-                <motion.button key={course.id} type="button" onMouseEnter={() => setActiveCourseId(course.id)} onClick={() => setActiveCourseId(course.id)} whileHover={{ y: -6, scale: 1.02 }} transition={{ duration: 0.25 }} className="relative group text-left">
-                  <motion.div className="absolute -inset-0.5 rounded-2xl opacity-0 group-hover:opacity-100" style={{ background: `linear-gradient(to bottom right, ${primaryColor}40, transparent, hsl(var(--secondary) / 0.4))` }} animate={{ opacity: isActive ? 1 : 0 }} transition={{ duration: 0.25 }} />
-                  <div className="relative rounded-2xl border border-border-subtle bg-surface-soft backdrop-blur-md px-4 py-4 overflow-hidden" style={{ boxShadow: `0 10px 40px rgba(0,0,0,${theme === 'dark' ? 0.75 : 0.15})` }}>
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <div className="flex-1">
-                        <p className="text-sm sm:text-base font-medium text-foreground mb-1">{course.title}</p>
-                        <p className="text-[11px] sm:text-xs text-muted-foreground">{course.platform}</p>
-                      </div>
-                      <motion.span className="mt-0.5 text-[9px] uppercase tracking-[0.2em] text-muted-foreground-subtle" animate={{ opacity: isActive ? 1 : 0.4 }}>{copy.status[course.status]}</motion.span>
-                    </div>
-                    <p className="text-[11px] sm:text-xs text-muted-foreground">{course.focus}</p>
-                    <motion.div className="absolute inset-px rounded-2xl border pointer-events-none" style={{ borderColor: primaryColor }} initial={{ opacity: 0 }} animate={{ opacity: isActive ? 0.35 : 0 }} transition={{ duration: 0.25 }} />
-                  </div>
-                </motion.button>
-              );
-            })}
-          </div>
+
+        <motion.section
+          initial={{ opacity: 0, y: 24, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+          className="w-full max-w-xl"
+        >
           <AnimatePresence mode="wait">
-            <motion.div key={activeCourse.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }} className="rounded-3xl border border-border-subtle bg-surface-soft backdrop-blur-md p-5 sm:p-6" style={{ boxShadow: `0 18px 60px rgba(0,0,0,${theme === 'dark' ? 0.6 : 0.15})` }}>
-              <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground-subtle mb-2">{copy.coursesLabel}</p>
-              <p className="text-sm sm:text-base text-foreground font-medium mb-1">{activeCourse.title}</p>
-              <p className="text-[11px] sm:text-xs text-muted-foreground mb-3">{activeCourse.platform} — {copy.status[activeCourse.status]}</p>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{activeCourse.focus}</p>
-            </motion.div>
+            {activeEducation && (
+              <motion.div
+                key={`${activeEducation.course}-${activeEducation.institution}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="rounded-3xl border border-border-subtle bg-surface-soft backdrop-blur-md p-5 sm:p-6"
+                style={{ boxShadow: `0 18px 60px rgba(0,0,0,${theme === 'dark' ? 0.6 : 0.15})` }}
+              >
+                <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground-subtle mb-2">{copy.listLabel}</p>
+                <p className="text-sm sm:text-base text-foreground font-medium mb-1">{activeEducation.course}</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground mb-3">{activeEducation.institution} - {activeEducation.period}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4">{activeEducation.description}</p>
+
+                {activeEducation.highlights && activeEducation.highlights.length > 0 && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground-subtle mb-2">{copy.highlightsLabel}</p>
+                    <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground">
+                      {activeEducation.highlights.map(highlight => (
+                        <li key={highlight} className="flex gap-2">
+                          <span
+                            className="mt-[5px] h-[3px] w-3 rounded-full"
+                            style={{ background: `linear-gradient(to right, ${primaryColor}, hsl(var(--secondary)))` }}
+                          />
+                          <span>{highlight}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </motion.div>
+            )}
           </AnimatePresence>
         </motion.section>
       </div>

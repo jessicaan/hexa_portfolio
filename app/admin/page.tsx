@@ -34,7 +34,7 @@ export default function AdminPage() {
             key={section.id}
             className="relative overflow-hidden rounded-2xl border border-border-subtle/70 bg-surface/70 p-5 backdrop-blur-xl shadow-[0_20px_70px_rgba(0,0,0,0.3)]"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-br from-primary/10 via-transparent to-secondary/10 pointer-events-none" />
             <div className="relative">
               <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground-subtle">
                 {section.title}

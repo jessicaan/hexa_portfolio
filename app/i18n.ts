@@ -20,7 +20,7 @@ const detectionOptions = {
 
 const fallbackLng = 'en';
 const supportedLngs: InitOptions['supportedLngs'] = ['en', 'es', 'fr', 'pt'];
-const shouldUseLanguageDetector = typeof window !== 'undefined';
+const shouldUseLanguageDetector = false;
 
 const config: InitOptions = {
   resources,

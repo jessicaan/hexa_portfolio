@@ -18,24 +18,14 @@ import {
 } from 'react-icons/si';
 import { HiArrowRight, HiLink } from 'react-icons/hi2';
 import { useTheme } from '@/components/ThemeProvider';
+import type { ProjectsContent, ProjectItem } from '@/lib/content/schema';
+import type { LanguageCode } from '@/app/i18n';
 
 gsap.registerPlugin(ScrambleTextPlugin);
 
-type LanguageCode = 'PT' | 'EN' | 'ES' | 'FR';
-
 interface ProjectsSectionProps {
-  language?: LanguageCode;
-}
-
-interface Project {
-  id: string;
-  name: string;
-  tagline: string;
-  description: string;
-  role: string;
-  year: string;
-  techs: string[];
-  link?: string;
+  content: ProjectsContent;
+  language: LanguageCode;
 }
 
 const techIconMap: Record<string, IconType> = {
@@ -50,45 +40,6 @@ const techIconMap: Record<string, IconType> = {
   'Node.js': SiNodedotjs,
 };
 
-const projects: Project[] = [
-  {
-    id: 'arkly',
-    name: 'Arkly',
-    tagline: 'Multi-tenant SaaS Platform',
-    description: 'Master panel for creating and managing specialized vertical CRMs. Features role-based access control, internationalization, and sophisticated data relationships.',
-    role: 'Full Stack Developer',
-    year: '2024',
-    techs: ['Next.js', 'TypeScript', 'Prisma', 'Supabase'],
-  },
-  {
-    id: 'cleantrack',
-    name: 'CleanTrack',
-    tagline: 'Cleaning Service Management',
-    description: 'Comprehensive platform with team management, scheduling systems, inspection workflows, and real-time messaging.',
-    role: 'Full Stack Developer',
-    year: '2024',
-    techs: ['Next.js', 'TypeScript', 'Prisma', 'Tailwind CSS'],
-  },
-  {
-    id: 'portfolio',
-    name: 'This Portfolio',
-    tagline: 'Immersive Experience',
-    description: 'Hexagonal network navigation with cinematic transitions, reactive backgrounds, and multi-language support.',
-    role: 'Design & Development',
-    year: '2024',
-    techs: ['Next.js', 'GSAP', 'Framer Motion', 'TypeScript'],
-  },
-  {
-    id: 'realestate',
-    name: 'Real Estate CRM',
-    tagline: 'Construction Sales Platform',
-    description: 'Property management system with sales tracking, unit inventory control, and comprehensive lead management.',
-    role: 'Frontend Developer',
-    year: '2023',
-    techs: ['React', 'TypeScript', 'Tailwind CSS', 'Node.js'],
-  },
-];
-
 const sectionCopy: Record<LanguageCode, {
   eyebrow: string;
   title: string;
@@ -96,28 +47,28 @@ const sectionCopy: Record<LanguageCode, {
   viewProject: string;
   techStack: string;
 }> = {
-  PT: {
+  pt: {
     eyebrow: 'Trabalhos',
     title: 'Projetos',
     subtitle: 'Uma seleção de trabalhos que representam minha jornada em criar experiências digitais.',
     viewProject: 'Ver projeto',
     techStack: 'Stack',
   },
-  EN: {
+  en: {
     eyebrow: 'Work',
     title: 'Projects',
     subtitle: 'A selection of work that represents my journey in crafting digital experiences.',
     viewProject: 'View project',
     techStack: 'Stack',
   },
-  ES: {
+  es: {
     eyebrow: 'Trabajos',
     title: 'Proyectos',
     subtitle: 'Una selección de trabajos que representan mi viaje en crear experiencias digitales.',
     viewProject: 'Ver proyecto',
     techStack: 'Stack',
   },
-  FR: {
+  fr: {
     eyebrow: 'Travaux',
     title: 'Projets',
     subtitle: "Une sélection de travaux qui représentent mon parcours dans la création d'expériences digitales.",
@@ -134,11 +85,11 @@ function ProjectCard({
   copy,
   primaryColor
 }: {
-  project: Project;
+  project: ProjectItem;
   isActive: boolean;
   onHover: () => void;
   index: number;
-  copy: typeof sectionCopy['EN'];
+  copy: typeof sectionCopy['en'];
   primaryColor: string;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -173,7 +124,7 @@ function ProjectCard({
           opacity: 1,
           duration: 0.4,
           scrambleText: {
-            text: project.name,
+            text: project.title,
             chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
             revealDelay: 0.2,
             speed: 0.5,
@@ -181,7 +132,7 @@ function ProjectCard({
         }
       );
     }
-  }, [isActive, project.name]);
+  }, [isActive, project.title]);
 
   return (
     <motion.div
@@ -218,15 +169,14 @@ function ProjectCard({
                 className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground-subtle"
                 animate={{ opacity: isActive ? 1 : 0.6 }}
               >
-                {project.year} — {project.role}
+                {project.featured ? 'Featured' : 'Side Project'}
               </motion.span>
               <h3
                 ref={nameRef}
                 className="text-2xl sm:text-3xl font-light tracking-tight text-foreground mt-1"
               >
-                {project.name}
+                {project.title}
               </h3>
-              <p className="text-sm text-muted-foreground mt-1">{project.tagline}</p>
             </div>
 
             <motion.div
@@ -268,7 +218,7 @@ function ProjectCard({
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {project.techs.map(tech => {
+                  {project.tags.map(tech => {
                     const Icon = techIconMap[tech];
                     return (
                       <span
@@ -282,9 +232,9 @@ function ProjectCard({
                   })}
                 </div>
 
-                {project.link && (
+                {project.demoUrl && (
                   <motion.a
-                    href={project.link}
+                    href={project.demoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 mt-5 text-xs tracking-[0.15em] uppercase hover:text-foreground transition-colors"
@@ -312,13 +262,24 @@ function ProjectCard({
   );
 }
 
-export default function ProjectsSection({ language = 'EN' }: ProjectsSectionProps) {
+export default function ProjectsSection({ content, language }: ProjectsSectionProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const copy = sectionCopy[language];
-
+  const copy = sectionCopy[language] ?? sectionCopy.en;
   const { primaryRgb } = useTheme();
   const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
+
+  const translation = language === 'pt' ? null : content.translations[language];
+  const projects = content.projects.map((p, i) => {
+    const translated = translation?.projects[i];
+    return {
+      ...p,
+      title: translated?.title || p.title,
+      description: translated?.description || p.description,
+      tags: (translated?.tags?.length ? translated.tags : p.tags) as any,
+    }
+  });
+  const summary = translation?.summary || content.summary;
 
   useEffect(() => {
     if (titleRef.current) {
@@ -365,17 +326,17 @@ export default function ProjectsSection({ language = 'EN' }: ProjectsSectionProp
           />
 
           <p className="text-sm sm:text-base text-muted-foreground max-w-lg mt-6 leading-relaxed">
-            {copy.subtitle}
+            {summary}
           </p>
         </motion.header>
 
         <div className="space-y-4 sm:space-y-6">
           {projects.map((project, index) => (
             <ProjectCard
-              key={project.id}
+              key={project.title}
               project={project}
-              isActive={activeId === project.id}
-              onHover={() => setActiveId(project.id)}
+              isActive={activeId === project.title}
+              onHover={() => setActiveId(project.title)}
               index={index}
               copy={copy}
               primaryColor={primaryColor}
@@ -391,12 +352,12 @@ export default function ProjectsSection({ language = 'EN' }: ProjectsSectionProp
         >
           {projects.map((project) => (
             <motion.button
-              key={project.id}
-              onClick={() => setActiveId(project.id)}
+              key={project.title}
+              onClick={() => setActiveId(project.title)}
               className="w-2 h-2 rounded-full transition-colors"
               animate={{
-                backgroundColor: activeId === project.id ? primaryColor : 'hsl(var(--muted-foreground-subtle))',
-                scale: activeId === project.id ? 1.3 : 1,
+                backgroundColor: activeId === project.title ? primaryColor : 'hsl(var(--muted-foreground-subtle))',
+                scale: activeId === project.title ? 1.3 : 1,
               }}
               whileHover={{ scale: 1.4 }}
               transition={{ duration: 0.2 }}

@@ -1,119 +1,27 @@
 "use server";
 
 import { adminDb } from "@/lib/firebase-admin";
+import {
+  defaultEducationContent,
+  mergeEducationContent,
+  type EducationContent,
+  type EducationItem,
+} from "@/lib/content/schema";
 
-export type LanguageCode = "pt" | "en" | "es" | "fr";
+export type { EducationContent, EducationItem, LanguageCode } from "@/lib/content/schema";
 
-export interface EducationItem {
-  institution: string;
-  course: string;
-  period: string;
-  description: string;
-  highlights: string[];
-}
-
-export interface EducationTranslation {
-  summary: string;
-  education: EducationItem[];
-}
-
-export interface EducationContent {
-  summary: string;
-  education: EducationItem[];
-  translations: {
-    en: EducationTranslation;
-    es: EducationTranslation;
-    fr: EducationTranslation;
-  };
-  updatedAt?: string;
-}
 
 const docRef = adminDb.collection("content").doc("education");
-
-const defaultEducation: EducationContent = {
-  summary: "",
-  education: [
-    {
-      institution: "",
-      course: "",
-      period: "",
-      description: "",
-      highlights: [""],
-    },
-  ],
-  translations: {
-    en: { summary: "", education: [] },
-    es: { summary: "", education: [] },
-    fr: { summary: "", education: [] },
-  },
-  updatedAt: undefined,
-};
-
-function padTranslations(base: EducationContent, translations: EducationContent["translations"]) {
-  const baseEdu = base.education;
-  const padEdu = (list?: EducationItem[]) => {
-    const arr = Array.isArray(list) ? [...list] : [];
-    while (arr.length < baseEdu.length) {
-      arr.push({
-        institution: "",
-        course: "",
-        period: "",
-        description: "",
-        highlights: [],
-      });
-    }
-    return arr.slice(0, baseEdu.length).map((item, idx) => {
-      const baseHighlights = baseEdu[idx]?.highlights ?? [];
-      const highlights = Array.isArray(item.highlights) ? [...item.highlights] : [];
-      while (highlights.length < baseHighlights.length) highlights.push("");
-      return {
-        institution: item.institution ?? "",
-        course: item.course ?? "",
-        period: item.period ?? "",
-        description: item.description ?? "",
-        highlights: highlights.slice(0, baseHighlights.length),
-      };
-    });
-  };
-
-  return {
-    en: {
-      summary: translations.en.summary ?? "",
-      education: padEdu(translations.en.education),
-    },
-    es: {
-      summary: translations.es.summary ?? "",
-      education: padEdu(translations.es.education),
-    },
-    fr: {
-      summary: translations.fr.summary ?? "",
-      education: padEdu(translations.fr.education),
-    },
-  };
-}
 
 export async function getEducationContent(): Promise<EducationContent> {
   const snapshot = await docRef.get();
   if (!snapshot.exists) {
-    return defaultEducation;
+    return mergeEducationContent(defaultEducationContent);
   }
 
   const data = snapshot.data() as Partial<EducationContent>;
-  const merged: EducationContent = {
-    ...defaultEducation,
-    ...data,
-    education: data.education ?? defaultEducation.education,
-    translations: {
-      en: { ...defaultEducation.translations.en, ...(data.translations?.en ?? {}) },
-      es: { ...defaultEducation.translations.es, ...(data.translations?.es ?? {}) },
-      fr: { ...defaultEducation.translations.fr, ...(data.translations?.fr ?? {}) },
-    },
-  };
 
-  return {
-    ...merged,
-    translations: padTranslations(merged, merged.translations),
-  };
+  return mergeEducationContent(data);
 }
 
 export async function saveEducationContent(payload: EducationContent) {
@@ -126,7 +34,10 @@ export async function saveEducationContent(payload: EducationContent) {
   );
 }
 
-export async function autoTranslateEducation(base: { summary: string; education: EducationItem[] }) {
+export async function autoTranslateEducation(base: {
+  summary: string;
+  education: EducationItem[];
+}) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY ausente nas variaveis de ambiente.");
@@ -179,19 +90,23 @@ ${educationText}
   const cleaned = raw.replace(/```json|```/g, "").trim();
 
   const parsed = JSON.parse(cleaned) as {
-    en?: EducationTranslation;
-    es?: EducationTranslation;
-    fr?: EducationTranslation;
+    en?: { summary?: string; education?: EducationItem[] };
+    es?: { summary?: string; education?: EducationItem[] };
+    fr?: { summary?: string; education?: EducationItem[] };
   };
 
   const normalizeList = (list?: EducationItem[]) =>
-    Array.isArray(list) ? list.map((item) => ({
-      institution: item.institution ?? "",
-      course: item.course ?? "",
-      period: item.period ?? "",
-      description: item.description ?? "",
-      highlights: Array.isArray(item.highlights) ? item.highlights.map((h) => h ?? "") : [],
-    })) : [];
+    Array.isArray(list)
+      ? list.map((item) => ({
+          institution: item.institution ?? "",
+          course: item.course ?? "",
+          period: item.period ?? "",
+          description: item.description ?? "",
+          highlights: Array.isArray(item.highlights)
+            ? item.highlights.map((h) => h ?? "")
+            : [],
+        }))
+      : [];
 
   return {
     en: {

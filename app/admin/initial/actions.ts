@@ -1,67 +1,22 @@
 "use server";
 
 import { adminDb } from "@/lib/firebase-admin";
+import {
+  defaultInitialContent,
+  mergeInitialContent,
+  type InitialSectionContent,
+  type LanguageCode,
+} from "@/lib/content/schema";
 import { translateWithGemini } from "@/lib/ai/translate";
 
-// -----------------------------
-// TYPES
-// -----------------------------
+export type { InitialSectionContent, LanguageCode } from "@/lib/content/schema";
 
-export type LanguageCode = "pt" | "en" | "es" | "fr";
-
-export interface InitialTranslation {
-  headline: string;
-  subheadline: string;
-  description: string;
-}
-
-export interface InitialSectionContent {
-  headline: string;
-  subheadline: string;
-  description: string;
-  heroVideoUrl: string;
-  languagesAvailable: LanguageCode[];
-  backgroundConfig: {
-    gradientFrom?: string;
-    gradientTo?: string;
-    glowColor?: string;
-    noiseOpacity?: number;
-    blur?: number;
-  };
-  translations: {
-    en: InitialTranslation;
-    es: InitialTranslation;
-    fr: InitialTranslation;
-  };
-  updatedAt?: string;
-}
 
 // -----------------------------
 // FIRESTORE
 // -----------------------------
 
 const docRef = adminDb.collection("content").doc("initial");
-
-const defaultContent: InitialSectionContent = {
-  headline: "",
-  subheadline: "",
-  description: "",
-  heroVideoUrl: "",
-  languagesAvailable: ["pt"],
-  backgroundConfig: {
-    gradientFrom: "hsl(var(--primary))",
-    gradientTo: "hsl(var(--secondary))",
-    glowColor: "hsl(var(--glow))",
-    noiseOpacity: 0.08,
-    blur: 12,
-  },
-  translations: {
-    en: { headline: "", subheadline: "", description: "" },
-    es: { headline: "", subheadline: "", description: "" },
-    fr: { headline: "", subheadline: "", description: "" },
-  },
-  updatedAt: undefined,
-};
 
 // -----------------------------
 // GET CONTENT
@@ -70,32 +25,11 @@ const defaultContent: InitialSectionContent = {
 export async function getInitialContent(): Promise<InitialSectionContent> {
   const snapshot = await docRef.get();
 
-  if (!snapshot.exists) return defaultContent;
+  if (!snapshot.exists) return defaultInitialContent;
 
   const data = snapshot.data() as Partial<InitialSectionContent>;
 
-  return {
-    ...defaultContent,
-    ...data,
-    backgroundConfig: {
-      ...defaultContent.backgroundConfig,
-      ...data.backgroundConfig,
-    },
-    translations: {
-      en: {
-        ...defaultContent.translations.en,
-        ...(data.translations?.en ?? {}),
-      },
-      es: {
-        ...defaultContent.translations.es,
-        ...(data.translations?.es ?? {}),
-      },
-      fr: {
-        ...defaultContent.translations.fr,
-        ...(data.translations?.fr ?? {}),
-      },
-    },
-  };
+  return mergeInitialContent(data);
 }
 
 // -----------------------------

@@ -3,8 +3,7 @@
 import { motion } from 'framer-motion';
 import ReactiveGridBackground from '@/components/Reactivegridbackground';
 import { useTheme } from '@/components/ThemeProvider';
-
-type LanguageCode = 'PT' | 'EN' | 'ES' | 'FR';
+import type { LanguageCode } from '@/app/i18n';
 
 interface PersonalSectionProps {
   language?: LanguageCode;
@@ -49,15 +48,16 @@ const hobbies: HobbyCard[] = [
   },
 ];
 
-const personalCopy: Record<LanguageCode, { eyebrow: string; title: string; description: string; hobbiesLabel: string; }> = {
+const personalCopy: Record<'PT' | 'EN' | 'ES' | 'FR', { eyebrow: string; title: string; description: string; hobbiesLabel: string; }> = {
   PT: { eyebrow: 'Hobbies e curiosidades', title: 'Um pouco do que me move fora do código', description: 'Gosto de pensar experiências digitais como extensão de coisas que vivo fora da tela.', hobbiesLabel: 'Hobbies que influenciam meu trabalho' },
   EN: { eyebrow: 'Hobbies & curiosities', title: 'What shapes me outside of code', description: 'I like to see digital experiences as an extension of what I enjoy offline.', hobbiesLabel: 'Hobbies that influence my work' },
   ES: { eyebrow: 'Hobbies y curiosidades', title: 'Lo que me mueve fuera del código', description: 'Me gusta pensar las experiencias digitales como extensión de lo que vivo fuera de la pantalla.', hobbiesLabel: 'Hobbies que influyen en mi trabajo' },
   FR: { eyebrow: 'Hobbies et curiosités', title: 'Ce qui me nourrit en dehors du code', description: "Je vois les expériences numériques comme une extension de ce que j'aime hors écran.", hobbiesLabel: 'Hobbies qui influencent mon travail' },
 };
 
-export default function PersonalSection({ language = 'EN' }: PersonalSectionProps) {
-  const copy = personalCopy[language ?? 'EN'];
+export default function PersonalSection({ language = 'en' }: PersonalSectionProps) {
+  const langKey = (language ?? 'en').toUpperCase() as 'PT' | 'EN' | 'ES' | 'FR';
+  const copy = personalCopy[langKey] ?? personalCopy.EN;
   const { primaryRgb, theme } = useTheme();
   const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
 

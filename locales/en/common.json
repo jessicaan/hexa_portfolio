@@ -8,5 +8,18 @@
     "part5": "center."
   },
   "deploy": "Deploy Now",
-  "docs": "Documentation"
+  "docs": "Documentation",
+  "about": {
+    "heading": "About me",
+    "summary": "I am a developer focused on crafting immersive digital experiences, combining motion, microinteractions and thoughtful interfaces to tell stories in any language.",
+    "myStory": "My Story",
+    "highlights": "Highlights",
+    "videoPitch": "Video Pitch",
+    "videoPlaceholder": {
+      "title": "Video Pitch",
+      "description": "Add a vertical video through the panel"
+    },
+    "skills": "Skills",
+    "language": "English"
+  }
 }

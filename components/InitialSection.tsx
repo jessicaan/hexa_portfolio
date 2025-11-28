@@ -4,17 +4,23 @@ import HexaNode from '@/components/HexaNode';
 import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import type { ReactElement } from 'react';
 import ReactiveGridBackground from '@/components/Reactivegridbackground';
 import { useTheme } from '@/components/ThemeProvider';
+import { loadInitialContent } from '@/lib/content/client';
+import {
+  defaultInitialContent,
+  type InitialSectionContent,
+  type LanguageCode as ContentLanguageCode,
+} from '@/lib/content/schema';
 
 gsap.registerPlugin(ScrambleTextPlugin);
 
-type LanguageCode = 'PT' | 'EN' | 'ES' | 'FR';
+type UiLanguageCode = 'PT' | 'EN' | 'ES' | 'FR';
 
 interface Language {
-  code: LanguageCode;
+  code: UiLanguageCode;
   country: string;
   name: string;
   greeting: string;
@@ -23,46 +29,56 @@ interface Language {
   explore: string;
 }
 
-interface InitialSectionProps {
-  onLanguageSelect?: (code: LanguageCode) => void;
+interface LanguageMeta {
+  code: UiLanguageCode;
+  country: string;
+  name: string;
+  fallbackGreeting: string;
+  fallbackDescription: string;
+  tip: string;
+  explore: string;
 }
 
-const languages: Language[] = [
+interface InitialSectionProps {
+  onLanguageSelect?: (code: UiLanguageCode) => void;
+}
+
+const languageMeta: LanguageMeta[] = [
   {
     code: 'EN',
     country: 'US',
     name: 'English',
-    greeting: 'Hello,',
-    description: 'Select the language for a truly immersive experience',
+    fallbackGreeting: 'Hello,',
+    fallbackDescription: 'Select the language for a truly immersive experience',
     tip: 'Click the node lines to see the magic happening',
-    explore: 'EXPLORE'
+    explore: 'EXPLORE',
   },
   {
     code: 'PT',
     country: 'BR',
-    name: 'Português',
-    greeting: 'Olá,',
-    description: 'Selecione o idioma para uma experiência imersiva',
-    tip: 'Clique nas linhas do nó para ver a mágica acontecer',
-    explore: 'EXPLORAR'
+    name: 'Portugues',
+    fallbackGreeting: 'Ola,',
+    fallbackDescription: 'Selecione o idioma para uma experiencia imersiva',
+    tip: 'Clique nas linhas do no para ver a magica acontecer',
+    explore: 'EXPLORAR',
   },
   {
     code: 'ES',
     country: 'ES',
-    name: 'Español',
-    greeting: 'Hola,',
-    description: 'Selecciona el idioma para una experiencia inmersiva',
-    tip: 'Haz clic en las líneas del nodo para ver la magia',
-    explore: 'EXPLORAR'
+    name: 'Espanol',
+    fallbackGreeting: 'Hola,',
+    fallbackDescription: 'Selecciona el idioma para una experiencia inmersiva',
+    tip: 'Haz clic en las lineas del nodo para ver la magia',
+    explore: 'EXPLORAR',
   },
   {
     code: 'FR',
     country: 'FR',
-    name: 'Français',
-    greeting: 'Bonjour,',
-    description: 'Sélectionnez la langue pour une expérience immersive',
-    tip: 'Cliquez sur les lignes du nœud pour voir la magie',
-    explore: 'EXPLORER'
+    name: 'Francais',
+    fallbackGreeting: 'Bonjour,',
+    fallbackDescription: 'Selectionnez la langue pour une experience immersive',
+    tip: 'Cliquez sur les lignes du noeud pour voir la magie',
+    explore: 'EXPLORER',
   },
 ];
 
@@ -191,6 +207,7 @@ function StylizedFlag({ country, isHovered, primaryRgb }: { country: string; isH
 }
 
 export default function InitialSection({ onLanguageSelect }: InitialSectionProps) {
+  const [content, setContent] = useState<InitialSectionContent>(defaultInitialContent);
   const [shockwave, setShockwave] = useState<{ position: { x: number; y: number } } | null>(null);
   const [activeGreeting, setActiveGreeting] = useState(0);
   const [hoveredLang, setHoveredLang] = useState<number | null>(null);
@@ -207,12 +224,87 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
   const { primaryRgb, theme } = useTheme();
   const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
 
+  useEffect(() => {
+    let active = true;
+
+    loadInitialContent()
+      .then(data => {
+        if (!active) return;
+        setContent(data);
+      })
+      .catch(error => {
+        console.error('[content] Failed to load initial section', error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const languages = useMemo<Language[]>(() => {
+    const available = new Set(
+      (content.languagesAvailable?.length ? content.languagesAvailable : ['pt']).map(code =>
+        code.toLowerCase()
+      )
+    );
+
+    const mapped = languageMeta
+      .filter(meta => available.has(meta.code.toLowerCase()))
+      .map(meta => {
+        const contentCode = meta.code.toLowerCase() as ContentLanguageCode;
+        const translation =
+          contentCode === 'pt'
+            ? null
+            : content.translations?.[contentCode as Exclude<ContentLanguageCode, 'pt'>];
+        const headline = translation?.headline || content.headline || meta.fallbackGreeting;
+        const subheadline = translation?.subheadline || content.subheadline || meta.fallbackDescription;
+        const description = translation?.description || content.description || meta.tip;
+
+        return {
+          code: meta.code,
+          country: meta.country,
+          name: meta.name,
+          greeting: headline,
+          description: subheadline,
+          tip: description,
+          explore: meta.explore,
+        };
+      });
+
+    if (mapped.length) return mapped;
+
+    const fallback = languageMeta[0];
+    return [
+      {
+        code: fallback.code,
+        country: fallback.country,
+        name: fallback.name,
+        greeting: fallback.fallbackGreeting,
+        description: fallback.fallbackDescription,
+        tip: fallback.tip,
+        explore: fallback.explore,
+      },
+    ];
+  }, [content]);
+
+  const activeLanguage = useMemo(
+    () => languages[activeGreeting] ?? languages[0],
+    [languages, activeGreeting]
+  );
+
+  useEffect(() => {
+    setSelectedLang(null);
+    setActiveGreeting(0);
+  }, [languages.length]);
+
   const handleLineClick = useCallback((_lineIndex: number, clickPosition: { x: number; y: number }) => {
     setShockwave({ position: clickPosition });
     setTimeout(() => setShockwave(null), 50);
   }, []);
 
   useEffect(() => {
+    if (!languages[0]) return;
+    const first = languages[0];
     const tl = gsap.timeline({ delay: 0.5 });
 
     if (greetingRef.current) {
@@ -223,7 +315,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
         {
           duration: 1.2,
           scrambleText: {
-            text: languages[0].greeting,
+            text: first.greeting,
             chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
             revealDelay: 0.5,
             speed: 0.3,
@@ -257,7 +349,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
         {
           duration: 1.5,
           scrambleText: {
-            text: languages[0].description,
+            text: first.description,
             chars: 'abcdefghijklmnopqrstuvwxyz ',
             revealDelay: 0.4,
             speed: 0.4,
@@ -270,10 +362,14 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
 
     tl.call(() => setShowTip(true), [], 3.8);
     tl.call(() => setShowExplore(true), [], 4.8);
-  }, []);
+
+    return () => {
+      tl.kill();
+    };
+  }, [languages]);
 
   useEffect(() => {
-    if (!showTip || !tipRef.current) return;
+    if (!showTip || !tipRef.current || !activeLanguage) return;
 
     gsap.fromTo(
       tipRef.current,
@@ -286,7 +382,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
             gsap.to(tipRef.current, {
               duration: 1.2,
               scrambleText: {
-                text: languages[activeGreeting].tip,
+                text: activeLanguage.tip,
                 chars: 'abcdefghijklmnopqrstuvwxyz ',
                 revealDelay: 0.3,
                 speed: 0.4,
@@ -297,10 +393,10 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
         },
       }
     );
-  }, [showTip]);
+  }, [showTip, activeLanguage]);
 
   useEffect(() => {
-    if (!showExplore || !exploreRef.current) return;
+    if (!showExplore || !exploreRef.current || !activeLanguage) return;
 
     gsap.fromTo(
       exploreRef.current,
@@ -315,7 +411,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
             gsap.to(exploreRef.current, {
               duration: 0.8,
               scrambleText: {
-                text: languages[activeGreeting].explore,
+                text: activeLanguage.explore,
                 chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
                 revealDelay: 0.2,
                 speed: 0.5,
@@ -326,9 +422,12 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
         },
       }
     );
-  }, [showExplore]);
+  }, [showExplore, activeLanguage]);
 
   const handleHover = useCallback((index: number) => {
+    const lang = languages[index];
+    if (!lang) return;
+
     setHoveredLang(index);
     setActiveGreeting(index);
 
@@ -336,7 +435,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
       gsap.to(greetingRef.current, {
         duration: 0.5,
         scrambleText: {
-          text: languages[index].greeting,
+          text: lang.greeting,
           chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
           revealDelay: 0.15,
           speed: 0.6,
@@ -349,7 +448,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
       gsap.to(descriptionRef.current, {
         duration: 0.5,
         scrambleText: {
-          text: languages[index].description,
+          text: lang.description,
           chars: 'abcdefghijklmnopqrstuvwxyz ',
           revealDelay: 0.15,
           speed: 0.6,
@@ -362,7 +461,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
       gsap.to(tipRef.current, {
         duration: 0.5,
         scrambleText: {
-          text: languages[index].tip,
+          text: lang.tip,
           chars: 'abcdefghijklmnopqrstuvwxyz ',
           revealDelay: 0.15,
           speed: 0.6,
@@ -375,7 +474,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
       gsap.to(exploreRef.current, {
         duration: 0.5,
         scrambleText: {
-          text: languages[index].explore,
+          text: lang.explore,
           chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
           revealDelay: 0.15,
           speed: 0.6,
@@ -383,13 +482,14 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
         ease: 'none',
       });
     }
-  }, [showTip, showExplore]);
+  }, [languages, showTip, showExplore]);
 
   const handleSelect = useCallback((index: number) => {
+    const lang = languages[index] ?? languages[0];
+    if (!lang) return;
     setSelectedLang(index);
-    const lang = languages[index];
     onLanguageSelect?.(lang.code);
-  }, [onLanguageSelect]);
+  }, [languages, onLanguageSelect]);
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -460,7 +560,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
                   textShadow: `0 0 80px rgba(${primaryRgb.r},${primaryRgb.g},${primaryRgb.b},0.3)`,
                 }}
               >
-                {languages[0].greeting}
+                {activeLanguage?.greeting ?? languageMeta[0].fallbackGreeting}
               </div>
 
               <div
@@ -476,7 +576,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
               ref={descriptionRef}
               className="text-[10px] sm:text-xs tracking-[0.25em] uppercase text-muted-foreground-subtle mb-10 sm:mb-12 text-center max-w-xs sm:max-w-sm"
             >
-              {languages[0].description}
+              {activeLanguage?.description ?? languageMeta[0].fallbackDescription}
             </motion.p>
 
             <motion.div
@@ -565,7 +665,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
             </motion.div>
 
             <AnimatePresence>
-              {showTip && (
+              {showTip && activeLanguage && (
                 <motion.p
                   ref={tipRef}
                   initial={{ opacity: 0, y: 10 }}
@@ -574,13 +674,13 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
                   transition={{ duration: 0.5 }}
                   className="text-[9px] sm:text-[10px] tracking-[0.2em] text-muted-foreground-subtle text-center max-w-xs"
                 >
-                  {languages[0].tip}
+                  {activeLanguage.tip}
                 </motion.p>
               )}
             </AnimatePresence>
 
             <AnimatePresence>
-              {showExplore && (
+              {showExplore && activeLanguage && (
                 <motion.button
                   ref={exploreRef}
                   initial={{ opacity: 0, y: 20 }}
@@ -590,11 +690,12 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
                   className="mt-8 px-8 py-3 bg-transparent border border-primary/30 text-muted-foreground text-xs tracking-[0.3em] rounded-sm hover:border-primary hover:text-foreground hover:bg-primary/10 transition-all duration-300"
                   onClick={() => {
                     const index = selectedLang ?? activeGreeting;
-                    const lang = languages[index];
+                    const lang = languages[index] ?? languages[0];
+                    if (!lang) return;
                     onLanguageSelect?.(lang.code);
                   }}
                 >
-                  {languages[0].explore}
+                  {activeLanguage.explore}
                 </motion.button>
               )}
             </AnimatePresence>

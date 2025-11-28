@@ -1,13 +1,23 @@
 "use server";
 
-type TranslatePayload = Record<string, string | string[]>;
+type TranslatePayload = Record<string, unknown>;
+
+const serializeValue = (value: unknown) => {
+  if (typeof value === "string") return value;
+  try {
+    const serialized = JSON.stringify(value);
+    return serialized ?? "";
+  } catch {
+    return String(value ?? "");
+  }
+};
 
 export async function translateWithGemini(content: TranslatePayload) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY está ausente.");
 
   const fields = Object.entries(content)
-    .map(([k, v]) => `${k}: ${Array.isArray(v) ? JSON.stringify(v) : v}`)
+    .map(([k, v]) => `${k}: ${serializeValue(v)}`)
     .join("\n");
 
   const prompt = `

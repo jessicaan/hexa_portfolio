@@ -3,14 +3,13 @@
 import { motion } from 'framer-motion';
 import ReactiveGridBackground from '@/components/Reactivegridbackground';
 import { useTheme } from '@/components/ThemeProvider';
-
-type LanguageCode = 'PT' | 'EN' | 'ES' | 'FR';
+import type { LanguageCode } from '@/app/i18n';
 
 interface ContactSectionProps {
   language?: LanguageCode;
 }
 
-const contactCopy: Record<LanguageCode, { eyebrow: string; title: string; description: string; emailLabel: string; socialLabel: string; availability: string; }> = {
+const contactCopy: Record<'PT' | 'EN' | 'ES' | 'FR', { eyebrow: string; title: string; description: string; emailLabel: string; socialLabel: string; availability: string; }> = {
   PT: { eyebrow: 'Contato', title: 'Vamos transformar uma ideia em experiência', description: 'Se você tem um produto, uma história ou um conceito que merece uma interface viva, podemos conversar.', emailLabel: 'E-mail principal', socialLabel: 'Outros lugares onde você pode me encontrar', availability: 'Disponível para projetos freelance · Remote' },
   EN: { eyebrow: 'Contact', title: "Let's turn an idea into an experience", description: "If you have a product, a story or a concept that deserves a living interface, let's talk.", emailLabel: 'Primary email', socialLabel: 'Other places you can find me', availability: 'Available for freelance projects · Remote' },
   ES: { eyebrow: 'Contacto', title: 'Convirtamos una idea en experiencia', description: 'Si tienes un producto, una historia o un concepto que merece una interfaz viva, hablemos.', emailLabel: 'Email principal', socialLabel: 'Otros lugares donde puedes encontrarme', availability: 'Disponible para proyectos freelance · Remote' },
@@ -23,8 +22,9 @@ const socials = [
   { id: 'dribbble', label: 'Dribbble / Behance', handle: 'Explorações visuais e UI', href: '#' },
 ];
 
-export default function ContactSection({ language = 'EN' }: ContactSectionProps) {
-  const copy = contactCopy[language ?? 'EN'];
+export default function ContactSection({ language = 'en' }: ContactSectionProps) {
+  const langKey = (language ?? 'en').toUpperCase() as 'PT' | 'EN' | 'ES' | 'FR';
+  const copy = contactCopy[langKey] ?? contactCopy.EN;
   const { primaryRgb, theme } = useTheme();
   const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
 

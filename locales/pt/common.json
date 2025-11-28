@@ -8,5 +8,18 @@
     "part5": "centro."
   },
   "deploy": "Implantar agora",
-  "docs": "Documentação"
+  "docs": "Documentação",
+  "about": {
+    "heading": "Sobre mim",
+    "summary": "Sou um desenvolvedor focado em criar experiencias digitais imersivas, unindo animacao, microinteracoes e interfaces cuidadosas para contar boas historias em qualquer idioma.",
+    "myStory": "Minha História",
+    "highlights": "Destaques",
+    "videoPitch": "Video Pitch",
+    "videoPlaceholder": {
+      "title": "Video Pitch",
+      "description": "Adicione um video vertical pelo painel"
+    },
+    "skills": "Competências",
+    "language": "Portugues"
+  }
 }
