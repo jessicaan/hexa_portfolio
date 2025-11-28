@@ -624,31 +624,66 @@ export function mergePersonalContent(
   };
 }
 
+export type ProjectStatus = "completed" | "in-progress" | "archived" | "concept";
+export type ProjectType =
+  | "web"
+  | "mobile"
+  | "desktop"
+  | "api"
+  | "library"
+  | "saas"
+  | "ecommerce"
+  | "portfolio"
+  | "other";
+
 export interface ProjectItem {
+  id: string;
   title: string;
+  slug: string;
+  shortDescription: string;
   description: string;
   thumbnail: string;
   images: string[];
+  technologies: string[];
   tags: string[];
   demoUrl?: string;
   repoUrl?: string;
+  caseStudyUrl?: string;
   featured: boolean;
-}
-
-export interface ProjectsTranslation {
-  summary: string;
-  projects: Pick<ProjectItem, "title" | "description" | "tags">[];
+  status: ProjectStatus;
+  type: ProjectType;
+  client?: string;
+  startDate?: string;
+  endDate?: string;
+  highlights?: string[];
+  metrics?: {
+    label: string;
+    value: string;
+  }[];
+  order: number;
 }
 
 export interface ProjectsContent {
   summary: string;
   projects: ProjectItem[];
   translations: {
-    en: ProjectsTranslation;
-    es: ProjectsTranslation;
-    fr: ProjectsTranslation;
+    en: TranslatedProjects;
+    es: TranslatedProjects;
+    fr: TranslatedProjects;
   };
   updatedAt?: string;
+}
+
+export interface TranslatedProjects {
+  summary: string;
+  projects: {
+    title: string;
+    shortDescription: string;
+    description: string;
+    tags: string[];
+    highlights?: string[];
+    metrics?: { label: string; value: string }[];
+  }[];
 }
 
 export const defaultProjectsContent: ProjectsContent = {
@@ -667,22 +702,58 @@ function padProjectsTranslations(
   translations: ProjectsContent["translations"]
 ) {
   const baseProjects = base.projects;
-  const padProject = (list?: ProjectsTranslation["projects"]) => {
+
+  const padProject = (list?: TranslatedProjects["projects"]) => {
     const arr = Array.isArray(list) ? [...list] : [];
     while (arr.length < baseProjects.length) {
-      arr.push({ title: "", description: "", tags: [] });
+      arr.push({
+        title: "",
+        shortDescription: "",
+        description: "",
+        tags: [],
+        highlights: [],
+        metrics: [],
+      });
     }
     return arr.slice(0, baseProjects.length).map((item, idx) => {
       const baseItem = baseProjects[idx];
-      if (!baseItem) return { title: "", description: "", tags: [] };
+      if (!baseItem)
+        return {
+          title: item.title ?? "",
+          shortDescription: item.shortDescription ?? "",
+          description: item.description ?? "",
+          tags: Array.isArray(item.tags) ? item.tags : [],
+          highlights: Array.isArray(item.highlights) ? item.highlights : [],
+          metrics: Array.isArray(item.metrics)
+            ? item.metrics.map((m) => ({ label: m.label ?? "", value: m.value ?? "" }))
+            : [],
+        };
 
       const tags = Array.isArray(item.tags) ? [...item.tags] : [];
       while (tags.length < baseItem.tags.length) tags.push("");
 
+      const baseHighlights = Array.isArray(baseItem.highlights)
+        ? baseItem.highlights
+        : [];
+      const highlights = Array.isArray(item.highlights) ? [...item.highlights] : [];
+      while (highlights.length < baseHighlights.length) highlights.push("");
+
+      const baseMetrics = Array.isArray(baseItem.metrics) ? baseItem.metrics : [];
+      const metrics = Array.isArray(item.metrics)
+        ? item.metrics.map((m) => ({
+            label: m.label ?? "",
+            value: m.value ?? "",
+          }))
+        : [];
+      while (metrics.length < baseMetrics.length) metrics.push({ label: "", value: "" });
+
       return {
         title: item.title ?? "",
-        description: item.description ?? "",
         tags: tags.slice(0, baseItem.tags.length),
+        shortDescription: item.shortDescription ?? "",
+        description: item.description ?? "",
+        highlights: highlights.slice(0, baseHighlights.length),
+        metrics: metrics.slice(0, baseMetrics.length),
       };
     });
   };
@@ -706,10 +777,51 @@ function padProjectsTranslations(
 export function mergeProjectsContent(
   data?: Partial<ProjectsContent>
 ): ProjectsContent {
+  const normalizeProjects = (list?: Partial<ProjectItem>[]) => {
+    if (!Array.isArray(list)) return defaultProjectsContent.projects;
+
+    return list.map((item, index) => {
+      const metrics = Array.isArray(item.metrics)
+        ? item.metrics.map((m) => ({
+            label: m.label ?? "",
+            value: m.value ?? "",
+          }))
+        : [];
+
+      return {
+        id: item.id ?? generateProjectId(),
+        title: item.title ?? "",
+        slug:
+          item.slug ??
+          (item.title ? generateSlug(item.title) : ""),
+        shortDescription: item.shortDescription ?? "",
+        description: item.description ?? "",
+        thumbnail: item.thumbnail ?? "",
+        images: Array.isArray(item.images) ? item.images : [],
+        technologies: Array.isArray(item.technologies)
+          ? item.technologies
+          : [],
+        tags: Array.isArray(item.tags) ? item.tags : [],
+        demoUrl: item.demoUrl ?? "",
+        repoUrl: item.repoUrl ?? "",
+        caseStudyUrl: item.caseStudyUrl ?? "",
+        featured: item.featured ?? false,
+        status: item.status ?? "in-progress",
+        type: item.type ?? "web",
+        client: item.client ?? "",
+        startDate: item.startDate ?? "",
+        endDate: item.endDate ?? "",
+        highlights: Array.isArray(item.highlights) ? item.highlights : [],
+        metrics,
+        order: item.order ?? index,
+      };
+    });
+  };
+
   const merged: ProjectsContent = {
     ...defaultProjectsContent,
     ...data,
-    projects: data?.projects ?? defaultProjectsContent.projects,
+    projects: normalizeProjects(data?.projects),
     translations: {
       en: {
         ...defaultProjectsContent.translations.en,
@@ -730,6 +842,19 @@ export function mergeProjectsContent(
     ...merged,
     translations: padProjectsTranslations(merged, merged.translations),
   };
+}
+
+export function generateProjectId(): string {
+  return `proj_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export interface Skill {

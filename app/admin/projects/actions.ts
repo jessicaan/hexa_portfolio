@@ -19,13 +19,21 @@ export async function getProjectsContent(): Promise<ProjectsContent> {
 }
 
 export async function saveProjectsContent(payload: ProjectsContent) {
-  await docRef.set(
-    {
-      ...payload,
-      updatedAt: new Date().toISOString(),
-    },
-    { merge: true }
-  );
+  const sanitized = {
+    ...payload,
+    projects: payload.projects.map((p, index) => ({
+      ...p,
+      order: p.order ?? index,
+      technologies: p.technologies ?? [],
+      images: p.images ?? [],
+      tags: p.tags ?? [],
+      highlights: p.highlights ?? [],
+      metrics: p.metrics ?? [],
+    })),
+    updatedAt: new Date().toISOString(),
+  };
+
+  await docRef.set(sanitized, { merge: true });
 }
 
 export async function autoTranslateProjects(base: {
@@ -36,17 +44,23 @@ export async function autoTranslateProjects(base: {
     summary: base.summary,
     projects: base.projects.map((p) => ({
       title: p.title,
+      shortDescription: p.shortDescription,
       description: p.description,
       tags: p.tags,
+      highlights: p.highlights,
+      metrics: p.metrics,
     })),
   });
 
-  const mapProjects = (arr?: any) => {
+  const mapProjects = (arr?: unknown) => {
     if (!Array.isArray(arr)) return [];
-    return arr.map((p: any) => ({
-      title: p.title ?? "",
-      description: p.description ?? "",
+    return arr.map((p: Record<string, unknown>) => ({
+      title: (p.title as string) ?? "",
+      shortDescription: (p.shortDescription as string) ?? "",
+      description: (p.description as string) ?? "",
       tags: Array.isArray(p.tags) ? p.tags : [],
+      highlights: Array.isArray(p.highlights) ? p.highlights : [],
+      metrics: Array.isArray(p.metrics) ? p.metrics : [],
     }));
   };
 
@@ -64,4 +78,22 @@ export async function autoTranslateProjects(base: {
       projects: mapProjects(result.fr?.projects),
     },
   };
+}
+
+export async function deleteProject(projectId: string) {
+  const current = await getProjectsContent();
+  const filtered = current.projects.filter((p) => p.id !== projectId);
+  await saveProjectsContent({ ...current, projects: filtered });
+}
+
+export async function reorderProjects(projectIds: string[]) {
+  const current = await getProjectsContent();
+  const reordered = projectIds
+    .map((id, index) => {
+      const project = current.projects.find((p) => p.id === id);
+      return project ? { ...project, order: index } : null;
+    })
+    .filter((p): p is ProjectItem => p !== null);
+
+  await saveProjectsContent({ ...current, projects: reordered });
 }
