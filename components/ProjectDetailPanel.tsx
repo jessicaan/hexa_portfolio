@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
@@ -13,6 +13,8 @@ import {
 } from 'react-icons/hi2';
 import { SiGithub } from 'react-icons/si';
 import { useTheme } from '@/components/ThemeProvider';
+import TechBadge from './TechBadge';
+import { getTechById, type Technology } from '@/lib/content/technologies';
 import type { ProjectStatus, ProjectType, LanguageCode } from '@/lib/content/schema';
 import type { ProjectWithTranslations } from './ProjectCard';
 
@@ -25,6 +27,7 @@ const i18n: Record<LanguageCode, {
     period: string;
     noProject: string;
     selectProject: string;
+    description: string;
     status: Record<ProjectStatus, string>;
     type: Record<ProjectType, string>;
 }> = {
@@ -37,6 +40,7 @@ const i18n: Record<LanguageCode, {
         period: 'Período',
         noProject: 'Nenhum projeto selecionado',
         selectProject: 'Selecione um projeto na galeria',
+        description: 'Descrição',
         status: {
             completed: 'Concluído',
             'in-progress': 'Em desenvolvimento',
@@ -64,6 +68,7 @@ const i18n: Record<LanguageCode, {
         period: 'Period',
         noProject: 'No project selected',
         selectProject: 'Select a project from the gallery',
+        description: 'Description',
         status: {
             completed: 'Completed',
             'in-progress': 'In development',
@@ -91,6 +96,7 @@ const i18n: Record<LanguageCode, {
         period: 'Período',
         noProject: 'Ningún proyecto seleccionado',
         selectProject: 'Selecciona un proyecto de la galería',
+        description: 'Descripción',
         status: {
             completed: 'Completado',
             'in-progress': 'En desarrollo',
@@ -118,6 +124,7 @@ const i18n: Record<LanguageCode, {
         period: 'Période',
         noProject: 'Aucun projet sélectionné',
         selectProject: 'Sélectionnez un projet dans la galerie',
+        description: 'Description',
         status: {
             completed: 'Terminé',
             'in-progress': 'En développement',
@@ -177,7 +184,15 @@ export default function ProjectDetailPanel({
     const nextImage = () => setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
     const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
 
-    const techs = project?.technologies?.length ? project.technologies : project?.tags || [];
+    const techIds = project?.technologies?.length ? project.technologies : project?.tags || [];
+    const technologies: Technology[] = techIds
+        .map(id => getTechById(id.toLowerCase().replace(/\s+/g, '-').replace(/\./g, '')))
+        .filter((t): t is Technology => t !== undefined);
+
+    const unknownTechs = techIds.filter(id => {
+        const normalized = id.toLowerCase().replace(/\s+/g, '-').replace(/\./g, '');
+        return !getTechById(normalized);
+    });
 
     if (!project) {
         return (
@@ -204,7 +219,7 @@ export default function ProjectDetailPanel({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="h-full flex flex-col rounded-2xl border border-border-subtle overflow-hidden backdrop-blur-md"
+            className="h-full flex flex-col lg:flex-row rounded-2xl border border-border-subtle overflow-hidden backdrop-blur-md"
             style={{
                 background: isDark ? 'rgba(20, 20, 25, 0.7)' : 'rgba(255, 255, 255, 0.5)',
                 boxShadow: `0 8px 32px rgba(0,0,0,${isDark ? 0.3 : 0.1})`,
@@ -219,7 +234,7 @@ export default function ProjectDetailPanel({
                 </button>
             )}
 
-            <div className="relative w-full aspect-video shrink-0 overflow-hidden">
+            <div className="relative w-full lg:w-[45%] xl:w-[40%] aspect-4/3 lg:aspect-auto shrink-0 overflow-hidden">
                 {allImages.length > 0 ? (
                     <>
                         <Image
@@ -228,7 +243,7 @@ export default function ProjectDetailPanel({
                             fill
                             className="object-cover"
                         />
-                        <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent lg:bg-linear-to-r lg:from-transparent lg:to-black/20" />
 
                         {allImages.length > 1 && (
                             <>
@@ -236,13 +251,13 @@ export default function ProjectDetailPanel({
                                     onClick={prevImage}
                                     className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 hover:bg-black/60 text-white transition-colors backdrop-blur-sm"
                                 >
-                                    <HiChevronLeft className="w-5 h-5" />
+                                    <HiChevronLeft className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={nextImage}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 hover:bg-black/60 text-white transition-colors backdrop-blur-sm"
                                 >
-                                    <HiChevronRight className="w-5 h-5" />
+                                    <HiChevronRight className="w-4 h-4" />
                                 </button>
 
                                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
@@ -250,7 +265,7 @@ export default function ProjectDetailPanel({
                                         <button
                                             key={idx}
                                             onClick={() => setCurrentImageIndex(idx)}
-                                            className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/70'
+                                            className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/70'
                                                 }`}
                                         />
                                     ))}
@@ -269,19 +284,19 @@ export default function ProjectDetailPanel({
             </div>
 
             <div
-                className="flex-1 overflow-y-auto p-6"
+                className="flex-1 overflow-y-auto p-5 lg:p-6 xl:p-8"
                 style={{
                     scrollbarWidth: 'thin',
                     scrollbarColor: `${primaryColor}30 transparent`,
                 }}
             >
-                <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-                    <h2 className="text-xl lg:text-2xl font-semibold text-foreground">
+                <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                    <h2 className="text-xl lg:text-2xl xl:text-3xl font-semibold text-foreground">
                         {project._title}
                     </h2>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 mb-5">
+                <div className="flex flex-wrap items-center gap-2 mb-4">
                     <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-muted text-muted-foreground">
                         {t.type[project.type]}
                     </span>
@@ -310,24 +325,24 @@ export default function ProjectDetailPanel({
                     </div>
                 )}
 
-                <div className="mb-6">
+                <div className="mb-5">
                     <div className="flex items-center gap-3 mb-3">
                         <span
                             className="h-0.5 w-8 rounded-full"
                             style={{ background: `linear-gradient(to right, ${primaryColor}, transparent)` }}
                         />
                         <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-                            Descrição
+                            {t.description}
                         </p>
                     </div>
                     <div
-                        className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+                        className="text-sm text-muted-foreground leading-relaxed"
                         dangerouslySetInnerHTML={{ __html: project._desc || project._short }}
                     />
                 </div>
 
                 {project._highlights && project._highlights.length > 0 && (
-                    <div className="mb-6">
+                    <div className="mb-5">
                         <div className="flex items-center gap-3 mb-3">
                             <span
                                 className="h-0.5 w-8 rounded-full"
@@ -363,8 +378,8 @@ export default function ProjectDetailPanel({
                     </div>
                 )}
 
-                {techs.length > 0 && (
-                    <div className="mb-6">
+                {(technologies.length > 0 || unknownTechs.length > 0) && (
+                    <div className="mb-5">
                         <div className="flex items-center gap-3 mb-3">
                             <span
                                 className="h-0.5 w-8 rounded-full"
@@ -375,12 +390,17 @@ export default function ProjectDetailPanel({
                             </p>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            {techs.map((tech) => (
+                            {technologies.map((tech) => (
+                                <TechBadge key={tech.id} tech={tech} size="md" />
+                            ))}
+                            {unknownTechs.map((tech) => (
                                 <span
                                     key={tech}
-                                    className="px-3 py-1.5 rounded-lg text-xs font-medium border border-border-subtle transition-colors hover:border-border"
+                                    className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
                                     style={{
-                                        background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                                        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                                        color: isDark ? '#94a3b8' : '#64748b',
                                     }}
                                 >
                                     {tech}
@@ -396,8 +416,11 @@ export default function ProjectDetailPanel({
                             href={project.demoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:scale-[1.02]"
-                            style={{ background: `linear-gradient(135deg, ${primaryColor}, hsl(var(--secondary)))` }}
+                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:scale-[1.02] hover:shadow-lg"
+                            style={{
+                                background: `linear-gradient(135deg, ${primaryColor}, hsl(var(--secondary)))`,
+                                boxShadow: `0 4px 14px ${primaryColor}40`,
+                            }}
                         >
                             <HiArrowTopRightOnSquare className="w-4 h-4" />
                             {t.viewLive}

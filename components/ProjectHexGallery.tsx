@@ -10,37 +10,22 @@ interface ProjectHexGalleryProps {
     projects: ProjectWithTranslations[];
     selectedId: string | null;
     onSelect: (id: string) => void;
+    onShockwave?: (position: { x: number; y: number }) => void;
 }
 
 const HEX_WIDTH = 200;
 const HEX_HEIGHT = 230;
-const VERTICAL_SPACING = 80;
+const VERTICAL_SPACING = 120;
 const HORIZONTAL_OFFSET = 80;
 
 export default function ProjectHexGallery({
     projects,
     selectedId,
     onSelect,
+    onShockwave,
 }: ProjectHexGalleryProps) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [containerHeight, setContainerHeight] = useState(0);
     const { primaryRgb } = useTheme();
-
-    useEffect(() => {
-        if (!containerRef.current) return;
-
-        const updateHeight = () => {
-            if (containerRef.current) {
-                setContainerHeight(containerRef.current.offsetHeight);
-            }
-        };
-
-        updateHeight();
-        const observer = new ResizeObserver(updateHeight);
-        observer.observe(containerRef.current);
-
-        return () => observer.disconnect();
-    }, []);
 
     const positions = useMemo(() => {
         return projects.map((_, index) => {
@@ -55,16 +40,11 @@ export default function ProjectHexGallery({
             const from = positions[index];
             const to = positions[index + 1];
 
-            const fromCenterX = from.x + HEX_WIDTH / 2;
-            const fromCenterY = from.y + HEX_HEIGHT / 2;
-            const toCenterX = to.x + HEX_WIDTH / 2;
-            const toCenterY = to.y + HEX_HEIGHT / 2;
-
             const fromBottomY = from.y + HEX_HEIGHT * 0.85;
             const toTopY = to.y + HEX_HEIGHT * 0.15;
 
-            const startX = fromCenterX + (index % 2 === 0 ? HEX_WIDTH * 0.25 : -HEX_WIDTH * 0.25);
-            const endX = toCenterX + (index % 2 === 0 ? -HEX_WIDTH * 0.25 : HEX_WIDTH * 0.25);
+            const startX = from.x + HEX_WIDTH / 2 + (index % 2 === 0 ? HEX_WIDTH * 0.25 : -HEX_WIDTH * 0.25);
+            const endX = to.x + HEX_WIDTH / 2 + (index % 2 === 0 ? -HEX_WIDTH * 0.25 : HEX_WIDTH * 0.25);
 
             return {
                 start: { x: startX, y: fromBottomY },
@@ -78,6 +58,16 @@ export default function ProjectHexGallery({
     const totalHeight = positions.length > 0
         ? positions[positions.length - 1].y + HEX_HEIGHT + 40
         : 0;
+
+    const handleConnectorVibrate = (position: { x: number; y: number }) => {
+        if (onShockwave && containerRef.current) {
+            const rect = containerRef.current.getBoundingClientRect();
+            onShockwave({
+                x: rect.left + position.x,
+                y: rect.top + position.y,
+            });
+        }
+    };
 
     return (
         <div
@@ -96,24 +86,16 @@ export default function ProjectHexGallery({
                     minHeight: totalHeight,
                 }}
             >
-                <svg
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                        width: totalWidth,
-                        height: totalHeight,
-                        overflow: 'visible',
-                    }}
-                >
-                    {connections.map((conn, index) => (
-                        <ProjectHexConnector
-                            key={`conn-${index}`}
-                            start={conn.start}
-                            end={conn.end}
-                            index={index}
-                            isActive={conn.isActive}
-                        />
-                    ))}
-                </svg>
+                {connections.map((conn, index) => (
+                    <ProjectHexConnector
+                        key={`conn-${index}`}
+                        start={conn.start}
+                        end={conn.end}
+                        index={index}
+                        isActive={conn.isActive}
+                        onVibrate={handleConnectorVibrate}
+                    />
+                ))}
 
                 {projects.map((project, index) => {
                     const position = positions[index];

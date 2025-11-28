@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
 import ReactiveGridBackground from '@/components/Reactivegridbackground';
@@ -49,12 +49,17 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [shockwave, setShockwave] = useState<{ position: { x: number; y: number } } | null>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handleShockwave = useCallback((position: { x: number; y: number }) => {
+    setShockwave({ position });
   }, []);
 
   const translationLanguage = language === 'pt' ? null : (language as keyof ProjectsContent['translations']);
@@ -112,7 +117,7 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
-      <ReactiveGridBackground />
+      <ReactiveGridBackground shockwave={shockwave} />
 
       <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden lg:overflow-hidden">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 py-8 lg:py-12 h-full flex flex-col">
@@ -199,6 +204,7 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
                 projects={projects}
                 selectedId={selectedId}
                 onSelect={handleSelect}
+                onShockwave={handleShockwave}
               />
             </motion.div>
 
@@ -209,11 +215,14 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
               className="lg:col-span-8 xl:col-span-9 h-full overflow-hidden"
             >
               <AnimatePresence mode="wait">
-                <ProjectDetailPanel
-                  key={selectedId || 'empty'}
-                  project={selectedProject}
-                  language={language}
-                />
+                {selectedProject && (
+                  <ProjectDetailPanel
+                    key={selectedId || 'empty'}
+                    project={selectedProject}
+                    language={language}
+                    onClose={handleClosePanel}
+                  />
+                )}
               </AnimatePresence>
             </motion.div>
           </div>
