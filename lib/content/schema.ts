@@ -690,6 +690,7 @@ export interface ProjectsContent {
 export interface TranslatedProjects {
   summary: string;
   projects: {
+    id: string;
     title: string;
     shortDescription: string;
     description: string;
@@ -721,6 +722,7 @@ function padProjectsTranslations(
     const arr = Array.isArray(list) ? [...list] : [];
     while (arr.length < baseProjects.length) {
       arr.push({
+        id: "",
         title: "",
         shortDescription: "",
         description: "",
@@ -734,6 +736,7 @@ function padProjectsTranslations(
       const baseItem = baseProjects[idx];
       if (!baseItem)
         return {
+          id: item.id ?? "",
           title: item.title ?? "",
           shortDescription: item.shortDescription ?? "",
           description: item.description ?? "",
@@ -768,6 +771,7 @@ function padProjectsTranslations(
       while (images.length < baseImages.length) images.push({ description: "" });
 
       return {
+        id: baseItem.id,
         title: item.title ?? "",
         tags: tags.slice(0, baseItem.tags.length),
         shortDescription: item.shortDescription ?? "",

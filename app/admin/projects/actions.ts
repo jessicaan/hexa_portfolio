@@ -63,9 +63,10 @@ export async function autoTranslateProjects(base: {
     })),
   });
 
-  const mapProjects = (arr?: unknown) => {
-    if (!Array.isArray(arr)) return [];
-    return arr.map((p: Record<string, unknown>) => ({
+  const mapProjects = (arr?: unknown, baseProjects?: ProjectItem[]) => {
+    if (!Array.isArray(arr) || !baseProjects) return [];
+    return arr.map((p: Record<string, unknown>, index: number) => ({
+      id: baseProjects[index]?.id ?? "",
       title: (p.title as string) ?? "",
       shortDescription: (p.shortDescription as string) ?? "",
       description: (p.description as string) ?? "",
@@ -83,15 +84,15 @@ export async function autoTranslateProjects(base: {
   return {
     en: {
       summary: result.en?.summary ?? "",
-      projects: mapProjects(result.en?.projects),
+      projects: mapProjects(result.en?.projects, base.projects),
     },
     es: {
       summary: result.es?.summary ?? "",
-      projects: mapProjects(result.es?.projects),
+      projects: mapProjects(result.es?.projects, base.projects),
     },
     fr: {
       summary: result.fr?.summary ?? "",
-      projects: mapProjects(result.fr?.projects),
+      projects: mapProjects(result.fr?.projects, base.projects),
     },
   };
 }

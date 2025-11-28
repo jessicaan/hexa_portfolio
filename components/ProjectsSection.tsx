@@ -67,8 +67,8 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
 
   const projects = useMemo<ProjectWithTranslations[]>(() => {
     const sorted = [...content.projects].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    return sorted.map((p, i): ProjectWithTranslations => {
-      const tr = translation?.projects?.[i];
+    return sorted.map((p): ProjectWithTranslations => {
+      const tr = translation?.projects?.find(t => t.id === p.id);
       const baseImages = Array.isArray(p.images) ? p.images : [];
       const translatedImages = tr?.images;
       const mergedImages = baseImages.map((img, imgIndex) => ({

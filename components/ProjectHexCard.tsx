@@ -5,10 +5,19 @@ import { gsap } from 'gsap';
 import { useTheme } from '@/components/ThemeProvider';
 import type { ProjectStatus } from '@/lib/content/schema';
 
+import {
+    SiTypescript, SiJavascript, SiReact, SiNextdotjs, SiTailwindcss,
+    SiPrisma, SiSupabase, SiNodedotjs, SiFirebase, SiMongodb,
+    SiPostgresql, SiDocker, SiGithub, SiVercel, SiFramer,
+    SiGreensock, SiGraphql, SiRedis, SiStripe, SiPython,
+    SiVuedotjs, SiAngular, SiFigma, SiAmazonwebservices,
+    SiHtml5, SiCss3, SiSass
+} from 'react-icons/si';
+
 interface ProjectHexCardProps {
     id: string;
     title: string;
-    thumbnail?: string;
+    shortDesc?: string;
     status: ProjectStatus;
     technologies?: string[];
     isSelected: boolean;
@@ -16,16 +25,58 @@ interface ProjectHexCardProps {
 }
 
 const STATUS_COLORS: Record<ProjectStatus, string> = {
-    completed: '#10b981',
-    'in-progress': '#3b82f6',
-    archived: '#6b7280',
-    concept: '#a855f7',
+    completed: '#10b981', // Emerald
+    'in-progress': '#3b82f6', // Blue
+    archived: '#6b7280', // Gray
+    concept: '#a855f7', // Purple
+};
+
+const TECH_MAP: Record<string, { icon: React.ElementType; color: string }> = {
+    typescript: { icon: SiTypescript, color: '#3178c6' },
+    ts: { icon: SiTypescript, color: '#3178c6' },
+    javascript: { icon: SiJavascript, color: '#f7df1e' },
+    js: { icon: SiJavascript, color: '#f7df1e' },
+    react: { icon: SiReact, color: '#61dafb' },
+    'reactjs': { icon: SiReact, color: '#61dafb' },
+    'react native': { icon: SiReact, color: '#61dafb' },
+    nextjs: { icon: SiNextdotjs, color: '#ffffff' },
+    'next.js': { icon: SiNextdotjs, color: '#ffffff' },
+    tailwindcss: { icon: SiTailwindcss, color: '#06b6d4' },
+    'tailwind css': { icon: SiTailwindcss, color: '#06b6d4' },
+    'tailwind': { icon: SiTailwindcss, color: '#06b6d4' },
+    prisma: { icon: SiPrisma, color: '#5a67d8' },
+    supabase: { icon: SiSupabase, color: '#3fcf8e' },
+    nodejs: { icon: SiNodedotjs, color: '#339933' },
+    'node.js': { icon: SiNodedotjs, color: '#339933' },
+    firebase: { icon: SiFirebase, color: '#ffca28' },
+    mongodb: { icon: SiMongodb, color: '#47a248' },
+    postgresql: { icon: SiPostgresql, color: '#4169e1' },
+    postgres: { icon: SiPostgresql, color: '#4169e1' },
+    docker: { icon: SiDocker, color: '#2496ed' },
+    github: { icon: SiGithub, color: '#ffffff' },
+    git: { icon: SiGithub, color: '#ffffff' },
+    vercel: { icon: SiVercel, color: '#ffffff' },
+    framer: { icon: SiFramer, color: '#0055ff' },
+    'framer motion': { icon: SiFramer, color: '#0055ff' },
+    gsap: { icon: SiGreensock, color: '#88ce02' },
+    graphql: { icon: SiGraphql, color: '#e10098' },
+    redis: { icon: SiRedis, color: '#dc382d' },
+    stripe: { icon: SiStripe, color: '#008cdd' },
+    python: { icon: SiPython, color: '#3776ab' },
+    vue: { icon: SiVuedotjs, color: '#4fc08d' },
+    angular: { icon: SiAngular, color: '#dd0031' },
+    figma: { icon: SiFigma, color: '#f24e1e' },
+    aws: { icon: SiAmazonwebservices, color: '#ff9900' },
+    html: { icon: SiHtml5, color: '#E34F26' },
+    css: { icon: SiCss3, color: '#1572B6' },
+    sass: { icon: SiSass, color: '#CC6699' },
+    scss: { icon: SiSass, color: '#CC6699' },
 };
 
 export default function ProjectHexCard({
     id,
     title,
-    thumbnail,
+    shortDesc,
     status,
     technologies = [],
     isSelected,
@@ -34,47 +85,40 @@ export default function ProjectHexCard({
     const hexRef = useRef<HTMLDivElement>(null);
     const { primaryRgb, theme } = useTheme();
 
-    const accentColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
-    const isDark = theme === 'dark';
+    const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
 
     useEffect(() => {
         if (!hexRef.current) return;
-
         if (isSelected) {
-            gsap.to(hexRef.current, {
-                scale: 1.06,
-                duration: 0.4,
-                ease: 'back.out(1.4)',
-            });
+            gsap.to(hexRef.current, { scale: 1.05, duration: 0.4, ease: 'back.out(1.4)' });
         } else {
-            gsap.to(hexRef.current, {
-                scale: 1,
-                duration: 0.3,
-                ease: 'power2.out',
-            });
+            gsap.to(hexRef.current, { scale: 1, duration: 0.3, ease: 'power2.out' });
         }
     }, [isSelected]);
 
     const handleMouseEnter = useCallback(() => {
         if (!hexRef.current || isSelected) return;
-        gsap.to(hexRef.current, {
-            scale: 1.03,
-            duration: 0.25,
-            ease: 'power2.out',
-        });
+        gsap.to(hexRef.current, { scale: 1.02, duration: 0.25, ease: 'power2.out' });
     }, [isSelected]);
 
     const handleMouseLeave = useCallback(() => {
         if (!hexRef.current || isSelected) return;
-        gsap.to(hexRef.current, {
-            scale: 1,
-            duration: 0.25,
-            ease: 'power2.out',
-        });
+        gsap.to(hexRef.current, { scale: 1, duration: 0.25, ease: 'power2.out' });
     }, [isSelected]);
 
-    const statusColor = STATUS_COLORS[status];
-    const displayTechs = technologies.slice(0, 3);
+    const displayTechs = technologies.slice(0, 4).map(techId => {
+        const key = techId.toLowerCase().trim();
+        const techData = TECH_MAP[key]
+            || TECH_MAP[key.replace(/\./g, '')]
+            || TECH_MAP[key.replace(/\s+/g, '-')]
+            || TECH_MAP[key.replace(/\s+/g, '')];
+
+        return {
+            id: techId,
+            Icon: techData?.icon,
+            color: techData?.color || '#fff'
+        };
+    });
 
     const width = 200;
     const height = 230;
@@ -85,94 +129,99 @@ export default function ProjectHexCard({
             onClick={onClick}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            className="relative cursor-pointer shrink-0 transition-[filter] duration-300"
-            style={{
-                width,
-                height,
-                filter: isSelected
-                    ? `drop-shadow(0 0 25px ${accentColor}50)`
-                    : `drop-shadow(0 4px 12px rgba(0,0,0,${isDark ? 0.4 : 0.15}))`,
-            }}
+            className="relative cursor-pointer shrink-0 z-10"
+            style={{ width, height }}
         >
             <svg
                 viewBox={`0 0 ${width} ${height}`}
-                className="absolute inset-0 w-full h-full"
+                className="absolute inset-0 w-full h-full drop-shadow-2xl"
                 style={{ overflow: 'visible' }}
             >
                 <defs>
-                    <clipPath id={`hex-clip-${id}`}>
-                        <polygon points="100,8 192,60 192,170 100,222 8,170 8,60" />
-                    </clipPath>
-                    <filter id={`hex-glow-${id}`} x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
+                    <filter id={`glow-${id}`} x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="blur" />
                         <feMerge>
                             <feMergeNode in="blur" />
                             <feMergeNode in="SourceGraphic" />
                         </feMerge>
                     </filter>
+                    <linearGradient id={`grad-${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="rgba(20, 20, 25, 0.95)" />
+                        <stop offset="100%" stopColor="rgba(10, 10, 15, 0.98)" />
+                    </linearGradient>
                 </defs>
 
                 <polygon
                     points="100,8 192,60 192,170 100,222 8,170 8,60"
-                    fill={isDark ? 'rgba(20, 20, 28, 0.85)' : 'rgba(255, 255, 255, 0.9)'}
-                    stroke={isSelected ? accentColor : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)')}
+                    fill={`url(#grad-${id})`}
+                    stroke={isSelected ? primaryColor : 'rgba(255,255,255,0.1)'}
                     strokeWidth={isSelected ? 2 : 1}
-                    filter={isSelected ? `url(#hex-glow-${id})` : undefined}
-                    style={{ backdropFilter: 'blur(12px)' }}
+                    filter={isSelected ? `url(#glow-${id})` : undefined}
+                    className="transition-all duration-300"
                 />
 
-                {thumbnail && (
-                    <g clipPath={`url(#hex-clip-${id})`} opacity={0.15}>
-                        <image
-                            href={thumbnail}
-                            x="0"
-                            y="0"
-                            width={width}
-                            height={height}
-                            preserveAspectRatio="xMidYMid slice"
-                        />
-                    </g>
-                )}
+                <circle cx="100" cy="8" r="3" fill={primaryColor} className={isSelected ? "animate-pulse" : ""} />
+                <circle cx="100" cy="8" r="8" fill={primaryColor} opacity="0.15" />
+
+                <circle cx="100" cy="222" r="3" fill={primaryColor} className={isSelected ? "animate-pulse" : ""} />
+                <circle cx="100" cy="222" r="8" fill={primaryColor} opacity="0.15" />
             </svg>
 
-            <div className="absolute inset-0 flex flex-col items-center px-4 pt-5 pb-4 pointer-events-none">
-                <div className="flex items-center gap-1.5 mb-2">
-                    <div
-                        className="w-2 h-2 rounded-full"
-                        style={{
-                            backgroundColor: statusColor,
-                            boxShadow: `0 0 6px ${statusColor}`,
-                        }}
-                    />
-                </div>
+            {/* Conteúdo Centralizado */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-6 pt-8 pb-8 text-center pointer-events-none">
 
+                {/* Status */}
+                <div
+                    className="w-1.5 h-1.5 rounded-full mb-3 shadow-[0_0_8px_currentColor]"
+                    style={{ backgroundColor: STATUS_COLORS[status], color: STATUS_COLORS[status] }}
+                />
+
+                {/* Título */}
                 <h3
-                    className="text-center font-semibold leading-snug line-clamp-2 flex-1 flex items-center"
+                    className="text-base font-bold leading-tight mb-2 text-white transition-colors duration-300"
                     style={{
-                        fontSize: 14,
-                        color: isSelected ? accentColor : (isDark ? '#f1f5f9' : '#1e293b'),
+                        textShadow: isSelected ? `0 0 15px ${primaryColor}80` : 'none',
+                        color: isSelected ? primaryColor : '#fff'
                     }}
                 >
                     {title}
                 </h3>
 
-                {displayTechs.length > 0 && (
-                    <div className="flex flex-wrap justify-center gap-1 mt-auto pt-2">
-                        {displayTechs.map((tech) => (
-                            <span
-                                key={tech}
-                                className="px-2 py-0.5 rounded text-[9px] font-medium truncate max-w-[70px]"
-                                style={{
-                                    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
-                                    color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
-                                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
-                                }}
+                {/* Descrição Curta (Margem reduzida para aproximar os ícones) */}
+                <p className="text-[10px] text-white/50 line-clamp-2 mb-3 leading-relaxed max-w-[140px]">
+                    {shortDesc || "Ver detalhes..."}
+                </p>
+
+                {/* Área de Ícones (Removido mt-auto, adicionado mt-1) */}
+                <div className="flex items-center justify-center gap-1.5 mt-1 min-h-[28px]">
+                    {displayTechs.map((tech, i) => (
+                        tech.Icon ? (
+                            <div
+                                key={i}
+                                className="p-1 rounded-full bg-white/5 border border-white/5 backdrop-blur-sm shadow-sm transition-transform hover:scale-110"
+                                title={tech.id}
                             >
-                                {tech}
-                            </span>
-                        ))}
-                    </div>
-                )}
+                                <tech.Icon
+                                    className="w-4 h-4 md:w-5 md:h-5 transition-colors"
+                                    style={{ color: tech.color }}
+                                />
+                            </div>
+                        ) : (
+                            <div
+                                key={i}
+                                className="px-1.5 py-1 rounded-md bg-white/5 border border-white/5 text-[10px] text-white/50 font-medium uppercase"
+                            >
+                                {tech.id.substring(0, 2)}
+                            </div>
+                        )
+                    ))}
+                    {technologies.length > 4 && (
+                        <span className="text-[9px] text-white/30 font-medium ml-0.5">
+                            +{technologies.length - 4}
+                        </span>
+                    )}
+                </div>
+
             </div>
         </div>
     );
