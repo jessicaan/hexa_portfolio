@@ -1,9 +1,13 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
+import ReactiveGridBackground from '@/components/Reactivegridbackground';
 import type { LanguageCode, ProjectImage, ProjectsContent } from '@/lib/content/schema';
-import ProjectCard, { ProjectWithTranslations } from '@/components/ProjectCard';
+import ProjectHexGallery from '@/components/ProjectHexGallery';
+import ProjectDetailPanel from '@/components/ProjectDetailPanel';
+import type { ProjectWithTranslations } from '@/components/ProjectCard';
 
 const i18n: Record<LanguageCode, {
   eyebrow: string;
@@ -39,8 +43,19 @@ interface ProjectsSectionProps {
 
 export default function ProjectsSection({ content, language }: ProjectsSectionProps) {
   const t = i18n[language] || i18n.pt;
-  const { primaryRgb } = useTheme();
-  const accent = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
+  const { primaryRgb, theme } = useTheme();
+  const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
+  const isDark = theme === 'dark';
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const translationLanguage = language === 'pt' ? null : (language as keyof ProjectsContent['translations']);
   const translation = translationLanguage ? content.translations[translationLanguage] : null;
@@ -66,43 +81,144 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
     });
   }, [content.projects, translation]);
 
+  const selectedProject = useMemo(() => {
+    return projects.find((p) => p.id === selectedId) || null;
+  }, [projects, selectedId]);
+
+  useEffect(() => {
+    if (projects.length > 0 && !selectedId && !isMobile) {
+      setSelectedId(projects[0].id);
+    }
+  }, [projects, selectedId, isMobile]);
+
+  const handleSelect = (id: string) => {
+    setSelectedId(id);
+  };
+
+  const handleClosePanel = () => {
+    setSelectedId(null);
+  };
+
   if (projects.length === 0) {
     return (
-      <section className="relative min-h-screen flex items-center justify-center bg-gray-950 px-4">
-        <div className="text-center">
+      <main className="relative w-screen h-screen overflow-hidden">
+        <ReactiveGridBackground />
+        <div className="relative z-10 w-full h-full flex items-center justify-center">
           <p className="text-muted-foreground">{t.empty}</p>
         </div>
-      </section>
+      </main>
     );
   }
 
   return (
-    <section className="relative min-h-screen bg-gray-950 py-24 sm:py-32">
-        <div 
-            className="absolute top-0 left-0 w-full h-full"
-            style={{
-                background: `radial-gradient(circle at 80% 20%, ${accent}10, transparent 40%)`
-            }}
-        />
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:mx-0">
-          <span className="text-base font-semibold leading-7" style={{ color: accent }}>
-            {t.eyebrow}
-          </span>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            {t.title}
-          </h2>
-          <p className="mt-6 text-lg leading-8 text-gray-300">
-            {content.summary}
-          </p>
-        </div>
+    <main className="relative w-screen h-screen overflow-hidden">
+      <ReactiveGridBackground />
 
-        <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-2">
-          {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} language={language} />
-          ))}
+      <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden lg:overflow-hidden">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 py-8 lg:py-12 h-full flex flex-col">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8 lg:mb-10 shrink-0"
+          >
+            <p className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2">
+              {t.eyebrow}
+            </p>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground">
+              {t.title}
+            </h1>
+            {content.summary && (
+              <p className="mt-3 text-base lg:text-lg text-muted-foreground leading-relaxed max-w-2xl">
+                {content.summary}
+              </p>
+            )}
+          </motion.div>
+
+          <div className="lg:hidden flex-1 flex flex-col gap-6 min-h-0">
+            <div className="shrink-0 overflow-x-auto pb-4">
+              <div className="flex gap-4 px-1">
+                {projects.map((project) => {
+                  const techs = project.technologies?.length ? project.technologies : project.tags || [];
+                  const isSelected = selectedId === project.id;
+
+                  return (
+                    <button
+                      key={project.id}
+                      onClick={() => handleSelect(project.id)}
+                      className={`shrink-0 px-4 py-3 rounded-xl border transition-all ${isSelected
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border-subtle bg-background/50 hover:border-border'
+                        }`}
+                      style={{
+                        boxShadow: isSelected ? `0 0 20px ${primaryColor}30` : undefined,
+                      }}
+                    >
+                      <p className={`text-sm font-medium ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                        {project._title}
+                      </p>
+                      {techs.length > 0 && (
+                        <p className="text-[10px] text-muted-foreground mt-1 truncate max-w-[150px]">
+                          {techs.slice(0, 2).join(' · ')}
+                        </p>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {selectedId && selectedProject && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex-1 min-h-0"
+                >
+                  <ProjectDetailPanel
+                    project={selectedProject}
+                    language={language}
+                    onClose={handleClosePanel}
+                    isMobile
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="hidden lg:grid lg:grid-cols-12 gap-8 xl:gap-12 flex-1 min-h-0">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="lg:col-span-4 xl:col-span-3 h-full overflow-hidden"
+            >
+              <ProjectHexGallery
+                projects={projects}
+                selectedId={selectedId}
+                onSelect={handleSelect}
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="lg:col-span-8 xl:col-span-9 h-full overflow-hidden"
+            >
+              <AnimatePresence mode="wait">
+                <ProjectDetailPanel
+                  key={selectedId || 'empty'}
+                  project={selectedProject}
+                  language={language}
+                />
+              </AnimatePresence>
+            </motion.div>
+          </div>
         </div>
       </div>
-    </section>
+    </main>
   );
 }
