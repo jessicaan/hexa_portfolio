@@ -624,6 +624,19 @@ export function mergePersonalContent(
   };
 }
 
+export interface ProjectImageTranslations {
+  en?: string;
+  es?: string;
+  fr?: string;
+}
+
+export interface ProjectImage {
+  id: string;
+  url: string;
+  description?: string;
+  translations?: ProjectImageTranslations;
+}
+
 export type ProjectStatus = "completed" | "in-progress" | "archived" | "concept";
 export type ProjectType =
   | "web"
@@ -643,7 +656,7 @@ export interface ProjectItem {
   shortDescription: string;
   description: string;
   thumbnail: string;
-  images: string[];
+  images: ProjectImage[];
   technologies: string[];
   tags: string[];
   demoUrl?: string;
@@ -683,6 +696,7 @@ export interface TranslatedProjects {
     tags: string[];
     highlights?: string[];
     metrics?: { label: string; value: string }[];
+    images?: { description: string }[];
   }[];
 }
 
@@ -713,6 +727,7 @@ function padProjectsTranslations(
         tags: [],
         highlights: [],
         metrics: [],
+        images: [],
       });
     }
     return arr.slice(0, baseProjects.length).map((item, idx) => {
@@ -727,6 +742,7 @@ function padProjectsTranslations(
           metrics: Array.isArray(item.metrics)
             ? item.metrics.map((m) => ({ label: m.label ?? "", value: m.value ?? "" }))
             : [],
+          images: Array.isArray(item.images) ? item.images : [],
         };
 
       const tags = Array.isArray(item.tags) ? [...item.tags] : [];
@@ -747,6 +763,10 @@ function padProjectsTranslations(
         : [];
       while (metrics.length < baseMetrics.length) metrics.push({ label: "", value: "" });
 
+      const baseImages = Array.isArray(baseItem.images) ? baseItem.images : [];
+      const images = Array.isArray(item.images) ? [...item.images] : [];
+      while (images.length < baseImages.length) images.push({ description: "" });
+
       return {
         title: item.title ?? "",
         tags: tags.slice(0, baseItem.tags.length),
@@ -754,6 +774,9 @@ function padProjectsTranslations(
         description: item.description ?? "",
         highlights: highlights.slice(0, baseHighlights.length),
         metrics: metrics.slice(0, baseMetrics.length),
+        images: images.slice(0, baseImages.length).map((img) => ({
+          description: (img as { description?: string })?.description ?? "",
+        })),
       };
     });
   };
@@ -777,6 +800,34 @@ function padProjectsTranslations(
 export function mergeProjectsContent(
   data?: Partial<ProjectsContent>
 ): ProjectsContent {
+  const normalizeImages = (projectId: string, list?: unknown, orderFallback = 0): ProjectImage[] => {
+    if (!Array.isArray(list)) return [];
+
+    return list
+      .map((item, index) => {
+        if (typeof item === "string") {
+          return {
+            id: generateProjectImageId(projectId, index),
+            url: item,
+            description: "",
+            translations: {},
+          };
+        }
+
+        const img = item as Partial<ProjectImage>;
+        const url = img.url ?? "";
+        if (!url) return null;
+
+        return {
+          id: img.id ?? generateProjectImageId(projectId, index || orderFallback),
+          url,
+          description: img.description ?? "",
+          translations: img.translations ?? {},
+        };
+      })
+      .filter((img): img is ProjectImage => !!img);
+  };
+
   const normalizeProjects = (list?: Partial<ProjectItem>[]) => {
     if (!Array.isArray(list)) return defaultProjectsContent.projects;
 
@@ -788,8 +839,10 @@ export function mergeProjectsContent(
           }))
         : [];
 
+      const resolvedId = item.id ?? generateProjectId();
+
       return {
-        id: item.id ?? generateProjectId(),
+        id: resolvedId,
         title: item.title ?? "",
         slug:
           item.slug ??
@@ -797,7 +850,7 @@ export function mergeProjectsContent(
         shortDescription: item.shortDescription ?? "",
         description: item.description ?? "",
         thumbnail: item.thumbnail ?? "",
-        images: Array.isArray(item.images) ? item.images : [],
+        images: normalizeImages(resolvedId, item.images, index),
         technologies: Array.isArray(item.technologies)
           ? item.technologies
           : [],
@@ -855,6 +908,11 @@ export function generateSlug(title: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+export function generateProjectImageId(projectId?: string, index?: number): string {
+  const suffix = index !== undefined ? `_${index}` : "";
+  return `img_${projectId ?? Date.now().toString(36)}${suffix}_${Math.random().toString(36).slice(2, 6)}`;
 }
 
 export interface Skill {

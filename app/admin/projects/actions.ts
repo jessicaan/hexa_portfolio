@@ -7,6 +7,7 @@ import {
   type ProjectItem,
   defaultProjectsContent,
   mergeProjectsContent,
+  generateProjectImageId,
 } from "@/lib/content/schema";
 
 const docRef = adminDb.collection("content").doc("projects");
@@ -25,7 +26,14 @@ export async function saveProjectsContent(payload: ProjectsContent) {
       ...p,
       order: p.order ?? index,
       technologies: p.technologies ?? [],
-      images: p.images ?? [],
+      images: (p.images ?? [])
+        .map((img, imgIndex) => ({
+          id: img.id ?? generateProjectImageId(p.id, imgIndex),
+          url: img.url ?? "",
+          description: img.description ?? "",
+          translations: img.translations ?? {},
+        }))
+        .filter((img) => !!img.url),
       tags: p.tags ?? [],
       highlights: p.highlights ?? [],
       metrics: p.metrics ?? [],
@@ -49,6 +57,9 @@ export async function autoTranslateProjects(base: {
       tags: p.tags,
       highlights: p.highlights,
       metrics: p.metrics,
+      images: (p.images ?? []).map((img) => ({
+        description: img.description ?? "",
+      })),
     })),
   });
 
@@ -61,6 +72,11 @@ export async function autoTranslateProjects(base: {
       tags: Array.isArray(p.tags) ? p.tags : [],
       highlights: Array.isArray(p.highlights) ? p.highlights : [],
       metrics: Array.isArray(p.metrics) ? p.metrics : [],
+      images: Array.isArray(p.images)
+        ? p.images.map((img: Record<string, unknown>) => ({
+            description: (img?.description as string) ?? "",
+          }))
+        : [],
     }));
   };
 

@@ -34,7 +34,7 @@ import type {
     ProjectStatus,
     ProjectType,
 } from '@/lib/content/schema';
-import { generateProjectId, generateSlug } from '@/lib/content/schema';
+import { generateProjectId, generateProjectImageId, generateSlug } from '@/lib/content/schema';
 
 interface Props {
     initial: ProjectsContent;
@@ -94,12 +94,17 @@ export default function ProjectsSectionEditor({ initial }: Props) {
 
     const duplicateProject = useCallback((index: number) => {
         const source = form.projects[index];
+        const newId = generateProjectId();
         const newProject: ProjectItem = {
             ...source,
-            id: generateProjectId(),
-            title: `${source.title} (cópia)`,
+            id: newId,
+            title: `${source.title} (copia)`,
             slug: `${source.slug}-copy`,
             order: form.projects.length,
+            images: (source.images ?? []).map((img, imgIndex) => ({
+                ...img,
+                id: generateProjectImageId(newId, imgIndex),
+            })),
         };
         setForm(prev => ({ ...prev, projects: [...prev.projects, newProject] }));
         setExpandedCards(prev => new Set([...prev, newProject.id]));

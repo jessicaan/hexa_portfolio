@@ -1,33 +1,118 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { FiPlus, FiTrash, FiImage, FiMove, FiMaximize2, FiX } from 'react-icons/fi';
-import Image from 'next/image';
-import FileUploader from '@/components/admin/FileUploader';
+import { FiTrash, FiMove, FiMaximize2, FiX, FiUpload, FiLoader } from 'react-icons/fi';
+import NextImage from 'next/image';
+import type { ProjectImage } from '@/lib/content/schema';
+import { generateProjectImageId } from '@/lib/content/schema';
 
 interface Props {
-    images: string[];
-    onChange: (images: string[]) => void;
+    images: ProjectImage[];
+    onChange: (images: ProjectImage[]) => void;
     folder?: string;
 }
 
 export default function ImageGalleryEditor({ images, onChange, folder = 'projects' }: Props) {
-    const [showUploader, setShowUploader] = useState(false);
     const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleUpload = useCallback((url: string) => {
-        onChange([...images, url]);
-        setShowUploader(false);
+    const handleRemove = useCallback((id: string) => {
+        onChange(images.filter((img) => img.id !== id));
     }, [images, onChange]);
 
-    const handleRemove = useCallback((index: number) => {
-        onChange(images.filter((_, i) => i !== index));
-    }, [images, onChange]);
-
-    const handleReorder = useCallback((newOrder: string[]) => {
+    const handleReorder = useCallback((newOrder: ProjectImage[]) => {
         onChange(newOrder);
     }, [onChange]);
+
+    const handleDescriptionChange = useCallback((id: string, description: string) => {
+        onChange(images.map((img) => img.id === id ? { ...img, description } : img));
+    }, [images, onChange]);
+
+    const convertToWebp = useCallback((file: File) => {
+        return new Promise<File>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const img = new window.Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) {
+                        reject(new Error('N�o foi poss�vel processar a imagem'));
+                        return;
+                    }
+                    ctx.drawImage(img, 0, 0);
+                    canvas.toBlob(
+                        (blob) => {
+                            if (!blob) {
+                                reject(new Error('Falha ao converter para WebP'));
+                                return;
+                            }
+                            const webpFile = new File(
+                                [blob],
+                                file.name.replace(/\.[^.]+$/, '') + '.webp',
+                                { type: 'image/webp' }
+                            );
+                            resolve(webpFile);
+                        },
+                        'image/webp',
+                        0.82
+                    );
+                };
+                img.onerror = () => reject(new Error('Falha ao carregar a imagem'));
+                img.src = reader.result as string;
+            };
+            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+            reader.readAsDataURL(file);
+        });
+    }, []);
+
+    const uploadFile = useCallback(async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', folder);
+
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) throw new Error('Falha no upload');
+        const data = await response.json();
+        return data.url as string;
+    }, [folder]);
+
+    const handleFilesSelected = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+        setError(null);
+        setUploading(true);
+        try {
+            const uploads: ProjectImage[] = [];
+            for (let i = 0; i < files.length; i++) {
+                const original = files.item(i);
+                if (!original) continue;
+                const webp = await convertToWebp(original);
+                const url = await uploadFile(webp);
+                uploads.push({
+                    id: generateProjectImageId(),
+                    url,
+                    description: '',
+                    translations: {},
+                });
+            }
+            onChange([...images, ...uploads]);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erro ao enviar imagens');
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    }, [convertToWebp, uploadFile, images, onChange]);
 
     return (
         <div className="space-y-3">
@@ -35,9 +120,26 @@ export default function ImageGalleryEditor({ images, onChange, folder = 'project
                 <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle">
                     Galeria de Imagens
                 </span>
-                <span className="text-xs text-muted-foreground">
-                    {images.length} imagem{images.length !== 1 && 'ns'}
-                </span>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span>{images.length} imagem{images.length !== 1 && 'ns'}</span>
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="inline-flex items-center gap-1 rounded-md border border-border-subtle px-2 py-1 text-[11px] font-medium hover:border-primary/60 transition-colors"
+                        disabled={uploading}
+                    >
+                        {uploading ? <FiLoader className="w-3.5 h-3.5 animate-spin" /> : <FiUpload className="w-3.5 h-3.5" />}
+                        {uploading ? 'Enviando...' : 'Adicionar imagens'}
+                    </button>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFilesSelected}
+                        className="hidden"
+                    />
+                </div>
             </div>
 
             {images.length > 0 && (
@@ -47,10 +149,10 @@ export default function ImageGalleryEditor({ images, onChange, folder = 'project
                     onReorder={handleReorder}
                     className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide"
                 >
-                    {images.map((url, index) => (
+                    {images.map((img, index) => (
                         <Reorder.Item
-                            key={url}
-                            value={url}
+                            key={img.id}
+                            value={img}
                             className="shrink-0 cursor-grab active:cursor-grabbing"
                         >
                             <motion.div
@@ -58,10 +160,10 @@ export default function ImageGalleryEditor({ images, onChange, folder = 'project
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
-                                className="group relative w-28 h-20 rounded-lg overflow-hidden border border-border-subtle bg-surface-soft"
+                                className="group relative w-36 h-28 rounded-lg overflow-hidden border border-border-subtle bg-surface-soft"
                             >
-                                <Image
-                                    src={url}
+                                <NextImage
+                                    src={img.url}
                                     alt={`Imagem ${index + 1}`}
                                     fill
                                     className="object-cover"
@@ -76,7 +178,7 @@ export default function ImageGalleryEditor({ images, onChange, folder = 'project
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => handleRemove(index)}
+                                        onClick={() => handleRemove(img.id)}
                                         className="p-1.5 rounded-md bg-red-500/80 hover:bg-red-500 transition-colors"
                                     >
                                         <FiTrash className="w-3.5 h-3.5 text-white" />
@@ -89,50 +191,34 @@ export default function ImageGalleryEditor({ images, onChange, folder = 'project
                                     {index + 1}
                                 </div>
                             </motion.div>
+                            <input
+                                type="text"
+                                value={img.description ?? ''}
+                                onChange={(e) => handleDescriptionChange(img.id, e.target.value)}
+                                placeholder="Descri��ǜo da imagem"
+                                className="mt-2 w-full rounded-md border border-border-subtle bg-background/60 px-2 py-1 text-xs"
+                            />
                         </Reorder.Item>
                     ))}
                 </Reorder.Group>
             )}
 
-            <AnimatePresence mode="wait">
-                {showUploader ? (
-                    <motion.div
-                        key="uploader"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden"
+            {!images.length && (
+                <div className="rounded-lg border border-dashed border-border-subtle py-6 text-center text-sm text-muted-foreground">
+                    Nenhuma imagem adicionada ainda
+                </div>
+            )}
+
+            <AnimatePresence>
+                {error && (
+                    <motion.p
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        className="text-xs text-red-400"
                     >
-                        <div className="rounded-lg border border-border-subtle bg-background/60 p-3 space-y-2">
-                            <FileUploader
-                                value=""
-                                onChange={handleUpload}
-                                accept="image/*"
-                                label=""
-                                folder={folder}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowUploader(false)}
-                                className="w-full text-sm text-muted-foreground hover:text-foreground"
-                            >
-                                Cancelar
-                            </button>
-                        </div>
-                    </motion.div>
-                ) : (
-                    <motion.button
-                        key="add-button"
-                        type="button"
-                        onClick={() => setShowUploader(true)}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border-subtle py-6 text-sm text-muted-foreground hover:border-primary/60 hover:text-foreground transition-colors"
-                    >
-                        <FiPlus className="w-4 h-4" />
-                        Adicionar imagem
-                    </motion.button>
+                        {error}
+                    </motion.p>
                 )}
             </AnimatePresence>
 
@@ -153,8 +239,8 @@ export default function ImageGalleryEditor({ images, onChange, folder = 'project
                             <FiX className="w-5 h-5 text-white" />
                         </button>
                         <div className="relative max-w-4xl max-h-[80vh] w-full h-full">
-                            <Image
-                                src={images[previewIndex]}
+                            <NextImage
+                                src={images[previewIndex]?.url}
                                 alt={`Preview ${previewIndex + 1}`}
                                 fill
                                 className="object-contain"
