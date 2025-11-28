@@ -41,6 +41,7 @@ interface LanguageMeta {
 
 interface InitialSectionProps {
   onLanguageSelect?: (code: UiLanguageCode) => void;
+  onExplore?: (code: UiLanguageCode) => void;
 }
 
 const languageMeta: LanguageMeta[] = [
@@ -206,7 +207,7 @@ function StylizedFlag({ country, isHovered, primaryRgb }: { country: string; isH
   );
 }
 
-export default function InitialSection({ onLanguageSelect }: InitialSectionProps) {
+export default function InitialSection({ onLanguageSelect, onExplore }: InitialSectionProps) {
   const [content, setContent] = useState<InitialSectionContent>(defaultInitialContent);
   const [shockwave, setShockwave] = useState<{ position: { x: number; y: number } } | null>(null);
   const [activeGreeting, setActiveGreeting] = useState(0);
@@ -351,7 +352,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
           scrambleText: {
             text: first.description,
             chars: 'abcdefghijklmnopqrstuvwxyz ',
-            revealDelay: 0.4,
+            revealDelay: 0.1,
             speed: 0.4,
           },
           ease: 'none',
@@ -384,7 +385,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
               scrambleText: {
                 text: activeLanguage.tip,
                 chars: 'abcdefghijklmnopqrstuvwxyz ',
-                revealDelay: 0.3,
+                revealDelay: 0.1,
                 speed: 0.4,
               },
               ease: 'none',
@@ -413,7 +414,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
               scrambleText: {
                 text: activeLanguage.explore,
                 chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-                revealDelay: 0.2,
+                revealDelay: 0.1,
                 speed: 0.5,
               },
               ease: 'none',
@@ -437,7 +438,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
         scrambleText: {
           text: lang.greeting,
           chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-          revealDelay: 0.15,
+          revealDelay: 0.1,
           speed: 0.6,
         },
         ease: 'none',
@@ -450,7 +451,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
         scrambleText: {
           text: lang.description,
           chars: 'abcdefghijklmnopqrstuvwxyz ',
-          revealDelay: 0.15,
+          revealDelay: 0.1,
           speed: 0.6,
         },
         ease: 'none',
@@ -463,7 +464,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
         scrambleText: {
           text: lang.tip,
           chars: 'abcdefghijklmnopqrstuvwxyz ',
-          revealDelay: 0.15,
+          revealDelay: 0.1,
           speed: 0.6,
         },
         ease: 'none',
@@ -476,7 +477,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
         scrambleText: {
           text: lang.explore,
           chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-          revealDelay: 0.15,
+          revealDelay: 0.1,
           speed: 0.6,
         },
         ease: 'none',
@@ -692,7 +693,7 @@ export default function InitialSection({ onLanguageSelect }: InitialSectionProps
                     const index = selectedLang ?? activeGreeting;
                     const lang = languages[index] ?? languages[0];
                     if (!lang) return;
-                    onLanguageSelect?.(lang.code);
+                    onExplore?.(lang.code);
                   }}
                 >
                   {activeLanguage.explore}

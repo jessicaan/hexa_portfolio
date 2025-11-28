@@ -22,6 +22,7 @@ interface HexaNetworkAdvancedProps {
         targetId: string;
         triggerKey: number;
     };
+    command?: { name: 'zoomOut'; key: number } | null;
 }
 
 type ViewState = 'focused' | 'zooming-out' | 'network' | 'zooming-in';
@@ -31,7 +32,8 @@ export default function HexaNetworkAdvanced({
     initialNode,
     nodeRadius = 120,
     onNodeChange,
-    transitionToNode
+    transitionToNode,
+    command
 }: HexaNetworkAdvancedProps) {
     const { theme, primaryRgb } = useTheme();
 
@@ -251,6 +253,13 @@ export default function HexaNetworkAdvanced({
         }
     }, [viewState, calculateView, applyTransform, onNodeChange]);
 
+    const zoomOutRef = useRef(zoomOut);
+    const zoomInRef = useRef(zoomIn);
+    useEffect(() => {
+        zoomOutRef.current = zoomOut;
+        zoomInRef.current = zoomIn;
+    });
+
     const handleNodeClick = useCallback((nodeId: string) => {
         if (viewState === 'focused' && nodeId === activeNode) {
             zoomOut();
@@ -270,12 +279,12 @@ export default function HexaNetworkAdvanced({
         pendingTargetRef.current = transitionToNode.targetId;
 
         if (viewState === 'focused') {
-            zoomOut();
+            zoomOutRef.current();
         } else if (viewState === 'network') {
             const target = pendingTargetRef.current;
             pendingTargetRef.current = null;
             if (target) {
-                zoomIn(target);
+                zoomInRef.current(target);
             }
         }
     }, [transitionToNode?.triggerKey]);
@@ -285,10 +294,16 @@ export default function HexaNetworkAdvanced({
             const target = pendingTargetRef.current;
             pendingTargetRef.current = null;
             if (target) {
-                zoomIn(target);
+                zoomInRef.current(target);
             }
         }
-    }, [viewState, zoomIn]);
+    }, [viewState]);
+
+    useEffect(() => {
+        if (command?.name === 'zoomOut') {
+            zoomOutRef.current();
+        }
+    }, [command]);
 
     useEffect(() => {
         const view = calculateView(activeNode);
