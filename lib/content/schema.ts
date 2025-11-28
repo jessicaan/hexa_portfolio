@@ -891,6 +891,8 @@ export function mergeProjectsContent(
     },
   };
 
+  merged.projects.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
   return {
     ...merged,
     translations: padProjectsTranslations(merged, merged.translations),

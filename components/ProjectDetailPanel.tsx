@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     HiArrowTopRightOnSquare,
     HiBuildingOffice2,
@@ -30,6 +30,7 @@ const i18n: Record<LanguageCode, {
     description: string;
     status: Record<ProjectStatus, string>;
     type: Record<ProjectType, string>;
+    otherInfo: string;
 }> = {
     pt: {
         viewLive: 'Ver projeto',
@@ -40,7 +41,7 @@ const i18n: Record<LanguageCode, {
         period: 'Período',
         noProject: 'Nenhum projeto selecionado',
         selectProject: 'Selecione um projeto na galeria',
-        description: 'Descrição',
+        description: 'Descrição do Projeto',
         status: {
             completed: 'Concluído',
             'in-progress': 'Em desenvolvimento',
@@ -58,6 +59,7 @@ const i18n: Record<LanguageCode, {
             portfolio: 'Portfolio',
             other: 'Outro',
         },
+        otherInfo: 'Informações',
     },
     en: {
         viewLive: 'View live',
@@ -68,7 +70,7 @@ const i18n: Record<LanguageCode, {
         period: 'Period',
         noProject: 'No project selected',
         selectProject: 'Select a project from the gallery',
-        description: 'Description',
+        description: 'Project Description',
         status: {
             completed: 'Completed',
             'in-progress': 'In development',
@@ -86,6 +88,7 @@ const i18n: Record<LanguageCode, {
             portfolio: 'Portfolio',
             other: 'Other',
         },
+        otherInfo: 'Details',
     },
     es: {
         viewLive: 'Ver en vivo',
@@ -114,6 +117,7 @@ const i18n: Record<LanguageCode, {
             portfolio: 'Portafolio',
             other: 'Otro',
         },
+        otherInfo: 'Información',
     },
     fr: {
         viewLive: 'Voir en ligne',
@@ -142,6 +146,7 @@ const i18n: Record<LanguageCode, {
             portfolio: 'Portfolio',
             other: 'Autre',
         },
+        otherInfo: 'Détails',
     },
 };
 
@@ -170,12 +175,13 @@ export default function ProjectDetailPanel({
 
     const t = i18n[language] || i18n.pt;
     const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
+    const primaryColorBg = `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.1)`;
     const isDark = theme === 'dark';
 
     const allImages = project ? [
-        project.thumbnail,
-        ...(project._images?.map(img => img.url) || project.images?.map(img => img.url) || [])
-    ].filter(Boolean) : [];
+        { url: project.thumbnail, caption: project._title },
+        ...(project._images?.map(img => ({ url: img.url, caption: img.description || '' })) || [])
+    ].filter(img => Boolean(img.url)) : [];
 
     useEffect(() => {
         setCurrentImageIndex(0);
@@ -212,233 +218,292 @@ export default function ProjectDetailPanel({
     }
 
     const statusStyle = STATUS_STYLES[project.status];
+    const currentImage = allImages[currentImageIndex];
 
     return (
-        <motion.div
-            key={project.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="h-full flex flex-col lg:flex-row rounded-2xl border border-border-subtle overflow-hidden backdrop-blur-md"
-            style={{
-                background: isDark ? 'rgba(20, 20, 25, 0.7)' : 'rgba(255, 255, 255, 0.5)',
-                boxShadow: `0 8px 32px rgba(0,0,0,${isDark ? 0.3 : 0.1})`,
-            }}
-        >
-            {isMobile && onClose && (
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm transition-colors"
+        <>
+            <style jsx global>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 6px;
+                    height: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background-color: rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.3);
+                    border-radius: 3px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background-color: rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.5);
+                }
+            `}</style>
+
+            <motion.div
+                key={project.id}
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="h-full flex flex-col rounded-2xl border border-border-subtle overflow-hidden backdrop-blur-md"
+                style={{
+                    background: 'transparent',
+                    boxShadow: `0 8px 32px rgba(0,0,0,${isDark ? 0.3 : 0.1})`,
+                }}
+            >
+                {/* --- SECTION 1: CAROUSEL (TOP) --- */}
+                <div
+                    className="relative h-[50%] w-full aspect-video shrink-0 overflow-hidden flex flex-col group backdrop-blur-[2px]"
+                    style={{ backgroundColor: primaryColorBg }}
                 >
-                    <HiXMark className="w-5 h-5 text-white" />
-                </button>
-            )}
+                    {isMobile && onClose && (
+                        <button
+                            onClick={onClose}
+                            className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm transition-colors text-white border border-white/10"
+                        >
+                            <HiXMark className="w-5 h-5" />
+                        </button>
+                    )}
 
-            <div className="relative w-full lg:w-[45%] xl:w-[40%] aspect-4/3 lg:aspect-auto shrink-0 overflow-hidden">
-                {allImages.length > 0 ? (
-                    <>
-                        <Image
-                            src={allImages[currentImageIndex] as string}
-                            alt={project._title}
-                            fill
-                            className="object-cover"
-                        />
-                        <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent lg:bg-linear-to-r lg:from-transparent lg:to-black/20" />
+                    {/* Area Principal: Botão Esq - Imagem - Botão Dir */}
+                    <div className="flex-1 flex items-center justify-between w-full h-full relative px-2 sm:px-4 lg:px-8">
 
+                        {/* Left Button (Outside Image) */}
                         {allImages.length > 1 && (
-                            <>
-                                <button
-                                    onClick={prevImage}
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 hover:bg-black/60 text-white transition-colors backdrop-blur-sm"
-                                >
-                                    <HiChevronLeft className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={nextImage}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 hover:bg-black/60 text-white transition-colors backdrop-blur-sm"
-                                >
-                                    <HiChevronRight className="w-4 h-4" />
-                                </button>
+                            <button
+                                onClick={prevImage}
+                                className="z-10 p-2 lg:p-3 rounded-full bg-black/60 hover:bg-black/90 transition-all border border-white/10 backdrop-blur-sm group/btn"
+                            >
+                                <HiChevronLeft
+                                    className="w-5 h-5 lg:w-6 lg:h-6 transition-transform group-hover/btn:-translate-x-0.5"
+                                    style={{ color: primaryColor }}
+                                />
+                            </button>
+                        )}
 
-                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                        {/* Image Container */}
+                        <div className="relative h-full w-full max-w-[85%] lg:max-w-[60%] flex items-center justify-center p-4">
+                            {allImages.length > 0 ? (
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={currentImageIndex}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="relative w-full h-full"
+                                    >
+                                        <Image
+                                            src={currentImage?.url as string}
+                                            alt={currentImage?.caption || project._title}
+                                            fill
+                                            className="object-contain drop-shadow-2xl"
+                                            priority
+                                        />
+                                    </motion.div>
+                                </AnimatePresence>
+                            ) : (
+                                <div className="flex items-center justify-center text-white/60">
+                                    <p className="text-sm">No image available</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Right Button (Outside Image) */}
+                        {allImages.length > 1 && (
+                            <button
+                                onClick={nextImage}
+                                className="z-10 p-2 lg:p-3 rounded-full bg-black/60 hover:bg-black/80 transition-all border border-white/10 backdrop-blur-sm group/btn"
+                            >
+                                <HiChevronRight
+                                    className="w-5 h-5 lg:w-6 lg:h-6 transition-transform group-hover/btn:translate-x-0.5"
+                                    style={{ color: primaryColor }}
+                                />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Bottom Info: Caption & Dots (VISUAL LIMPO) */}
+                    {allImages.length > 0 && (
+                        <div className="w-full absolute bottom-0 left-0 flex flex-col items-center justify-end pointer-events-none pt-12 pb-6 bg-linear-to-t from-black/90 via-black/40 to-transparent">
+
+                            {/* Caption da Imagem */}
+                            <motion.div
+                                key={`caption-${currentImageIndex}`}
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mb-4 px-8 text-center max-w-[90%]"
+                            >
+                                <p className="text-sm md:text-base text-white font-medium tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                                    {currentImage?.caption}
+                                </p>
+                            </motion.div>
+
+                            {/* Dots - Flutuando, sem container cinza */}
+                            {allImages.length > 1 && (
+                                <div className="flex items-center gap-2 pointer-events-auto">
                                     {allImages.map((_, idx) => (
                                         <button
                                             key={idx}
                                             onClick={() => setCurrentImageIndex(idx)}
-                                            className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/70'
+                                            className={`transition-all duration-300 rounded-full ${idx === currentImageIndex
+                                                ? 'w-6 h-1.5 shadow-[0_0_8px_rgba(0,0,0,0.5)]'
+                                                : 'w-1.5 h-1.5 bg-white/40 hover:bg-white/80'
                                                 }`}
+                                            style={{
+                                                backgroundColor: idx === currentImageIndex ? primaryColor : undefined
+                                            }}
                                         />
                                     ))}
                                 </div>
-                            </>
-                        )}
-                    </>
-                ) : (
-                    <div
-                        className="w-full h-full flex items-center justify-center"
-                        style={{ background: `linear-gradient(135deg, ${primaryColor}20, transparent)` }}
-                    >
-                        <p className="text-sm text-muted-foreground">Sem imagem</p>
-                    </div>
-                )}
-            </div>
-
-            <div
-                className="flex-1 overflow-y-auto p-5 lg:p-6 xl:p-8"
-                style={{
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: `${primaryColor}30 transparent`,
-                }}
-            >
-                <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-                    <h2 className="text-xl lg:text-2xl xl:text-3xl font-semibold text-foreground">
-                        {project._title}
-                    </h2>
+                            )}
+                        </div>
+                    )}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                    <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-muted text-muted-foreground">
-                        {t.type[project.type]}
-                    </span>
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusStyle.bg} ${statusStyle.text}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot} ${project.status === 'in-progress' ? 'animate-pulse' : ''}`} />
-                        {t.status[project.status]}
-                    </span>
-                </div>
+                {/* --- SECTION 2: CONTENT (BOTTOM) --- */}
+                <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden custom-scrollbar bg-background/80 backdrop-blur-sm">
 
-                {(project.client || project.startDate) && (
-                    <div className="flex flex-wrap gap-x-5 gap-y-2 mb-5 text-sm text-muted-foreground">
-                        {project.client && (
-                            <div className="flex items-center gap-2">
-                                <HiBuildingOffice2 className="w-4 h-4" style={{ color: primaryColor }} />
-                                <span>{t.client}: <span className="font-medium text-foreground">{project.client}</span></span>
-                            </div>
-                        )}
-                        {(project.startDate || project.endDate) && (
-                            <div className="flex items-center gap-2">
-                                <HiCalendarDays className="w-4 h-4" style={{ color: primaryColor }} />
-                                <span>{t.period}: <span className="font-medium text-foreground">
-                                    {project.startDate} {project.endDate ? `- ${project.endDate}` : ''}
-                                </span></span>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                <div className="mb-5">
-                    <div className="flex items-center gap-3 mb-3">
-                        <span
-                            className="h-0.5 w-8 rounded-full"
-                            style={{ background: `linear-gradient(to right, ${primaryColor}, transparent)` }}
-                        />
-                        <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-                            {t.description}
-                        </p>
-                    </div>
-                    <div
-                        className="text-sm text-muted-foreground leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: project._desc || project._short }}
-                    />
-                </div>
-
-                {project._highlights && project._highlights.length > 0 && (
-                    <div className="mb-5">
-                        <div className="flex items-center gap-3 mb-3">
-                            <span
-                                className="h-0.5 w-8 rounded-full"
-                                style={{ background: `linear-gradient(to right, ${primaryColor}, transparent)` }}
-                            />
-                            <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-                                {t.highlights}
-                            </p>
-                        </div>
-                        <div className="space-y-2">
-                            {project._highlights.map((highlight, idx) => (
-                                <div
-                                    key={idx}
-                                    className="group rounded-lg border border-border-subtle p-3 relative overflow-hidden transition-all duration-300 hover:border-border"
-                                    style={{
-                                        background: isDark ? 'rgba(20, 20, 25, 0.5)' : 'rgba(255, 255, 255, 0.3)',
-                                    }}
-                                >
-                                    <div
-                                        className="absolute left-0 top-0 h-full w-0.5"
-                                        style={{ background: `linear-gradient(to bottom, ${primaryColor}, transparent)` }}
-                                    />
-                                    <div className="relative flex items-start gap-2 pl-2">
-                                        <div
-                                            className="shrink-0 w-1.5 h-1.5 rounded-full mt-1.5"
-                                            style={{ backgroundColor: primaryColor }}
-                                        />
-                                        <span className="text-sm text-foreground leading-relaxed">{highlight}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {(technologies.length > 0 || unknownTechs.length > 0) && (
-                    <div className="mb-5">
-                        <div className="flex items-center gap-3 mb-3">
-                            <span
-                                className="h-0.5 w-8 rounded-full"
-                                style={{ background: `linear-gradient(to right, ${primaryColor}, transparent)` }}
-                            />
-                            <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-                                {t.technologies}
-                            </p>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            {technologies.map((tech) => (
-                                <TechBadge key={tech.id} tech={tech} size="md" />
-                            ))}
-                            {unknownTechs.map((tech) => (
-                                <span
-                                    key={tech}
-                                    className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
-                                    style={{
-                                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
-                                        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
-                                        color: isDark ? '#94a3b8' : '#64748b',
-                                    }}
-                                >
-                                    {tech}
+                    {/* Left Column: Description */}
+                    <div className="w-full lg:w-3/4 p-6 lg:p-8 lg:h-full lg:overflow-y-auto custom-scrollbar lg:border-r border-border-subtle">
+                        <div className="mb-6">
+                            <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-3 leading-tight">
+                                {project._title}
+                            </h2>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-muted text-muted-foreground border border-border-subtle">
+                                    {t.type[project.type]}
                                 </span>
-                            ))}
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-transparent ${statusStyle.bg} ${statusStyle.text}`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot} ${project.status === 'in-progress' ? 'animate-pulse' : ''}`} />
+                                    {t.status[project.status]}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="h-px w-8 bg-linear-to-r from-primary/50 to-transparent" />
+                                <p className="text-xs uppercase tracking-widest font-semibold text-foreground/80">
+                                    {t.description}
+                                </p>
+                            </div>
+
+                            <div
+                                className="leading-relaxed space-y-4"
+                                dangerouslySetInnerHTML={{ __html: project._desc || project._short }}
+                            />
+
+                            {project._highlights && project._highlights.length > 0 && (
+                                <div className="mt-8 pt-6 border-t border-border-subtle">
+                                    <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                                        <span className="w-1 h-4 rounded-full bg-primary" style={{ backgroundColor: primaryColor }} />
+                                        {t.highlights}
+                                    </h3>
+                                    <ul className="grid gap-3 sm:grid-cols-2">
+                                        {project._highlights.map((highlight, idx) => (
+                                            <li key={idx} className="flex items-start gap-2 text-sm p-3 rounded-lg bg-muted/30 border border-border-subtle">
+                                                <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: primaryColor }} />
+                                                <span className="opacity-90">{highlight}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
                     </div>
-                )}
 
-                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border-subtle">
-                    {project.demoUrl && (
-                        <a
-                            href={project.demoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:scale-[1.02] hover:shadow-lg"
-                            style={{
-                                background: `linear-gradient(135deg, ${primaryColor}, hsl(var(--secondary)))`,
-                                boxShadow: `0 4px 14px ${primaryColor}40`,
-                            }}
-                        >
-                            <HiArrowTopRightOnSquare className="w-4 h-4" />
-                            {t.viewLive}
-                        </a>
-                    )}
-                    {project.repoUrl && (
-                        <a
-                            href={project.repoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium border border-border-subtle bg-background/50 text-foreground transition-colors hover:bg-muted"
-                        >
-                            <SiGithub className="w-4 h-4" />
-                            {t.viewCode}
-                        </a>
-                    )}
+                    {/* Right Column: Info & Techs */}
+                    <div className="w-full lg:w-1/4 flex flex-col bg-muted/20 border-t lg:border-t-0 border-border-subtle">
+                        <div className="flex-1 lg:overflow-y-auto custom-scrollbar flex flex-col">
+
+                            {/* Technologies */}
+                            <div className="p-6 border-b border-border-subtle">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <p className="text-xs uppercase tracking-widest font-semibold text-muted-foreground">
+                                        {t.technologies}
+                                    </p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {technologies.map((tech) => (
+                                        <TechBadge key={tech.id} tech={tech} size="sm" />
+                                    ))}
+                                    {unknownTechs.map((tech) => (
+                                        <span
+                                            key={tech}
+                                            className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border border-border-subtle bg-background/50 text-muted-foreground"
+                                        >
+                                            {tech}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Other Details */}
+                            <div className="p-6 flex-1">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <p className="text-xs uppercase tracking-widest font-semibold text-muted-foreground">
+                                        {t.otherInfo}
+                                    </p>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {(project.client || project.startDate) && (
+                                        <div className="space-y-3 p-4 rounded-xl bg-background/50 border border-border-subtle">
+                                            {project.client && (
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-[10px] text-muted-foreground uppercase">{t.client}</span>
+                                                    <div className="flex items-center gap-2 font-medium text-foreground text-sm">
+                                                        <HiBuildingOffice2 className="w-4 h-4 text-primary" style={{ color: primaryColor }} />
+                                                        {project.client}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {(project.startDate || project.endDate) && (
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-[10px] text-muted-foreground uppercase">{t.period}</span>
+                                                    <div className="flex items-center gap-2 font-medium text-foreground text-sm">
+                                                        <HiCalendarDays className="w-4 h-4 text-primary" style={{ color: primaryColor }} />
+                                                        <span>{project.startDate} {project.endDate ? `— ${project.endDate}` : ''}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="mt-8 flex flex-col gap-3">
+                                    {project.demoUrl && (
+                                        <a
+                                            href={project.demoUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                            style={{
+                                                background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)`,
+                                            }}
+                                        >
+                                            <HiArrowTopRightOnSquare className="w-4 h-4" />
+                                            {t.viewLive}
+                                        </a>
+                                    )}
+                                    {project.repoUrl && (
+                                        <a
+                                            href={project.repoUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium bg-background border border-border-subtle hover:bg-muted/50 hover:border-border transition-all"
+                                        >
+                                            <SiGithub className="w-4 h-4" />
+                                            {t.viewCode}
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </motion.div>
+            </motion.div>
+        </>
     );
 }
