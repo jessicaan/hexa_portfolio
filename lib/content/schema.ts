@@ -633,7 +633,7 @@ export interface ProjectImageTranslations {
 export interface ProjectImage {
   id: string;
   url: string;
-  description?: string;
+  description: string | undefined;
   translations?: ProjectImageTranslations;
 }
 
@@ -804,7 +804,7 @@ export function mergeProjectsContent(
     if (!Array.isArray(list)) return [];
 
     return list
-      .map((item, index) => {
+      .map((item, index): ProjectImage | null => {
         if (typeof item === "string") {
           return {
             id: generateProjectImageId(projectId, index),
