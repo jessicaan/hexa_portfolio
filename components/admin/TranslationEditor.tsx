@@ -66,7 +66,6 @@ export default function TranslationEditor<T extends Record<string, any>>({
 
     return (
         <div className="space-y-4">
-            {/* Tabs */}
             <div className="flex flex-wrap gap-2">
                 {tabs.map(tab => (
                     <button
@@ -96,7 +95,6 @@ export default function TranslationEditor<T extends Record<string, any>>({
                 </button>
             </div>
 
-            {/* Active language form */}
             <motion.div
                 key={active}
                 initial={{ opacity: 0, y: 8 }}
@@ -129,7 +127,6 @@ export default function TranslationEditor<T extends Record<string, any>>({
                 ))}
             </motion.div>
 
-            {/* Alerts */}
             <AnimatePresence>
                 {message && (
                     <motion.p

@@ -7,7 +7,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { loadContactContent } from '@/lib/content/client';
 import { defaultContactContent, type ContactContent, type LanguageCode } from '@/lib/content/schema';
 import { useTranslation } from 'react-i18next';
-import { getSocialIcon } from '@/components/icons/SocialMediaIcons'; // Import getSocialIcon
+import { getSocialIcon } from '@/components/icons/SocialMediaIcons';
 
 interface ContactSectionProps { }
 

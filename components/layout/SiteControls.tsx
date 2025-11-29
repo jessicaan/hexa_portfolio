@@ -68,7 +68,6 @@ export default function CornerControls() {
 
   return (
     <>
-      {/* Desktop Version - Top Right */}
       <div className="hidden md:block fixed top-6 right-6 z-50" ref={menuRef}>
         <motion.div
           initial={{ opacity: 0, x: 20 }}
@@ -211,7 +210,6 @@ export default function CornerControls() {
         </motion.div>
       </div>
 
-      {/* Mobile Version - Bottom Right FAB */}
       <div className="md:hidden fixed bottom-6 right-6 z-50" ref={menuRef}>
         <AnimatePresence>
           {isExpanded && (
@@ -282,7 +280,6 @@ export default function CornerControls() {
           )}
         </AnimatePresence>
 
-        {/* FAB Button */}
         <motion.button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}

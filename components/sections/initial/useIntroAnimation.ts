@@ -7,7 +7,6 @@ gsap.registerPlugin(ScrambleTextPlugin);
 
 interface IntroAnimationProps {
   languages: Language[];
-  // Adicionado "| null" aqui para satisfazer o TypeScript
   greetingRef: RefObject<HTMLDivElement | null>;
   descriptionRef: RefObject<HTMLParagraphElement | null>;
   lineRefs: RefObject<(HTMLDivElement | null)[]>;
@@ -30,20 +29,6 @@ export function useIntroAnimation({
 
     if (greetingRef.current) {
       gsap.set(greetingRef.current, { opacity: 1 });
-      tl.to(
-        greetingRef.current,
-        {
-          duration: 1.2,
-          scrambleText: {
-            text: first.greeting,
-            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-            revealDelay: 0.5,
-            speed: 0.3,
-          },
-          ease: 'none',
-        },
-        0,
-      );
     }
 
     lineRefs.current?.forEach((ref, index) => {
@@ -64,20 +49,6 @@ export function useIntroAnimation({
 
     if (descriptionRef.current) {
       gsap.set(descriptionRef.current, { opacity: 1 });
-      tl.to(
-        descriptionRef.current,
-        {
-          duration: 1.5,
-          scrambleText: {
-            text: first.description,
-            chars: 'abcdefghijklmnopqrstuvwxyz ',
-            revealDelay: 0.1,
-            speed: 0.4,
-          },
-          ease: 'none',
-        },
-        1.2,
-      );
     }
 
     tl.call(onShowTip, [], 3.8);

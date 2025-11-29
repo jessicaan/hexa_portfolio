@@ -947,7 +947,6 @@ export default function ProjectsSectionEditor({ initial }: Props) {
                                                 multiline
                                                 rows={3}
                                             />
-                                            {/* Editable Highlights */}
                                             <div className="space-y-1">
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-xs uppercase tracking-widest text-muted-foreground-subtle">

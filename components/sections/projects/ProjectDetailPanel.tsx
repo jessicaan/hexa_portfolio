@@ -118,7 +118,6 @@ export default function ProjectDetailPanel({
                     boxShadow: `0 8px 32px rgba(0,0,0,${isDark ? 0.3 : 0.1})`,
                 }}
             >
-                {/* --- SECTION 1: CAROUSEL (TOP) --- */}
                 <div
                     className="relative h-[50%] w-full aspect-video shrink-0 overflow-hidden flex flex-col group backdrop-blur-[2px]"
                     style={{ backgroundColor: primaryColorBg }}
@@ -132,7 +131,6 @@ export default function ProjectDetailPanel({
                         </button>
                     )}
 
-                    {/* Area Principal: Botão Esq - Imagem - Botão Dir */}
                     <div className="flex-1 flex items-center justify-between w-full h-full relative px-2 sm:px-4 lg:px-8">
 
                         {/* Left Button (Outside Image) */}
@@ -194,7 +192,7 @@ export default function ProjectDetailPanel({
                     {allImages.length > 0 && (
                         <div className="w-full absolute bottom-0 left-0 flex flex-col items-center justify-end pointer-events-none pt-12 pb-6 bg-linear-to-t from-black/90 via-black/40 to-transparent">
 
-                            {/* Caption da Imagem */}
+                            {/* Image Caption */}
                             <motion.div
                                 key={`caption-${currentImageIndex}`}
                                 initial={{ opacity: 0, y: 5 }}
@@ -206,7 +204,7 @@ export default function ProjectDetailPanel({
                                 </p>
                             </motion.div>
 
-                            {/* Dots - Flutuando, sem container cinza */}
+                            {/* Dots - Floating */}
                             {allImages.length > 1 && (
                                 <div className="flex items-center gap-2 pointer-events-auto">
                                     {allImages.map((_, idx) => (

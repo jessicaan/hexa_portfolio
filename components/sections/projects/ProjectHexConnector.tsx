@@ -18,35 +18,30 @@ export default function ProjectHexConnector({
     isActive = false,
     onVibrate,
 }: ProjectHexConnectorProps) {
-    const pathRef = useRef<SVGPathElement>(null); // Linha visível
-    const interactionRef = useRef<SVGPathElement>(null); // Linha grossa invisível para mouse
+    const pathRef = useRef<SVGPathElement>(null);
+    const interactionRef = useRef<SVGPathElement>(null);
     const [isHovered, setIsHovered] = useState(false);
 
-    // Referência para guardar a animação atual
+
     const animationRef = useRef<gsap.core.Timeline | null>(null);
 
     const { primaryRgb } = useTheme();
     const lineColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
 
-    // Caminho Inicial (Linha Reta)
     const dString = `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
 
-    // Lógica de "String Theory" (Animação de corda)
     const animateString = useCallback(() => {
         if (!pathRef.current) return;
 
-        // Mata animação anterior se houver
         if (animationRef.current) animationRef.current.kill();
 
         const state = { time: 0 };
         const tl = gsap.timeline();
         animationRef.current = tl;
 
-        // Dados matemáticos da linha
         const dx = end.x - start.x;
         const dy = end.y - start.y;
         const len = Math.sqrt(dx * dx + dy * dy);
-        // Vetor perpendicular normalizado
         const perpX = -dy / len;
         const perpY = dx / len;
 
@@ -56,28 +51,21 @@ export default function ProjectHexConnector({
             ease: 'none',
             onUpdate: () => {
                 const t = state.time;
-                // Amplitude decai com o tempo
                 const amplitude = 15 * Math.exp(-3 * t);
 
-                // Se amplitude muito pequena, volta para reta e para
                 if (amplitude < 0.1) {
                     pathRef.current?.setAttribute('d', dString);
                     return;
                 }
 
-                // Reconstrói o path com uma curva senoidal
                 let newD = `M ${start.x} ${start.y}`;
                 const segments = 20;
 
                 for (let i = 1; i <= segments; i++) {
                     const segmentT = i / segments;
-                    // Posição base na linha reta
                     const bx = start.x + dx * segmentT;
                     const by = start.y + dy * segmentT;
-
-                    // Cálculo da onda
                     const wave = Math.sin(segmentT * Math.PI) * Math.sin(t * 20) * amplitude;
-
                     newD += ` L ${bx + perpX * wave} ${by + perpY * wave}`;
                 }
 
@@ -100,7 +88,6 @@ export default function ProjectHexConnector({
                 animateString();
             }}
         >
-            {/* 1. Área de Interação (Invisível e grossa) */}
             <path
                 ref={interactionRef}
                 d={dString}
@@ -110,7 +97,6 @@ export default function ProjectHexConnector({
                 className="cursor-crosshair"
             />
 
-            {/* 2. Linha Visual Brilhante */}
             <path
                 ref={pathRef}
                 d={dString}
@@ -124,12 +110,6 @@ export default function ProjectHexConnector({
                     filter: isActive || isHovered ? `drop-shadow(0 0 8px ${lineColor})` : 'none',
                 }}
             />
-
-            {/* 3. Pontos de solda (Onde a linha conecta no card) */}
-            {/* Ponto Inicial */}
-            {/* <circle cx={start.x} cy={start.y} r="2" fill={lineColor} opacity="0.5" /> */}
-            {/* Ponto Final */}
-            {/* <circle cx={end.x} cy={end.y} r="2" fill={lineColor} opacity="0.5" /> */}
         </g>
     );
 }

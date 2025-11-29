@@ -65,7 +65,6 @@ export default function ContactSectionEditor({ initial }: Props) {
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Erro ao traduzir.');
             }
-            // console.log("Form in ContactSectionEditor after translation:", form);
         });
     };
 

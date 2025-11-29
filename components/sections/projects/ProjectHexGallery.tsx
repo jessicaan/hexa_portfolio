@@ -15,13 +15,11 @@ interface ProjectHexGalleryProps {
     translation: TranslatedProjects;
 }
 
-// Dimensões exatas do SVG do Card
 const HEX_WIDTH = 200;
 const HEX_HEIGHT = 230;
 
-// Aumentado para garantir que o card de baixo comece DEPOIS que o de cima termina
 const VERTICAL_SPACING = 260;
-const HORIZONTAL_OFFSET = 100; // Deslocamento para o Zig-Zag
+const HORIZONTAL_OFFSET = 100;
 
 export default function ProjectHexGallery({
     projects,
@@ -33,30 +31,24 @@ export default function ProjectHexGallery({
     const containerRef = useRef<HTMLDivElement>(null);
     const { primaryRgb } = useTheme();
 
-    // 1. Calcular Posições dos Cards (ZigZag)
     const positions = useMemo(() => {
         return projects.map((_, index) => {
-            // Alterna esquerda/direita (0 ou 100px)
             const x = index % 2 === 0 ? 0 : HORIZONTAL_OFFSET;
-            // Cada card desce VERTICAL_SPACING pixels
             const y = index * VERTICAL_SPACING;
             return { x, y };
         });
     }, [projects.length]);
 
-    // 2. Calcular Linhas de Conexão
     const connections = useMemo(() => {
         return projects.slice(0, -1).map((_, index) => {
             const fromPos = positions[index];
             const toPos = positions[index + 1];
 
-            // Ponto de Saída: Fundo do Card A (Centro X, Base Y)
-            // O card tem 230px de altura, o "bico" inferior está em Y=222
+
             const startX = fromPos.x + (HEX_WIDTH / 2);
             const startY = fromPos.y + 222;
 
-            // Ponto de Chegada: Topo do Card B (Centro X, Topo Y)
-            // O "bico" superior está em Y=8
+
             const endX = toPos.x + (HEX_WIDTH / 2);
             const endY = toPos.y + 8;
 
@@ -100,7 +92,6 @@ export default function ProjectHexGallery({
                     minHeight: totalHeight,
                 }}
             >
-                {/* CAMADA 1: Conexões (Desenhadas atrás dos cards) */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-0">
                     {connections.map((conn, index) => (
                         <ProjectHexConnector
@@ -114,7 +105,6 @@ export default function ProjectHexGallery({
                     ))}
                 </svg>
 
-                {/* CAMADA 2: Cards (Desenhados na frente) */}
                 {projects.map((project, index) => {
                     const position = positions[index];
                     const techs = project.technologies?.length ? project.technologies : project.tags || [];
@@ -122,7 +112,7 @@ export default function ProjectHexGallery({
                     return (
                         <div
                             key={project.id}
-                            className="absolute z-10" // Garante que o card fique SOBRE a linha
+                            className="absolute z-10"
                             style={{
                                 left: position.x,
                                 top: position.y,

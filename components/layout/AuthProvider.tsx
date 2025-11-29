@@ -81,7 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await setPersistence(auth, browserLocalPersistence);
           persistenceConfigured = true;
         } catch (error) {
-          // Persistence fallback will be handled by Firebase defaults.
           console.error('Failed to set auth persistence', error);
         }
       }

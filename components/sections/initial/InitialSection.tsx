@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { gsap } from 'gsap';
+import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import HexaNode from '../../hexagrid/HexaNode';
 import ReactiveGridBackground from '../../background/ReactiveGridBackground';
 import { useTheme } from '../../theme/ThemeProvider';
@@ -18,12 +19,17 @@ import { languageMeta } from './constants';
 import { InitialSectionProps, Language } from './types';
 import { useIntroAnimation } from './useIntroAnimation';
 
+gsap.registerPlugin(ScrambleTextPlugin);
+
+type UiLanguageCode = 'PT' | 'EN' | 'ES' | 'FR';
+
 export default function InitialSection({ onLanguageSelect, onExplore }: InitialSectionProps) {
   const [content, setContent] = useState<InitialSectionContent>(defaultInitialContent);
   const [shockwave, setShockwave] = useState<{ position: { x: number; y: number } } | null>(null);
-  const [activeGreeting, setActiveGreeting] = useState(0);
+  const [displayLanguageIndex, setDisplayLanguageIndex] = useState(0);
+  const [currentSelectedLanguageIndex, setCurrentSelectedLanguageIndex] = useState<number | null>(null);
   const [hoveredLang, setHoveredLang] = useState<number | null>(null);
-  const [selectedLang, setSelectedLang] = useState<number | null>(null);
+
   const [showTip, setShowTip] = useState(false);
   const [showExplore, setShowExplore] = useState(false);
 
@@ -42,6 +48,9 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
       .catch(err => console.error(err));
     return () => { active = false; };
   }, []);
+
+
+
 
   const languages = useMemo<Language[]>(() => {
     const available = new Set(
@@ -67,11 +76,11 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
     return mapped.length ? mapped : [languageMeta[0] as unknown as Language];
   }, [content]);
 
-  const activeLanguage = useMemo(() => languages[activeGreeting] ?? languages[0], [languages, activeGreeting]);
+  const activeLanguage = useMemo(() => languages[displayLanguageIndex] ?? languages[0], [languages, displayLanguageIndex]);
 
   useEffect(() => {
-    setSelectedLang(null);
-    setActiveGreeting(0);
+    setDisplayLanguageIndex(0);
+    setCurrentSelectedLanguageIndex(null);
   }, [languages.length]);
 
   const handleLineClick = useCallback((_: number, pos: { x: number; y: number }) => {
@@ -79,7 +88,6 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
     setTimeout(() => setShockwave(null), 50);
   }, []);
 
-  // Hook de Animação Inicial
   useIntroAnimation({
     languages,
     greetingRef,
@@ -89,7 +97,6 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
     onShowExplore: () => setShowExplore(true),
   });
 
-  // Atualizado para aceitar HTMLElement | null
   const animateText = useCallback((ref: React.RefObject<HTMLElement | null>, text: string, speed: number, chars: string) => {
     if (ref.current) {
       gsap.to(ref.current, {
@@ -103,7 +110,7 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
   const handleHover = useCallback((index: number | null) => {
     setHoveredLang(index);
     if (index !== null) {
-      setActiveGreeting(index);
+      setDisplayLanguageIndex(index);
       const lang = languages[index];
       animateText(greetingRef, lang.greeting, 0.6, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
       animateText(descriptionRef, lang.description, 0.6, 'abcdefghijklmnopqrstuvwxyz ');
@@ -190,13 +197,14 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
 
             <LanguageSelector
               languages={languages}
-              activeGreeting={activeGreeting}
+              activeGreeting={displayLanguageIndex}
               hoveredLang={hoveredLang}
-              selectedLang={selectedLang}
+              selectedLang={currentSelectedLanguageIndex}
               primaryRgb={primaryRgb}
               onHover={handleHover}
               onSelect={(idx) => {
-                setSelectedLang(idx);
+                setCurrentSelectedLanguageIndex(idx);
+                setDisplayLanguageIndex(idx);
                 onLanguageSelect?.(languages[idx].code);
               }}
             />
@@ -220,9 +228,9 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
               {showExplore && activeLanguage && (
                 <motion.button
                   ref={exploreRef}
-                  className="mt-4 sm:mt-8 px-6 sm:px-8 py-2.5 sm:py-3 bg-transparent border border-primary/30 text-muted-foreground text-xs sm:text-md tracking-[0.25em] sm:tracking-[0.3em] rounded-sm hover:border-primary hover:text-foreground hover:bg-primary/10 transition-all duration-300"
+                  className="mt-4 sm:mt-8 px-6 sm:px-8 py-2.5 sm:py-3 bg-transparent border border-primary/30 text-muted-foreground text-xs sm:text-md tracking-[0.25em] sm:tracking-[0.3em] rounded-sm hover:border-primary hover:text-foreground hover:bg-primary/10 transition-all duration-100"
                   onClick={() => {
-                    const index = selectedLang ?? activeGreeting;
+                    const index = currentSelectedLanguageIndex ?? displayLanguageIndex;
                     const lang = languages[index] ?? languages[0];
                     if (lang) onExplore?.(lang.code);
                   }}
