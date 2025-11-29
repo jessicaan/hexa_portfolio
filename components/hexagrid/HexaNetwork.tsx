@@ -5,7 +5,6 @@ import HexaNetworkWeb from './HexaNetworkWeb';
 import HexaNetworkMobile from './HexaNetworkMobile';
 import { ReactNode } from 'react';
 
-// Tipagem compartilhada
 export interface NetworkNode {
     id: string;
     label: string;

@@ -11,8 +11,8 @@ type ViewState = 'focused' | 'zooming-out' | 'network' | 'zooming-in';
 export default function HexaNetworkWeb({
     nodes,
     initialNode,
-    nodeRadius = 120,
-    networkScaleDesktop = 0.45,
+    nodeRadius = 180,
+    networkScaleDesktop = 0.95,
     onNodeChange,
     transitionToNode,
     command
