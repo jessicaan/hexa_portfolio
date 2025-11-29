@@ -383,7 +383,7 @@ export default function HexaNetworkMobile({
                                 left: node.position.x,
                                 top: node.position.y,
                                 transform: 'translate(-50%, -50%)',
-                                width: '85vw',
+                                width: 'auto',
                                 maxWidth: '400px',
                                 opacity: node.id === activeNode && viewState === 'focused' ? 1 : 0,
                                 pointerEvents: node.id === activeNode && viewState === 'focused' ? 'auto' : 'none',
