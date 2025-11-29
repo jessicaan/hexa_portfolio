@@ -9,6 +9,8 @@ import {
 } from '@/app/admin/contact/actions';
 import type { ContactContent } from '@/lib/content/schema';
 
+import SocialLinksEditor from './SocialLinksEditor';
+
 interface Props {
     initial: ContactContent;
 }
@@ -29,6 +31,10 @@ export default function ContactSectionEditor({ initial }: Props) {
                 ? prev.preferredContact.filter(m => m !== method)
                 : [...prev.preferredContact, method],
         }));
+    };
+
+    const handleSocialLinksChange = (newLinks: { platform: string; url: string }[]) => {
+        setForm(prev => ({ ...prev, socialLinks: newLinks }));
     };
 
     const handleSave = () => {
@@ -59,6 +65,7 @@ export default function ContactSectionEditor({ initial }: Props) {
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Erro ao traduzir.');
             }
+            // console.log("Form in ContactSectionEditor after translation:", form);
         });
     };
 
@@ -184,6 +191,11 @@ export default function ContactSectionEditor({ initial }: Props) {
                         ))}
                     </div>
                 </div>
+
+                <SocialLinksEditor
+                    socialLinks={form.socialLinks}
+                    setSocialLinks={handleSocialLinksChange}
+                />
             </div>
 
             <AnimatePresence>

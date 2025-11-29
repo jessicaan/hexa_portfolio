@@ -40,14 +40,7 @@ export default function PersonalSectionEditor({ initial }: Props) {
         }));
     };
 
-    const addSocialLink = () => setForm(prev => ({ ...prev, socialLinks: [...prev.socialLinks, { platform: '', url: '' }] }));
-    const removeSocialLink = (index: number) => setForm(prev => ({ ...prev, socialLinks: prev.socialLinks.filter((_, i) => i !== index) }));
-    const updateSocialLink = (index: number, key: 'platform' | 'url', value: string) => {
-        setForm(prev => ({
-            ...prev,
-            socialLinks: prev.socialLinks.map((s, i) => (i === index ? { ...s, [key]: value } : s)),
-        }));
-    };
+
 
     const addTrait = () => {
         const newTrait: Trait = { id: `trait-${Date.now()}`, label: '', value: 0.5 };
@@ -246,33 +239,7 @@ export default function PersonalSectionEditor({ initial }: Props) {
                             </div>
                         </div>
 
-                        <div className="rounded-xl border border-border-subtle bg-surface-soft p-5 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium">Redes Sociais</p>
-                                <button type="button" onClick={addSocialLink} className="text-xs text-primary hover:underline flex items-center gap-1">
-                                    <FiPlus className="w-3 h-3" /> Adicionar
-                                </button>
-                            </div>
-                            {form.socialLinks.map((link, idx) => (
-                                <div key={idx} className="flex gap-2">
-                                    <input
-                                        value={link.platform}
-                                        onChange={e => updateSocialLink(idx, 'platform', e.target.value)}
-                                        placeholder="Plataforma"
-                                        className="w-32 rounded-lg border border-border-subtle bg-background px-3 py-2 text-sm"
-                                    />
-                                    <input
-                                        value={link.url}
-                                        onChange={e => updateSocialLink(idx, 'url', e.target.value)}
-                                        placeholder="URL"
-                                        className="flex-1 rounded-lg border border-border-subtle bg-background px-3 py-2 text-sm"
-                                    />
-                                    <button type="button" onClick={() => removeSocialLink(idx)} className="text-red-400 hover:text-red-300 p-2">
-                                        <FiTrash className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+
                     </motion.div>
                 )}
 

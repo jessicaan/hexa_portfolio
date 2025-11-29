@@ -15,7 +15,7 @@ export interface ContactContent {
   phone?: string;
   location?: string;
   preferredContact: string[];
-  socialLinks: { platform: string; url: string; label: string; handle: string }[];
+  socialLinks: { platform: string; url: string }[];
   translations: {
     en: ContactTranslation;
     es: ContactTranslation;

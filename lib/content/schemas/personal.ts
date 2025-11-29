@@ -27,7 +27,7 @@ export interface PersonalContent {
   bio: string;
   values: string[];
   photos: string[];
-  socialLinks: { platform: string; url: string }[];
+
   traits: Trait[];
   hobbyCards: HobbyCard[];
   translations: {
@@ -43,7 +43,7 @@ export const defaultPersonalContent: PersonalContent = {
   bio: "",
   values: [],
   photos: [],
-  socialLinks: [],
+
   traits: [
     { id: 'curiosity', label: 'Curiosidade', value: 0.95 },
     { id: 'creativity', label: 'Criatividade', value: 0.9 },
@@ -249,7 +249,7 @@ export function mergePersonalContent(
     hobbyCards: data?.hobbyCards ?? defaultPersonalContent.hobbyCards,
     values: data?.values ?? defaultPersonalContent.values,
     photos: data?.photos ?? defaultPersonalContent.photos,
-    socialLinks: data?.socialLinks ?? defaultPersonalContent.socialLinks,
+
     traits: data?.traits ?? defaultPersonalContent.traits,
     translations: {
       en: {
