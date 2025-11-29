@@ -366,7 +366,7 @@ export default function HexaNetworkWeb({
                                     fontWeight={isActive ? "600" : "300"}
                                     letterSpacing="0.05em"
                                     opacity={viewState === 'network' || viewState === 'zooming-out' ? 1 : 0}
-                                    className="pointer-events-none select-none transition-all duration-300"
+                                    className="pointer-events-none select-none transition-all duration-300 text-md font-light font-sans"
                                     style={{ textShadow: isActive ? `0 0 10px ${colors.glow}` : 'none' }}
                                 >
                                     {node.label}
