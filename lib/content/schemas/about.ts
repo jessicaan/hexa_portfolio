@@ -13,16 +13,14 @@ export interface AboutTranslation {
   videoPlaceholderTitle: string;
   videoPlaceholderDescription: string;
   skillsText: string;
+  softSkills: SoftSkill[];
+  highlights: string[];
 }
 
 export interface AboutContent {
   title: string;
-  summary: string;
-  longDescription: string;
   videoPitchUrl: string;
   profileImage: string;
-  softSkills: SoftSkill[];
-  highlights: string[];
   translations: {
     en: AboutTranslation;
     es: AboutTranslation;
@@ -34,12 +32,8 @@ export interface AboutContent {
 
 export const defaultAboutContent: AboutContent = {
   title: "",
-  summary: "",
-  longDescription: "",
   videoPitchUrl: "",
   profileImage: "",
-  softSkills: [],
-  highlights: [],
   translations: {
     en: {
       summary: "",
@@ -51,6 +45,8 @@ export const defaultAboutContent: AboutContent = {
       videoPlaceholderTitle: "No video available",
       videoPlaceholderDescription: "A personal video pitch will be added here soon.",
       skillsText: "Skills",
+      softSkills: [],
+      highlights: [],
     },
     es: {
       summary: "",
@@ -62,6 +58,8 @@ export const defaultAboutContent: AboutContent = {
       videoPlaceholderTitle: "Video no disponible",
       videoPlaceholderDescription: "Pronto se agregará un video de presentación personal.",
       skillsText: "Habilidades",
+      softSkills: [],
+      highlights: [],
     },
     fr: {
       summary: "",
@@ -73,6 +71,8 @@ export const defaultAboutContent: AboutContent = {
       videoPlaceholderTitle: "Aucune vidéo disponible",
       videoPlaceholderDescription: "Une présentation vidéo personnelle sera ajoutée ici bientôt.",
       skillsText: "Compétences",
+      softSkills: [],
+      highlights: [],
     },
     pt: {
       summary: "",
@@ -84,6 +84,8 @@ export const defaultAboutContent: AboutContent = {
       videoPlaceholderTitle: "Nenhum vídeo disponível",
       videoPlaceholderDescription: "Um vídeo de apresentação pessoal será adicionado aqui em breve.",
       skillsText: "Habilidades",
+      softSkills: [],
+      highlights: [],
     },
   },
 };
@@ -94,24 +96,30 @@ export function mergeAboutContent(data?: Partial<AboutContent>): AboutContent {
   const merged: AboutContent = {
     ...defaultAboutContent,
     ...data,
-    softSkills: data.softSkills ?? defaultAboutContent.softSkills,
-    highlights: data.highlights ?? defaultAboutContent.highlights,
     translations: {
       en: {
         ...defaultAboutContent.translations.en,
         ...(data.translations?.en ?? {}),
+        softSkills: data.translations?.en?.softSkills ?? defaultAboutContent.translations.en.softSkills,
+        highlights: data.translations?.en?.highlights ?? defaultAboutContent.translations.en.highlights,
       },
       es: {
         ...defaultAboutContent.translations.es,
         ...(data.translations?.es ?? {}),
+        softSkills: data.translations?.es?.softSkills ?? defaultAboutContent.translations.es.softSkills,
+        highlights: data.translations?.es?.highlights ?? defaultAboutContent.translations.es.highlights,
       },
       fr: {
         ...defaultAboutContent.translations.fr,
         ...(data.translations?.fr ?? {}),
+        softSkills: data.translations?.fr?.softSkills ?? defaultAboutContent.translations.fr.softSkills,
+        highlights: data.translations?.fr?.highlights ?? defaultAboutContent.translations.fr.highlights,
       },
       pt: {
         ...defaultAboutContent.translations.pt,
         ...(data.translations?.pt ?? {}),
+        softSkills: data.translations?.pt?.softSkills ?? defaultAboutContent.translations.pt.softSkills,
+        highlights: data.translations?.pt?.highlights ?? defaultAboutContent.translations.pt.highlights,
       },
     },
   };
