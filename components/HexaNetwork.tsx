@@ -23,6 +23,13 @@ interface HexaNetworkAdvancedProps {
         triggerKey: number;
     };
     command?: { name: 'zoomOut'; key: number } | null;
+    colors?: {
+        line: string;
+        node: string;
+        nodeFill: string;
+        glow: string;
+        activeGlow: string;
+    };
 }
 
 type ViewState = 'focused' | 'zooming-out' | 'network' | 'zooming-in';

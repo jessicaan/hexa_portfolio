@@ -15,140 +15,8 @@ import { SiGithub } from 'react-icons/si';
 import { useTheme } from '@/components/ThemeProvider';
 import TechBadge from './TechBadge';
 import { getTechById, type Technology } from '@/lib/content/technologies';
-import type { ProjectStatus, ProjectType, LanguageCode } from '@/lib/content/schema';
+import type { ProjectStatus, ProjectType, LanguageCode, TranslatedProjects } from '@/lib/content/schema';
 import type { ProjectWithTranslations } from './ProjectCard';
-
-const i18n: Record<LanguageCode, {
-    viewLive: string;
-    viewCode: string;
-    technologies: string;
-    highlights: string;
-    client: string;
-    period: string;
-    noProject: string;
-    selectProject: string;
-    description: string;
-    status: Record<ProjectStatus, string>;
-    type: Record<ProjectType, string>;
-    otherInfo: string;
-}> = {
-    pt: {
-        viewLive: 'Ver projeto',
-        viewCode: 'Ver código',
-        technologies: 'Tecnologias',
-        highlights: 'Destaques',
-        client: 'Cliente',
-        period: 'Período',
-        noProject: 'Nenhum projeto selecionado',
-        selectProject: 'Selecione um projeto na galeria',
-        description: 'Descrição do Projeto',
-        status: {
-            completed: 'Concluído',
-            'in-progress': 'Em desenvolvimento',
-            archived: 'Arquivado',
-            concept: 'Conceito',
-        },
-        type: {
-            web: 'Web App',
-            mobile: 'Mobile',
-            desktop: 'Desktop',
-            api: 'API',
-            library: 'Biblioteca',
-            saas: 'SaaS',
-            ecommerce: 'E-commerce',
-            portfolio: 'Portfolio',
-            other: 'Outro',
-        },
-        otherInfo: 'Informações',
-    },
-    en: {
-        viewLive: 'View live',
-        viewCode: 'Source code',
-        technologies: 'Technologies',
-        highlights: 'Highlights',
-        client: 'Client',
-        period: 'Period',
-        noProject: 'No project selected',
-        selectProject: 'Select a project from the gallery',
-        description: 'Project Description',
-        status: {
-            completed: 'Completed',
-            'in-progress': 'In development',
-            archived: 'Archived',
-            concept: 'Concept',
-        },
-        type: {
-            web: 'Web App',
-            mobile: 'Mobile',
-            desktop: 'Desktop',
-            api: 'API',
-            library: 'Library',
-            saas: 'SaaS',
-            ecommerce: 'E-commerce',
-            portfolio: 'Portfolio',
-            other: 'Other',
-        },
-        otherInfo: 'Details',
-    },
-    es: {
-        viewLive: 'Ver en vivo',
-        viewCode: 'Ver código',
-        technologies: 'Tecnologías',
-        highlights: 'Destacados',
-        client: 'Cliente',
-        period: 'Período',
-        noProject: 'Ningún proyecto seleccionado',
-        selectProject: 'Selecciona un proyecto de la galería',
-        description: 'Descripción',
-        status: {
-            completed: 'Completado',
-            'in-progress': 'En desarrollo',
-            archived: 'Archivado',
-            concept: 'Concepto',
-        },
-        type: {
-            web: 'Web App',
-            mobile: 'Móvil',
-            desktop: 'Desktop',
-            api: 'API',
-            library: 'Biblioteca',
-            saas: 'SaaS',
-            ecommerce: 'E-commerce',
-            portfolio: 'Portafolio',
-            other: 'Otro',
-        },
-        otherInfo: 'Información',
-    },
-    fr: {
-        viewLive: 'Voir en ligne',
-        viewCode: 'Code source',
-        technologies: 'Technologies',
-        highlights: 'Points forts',
-        client: 'Client',
-        period: 'Période',
-        noProject: 'Aucun projet sélectionné',
-        selectProject: 'Sélectionnez un projet dans la galerie',
-        description: 'Description',
-        status: {
-            completed: 'Terminé',
-            'in-progress': 'En développement',
-            archived: 'Archivé',
-            concept: 'Concept',
-        },
-        type: {
-            web: 'App Web',
-            mobile: 'Mobile',
-            desktop: 'Desktop',
-            api: 'API',
-            library: 'Bibliothèque',
-            saas: 'SaaS',
-            ecommerce: 'E-commerce',
-            portfolio: 'Portfolio',
-            other: 'Autre',
-        },
-        otherInfo: 'Détails',
-    },
-};
 
 const STATUS_STYLES: Record<ProjectStatus, { bg: string; text: string; dot: string }> = {
     completed: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', dot: 'bg-emerald-400' },
@@ -159,21 +27,21 @@ const STATUS_STYLES: Record<ProjectStatus, { bg: string; text: string; dot: stri
 
 interface ProjectDetailPanelProps {
     project: ProjectWithTranslations | null;
-    language: LanguageCode;
+    translation: TranslatedProjects;
     onClose?: () => void;
     isMobile?: boolean;
 }
 
 export default function ProjectDetailPanel({
     project,
-    language,
+    translation,
     onClose,
     isMobile = false,
 }: ProjectDetailPanelProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const { primaryRgb, theme } = useTheme();
 
-    const t = i18n[language] || i18n.pt;
+    const t = translation;
     const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
     const primaryColorBg = `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.1)`;
     const isDark = theme === 'dark';
@@ -210,8 +78,8 @@ export default function ProjectDetailPanel({
                 }}
             >
                 <div className="text-center p-8">
-                    <p className="text-base font-medium text-foreground mb-2">{t.noProject}</p>
-                    <p className="text-sm text-muted-foreground">{t.selectProject}</p>
+                    <p className="text-base font-medium text-foreground mb-2">{translation.noProjectSelected}</p>
+                    <p className="text-sm text-muted-foreground">{translation.selectProjectFromGallery}</p>
                 </div>
             </div>
         );
@@ -303,7 +171,7 @@ export default function ProjectDetailPanel({
                                 </AnimatePresence>
                             ) : (
                                 <div className="flex items-center justify-center text-white/60">
-                                    <p className="text-sm">No image available</p>
+                                    <p className="text-sm">{translation.noImageAvailable}</p>
                                 </div>
                             )}
                         </div>
@@ -371,11 +239,11 @@ export default function ProjectDetailPanel({
                             </h2>
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-muted text-muted-foreground border border-border-subtle">
-                                    {t.type[project.type]}
+                                    {translation.typeLabels[project.type]}
                                 </span>
                                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-transparent ${statusStyle.bg} ${statusStyle.text}`}>
                                     <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot} ${project.status === 'in-progress' ? 'animate-pulse' : ''}`} />
-                                    {t.status[project.status]}
+                                    {translation.statusLabels[project.status]}
                                 </span>
                             </div>
                         </div>
@@ -384,7 +252,7 @@ export default function ProjectDetailPanel({
                             <div className="flex items-center gap-3 mb-4">
                                 <span className="h-px w-8 bg-linear-to-r from-primary/50 to-transparent" />
                                 <p className="text-xs uppercase tracking-widest font-semibold text-foreground/80">
-                                    {t.description}
+                                    {translation.descriptionLabel}
                                 </p>
                             </div>
 
@@ -397,7 +265,7 @@ export default function ProjectDetailPanel({
                                 <div className="mt-8 pt-6 border-t border-border-subtle">
                                     <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                                         <span className="w-1 h-4 rounded-full bg-primary" style={{ backgroundColor: primaryColor }} />
-                                        {t.highlights}
+                                        {translation.highlightsLabel}
                                     </h3>
                                     <ul className="grid gap-3 sm:grid-cols-2">
                                         {project._highlights.map((highlight, idx) => (
@@ -419,10 +287,9 @@ export default function ProjectDetailPanel({
                             {/* Technologies */}
                             <div className="p-6 border-b border-border-subtle">
                                 <div className="flex items-center gap-2 mb-4">
-                                    <p className="text-xs uppercase tracking-widest font-semibold text-muted-foreground">
-                                        {t.technologies}
-                                    </p>
-                                </div>
+                                                                    <p className="text-xs uppercase tracking-widest font-semibold text-muted-foreground">
+                                                                        {translation.technologiesLabel}
+                                                                    </p>                                </div>
                                 <div className="flex flex-wrap gap-2">
                                     {technologies.map((tech) => (
                                         <TechBadge key={tech.id} tech={tech} size="sm" />
@@ -441,17 +308,16 @@ export default function ProjectDetailPanel({
                             {/* Other Details */}
                             <div className="p-6 flex-1">
                                 <div className="flex items-center gap-2 mb-4">
-                                    <p className="text-xs uppercase tracking-widest font-semibold text-muted-foreground">
-                                        {t.otherInfo}
-                                    </p>
-                                </div>
+                                                                    <p className="text-xs uppercase tracking-widest font-semibold text-muted-foreground">
+                                                                        {translation.otherInfoLabel}
+                                                                    </p>                                </div>
 
                                 <div className="space-y-3">
                                     {(project.client || project.startDate) && (
                                         <div className="space-y-3 p-4 rounded-xl bg-background/50 border border-border-subtle">
                                             {project.client && (
                                                 <div className="flex flex-col gap-1">
-                                                    <span className="text-[10px] text-muted-foreground uppercase">{t.client}</span>
+                                                    <span className="text-[10px] text-muted-foreground uppercase">{translation.clientLabel}</span>
                                                     <div className="flex items-center gap-2 font-medium text-foreground text-sm">
                                                         <HiBuildingOffice2 className="w-4 h-4 text-primary" style={{ color: primaryColor }} />
                                                         {project.client}
@@ -460,7 +326,7 @@ export default function ProjectDetailPanel({
                                             )}
                                             {(project.startDate || project.endDate) && (
                                                 <div className="flex flex-col gap-1">
-                                                    <span className="text-[10px] text-muted-foreground uppercase">{t.period}</span>
+                                                    <span className="text-[10px] text-muted-foreground uppercase">{translation.periodLabel}</span>
                                                     <div className="flex items-center gap-2 font-medium text-foreground text-sm">
                                                         <HiCalendarDays className="w-4 h-4 text-primary" style={{ color: primaryColor }} />
                                                         <span>{project.startDate} {project.endDate ? `— ${project.endDate}` : ''}</span>
@@ -484,7 +350,7 @@ export default function ProjectDetailPanel({
                                             }}
                                         >
                                             <HiArrowTopRightOnSquare className="w-4 h-4" />
-                                            {t.viewLive}
+                                            {translation.viewLive}
                                         </a>
                                     )}
                                     {project.repoUrl && (
@@ -495,7 +361,7 @@ export default function ProjectDetailPanel({
                                             className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium bg-background border border-border-subtle hover:bg-muted/50 hover:border-border transition-all"
                                         >
                                             <SiGithub className="w-4 h-4" />
-                                            {t.viewCode}
+                                            {translation.viewCode}
                                         </a>
                                     )}
                                 </div>

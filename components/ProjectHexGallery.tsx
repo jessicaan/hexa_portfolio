@@ -5,12 +5,14 @@ import { useTheme } from '@/components/ThemeProvider';
 import ProjectHexCard from './ProjectHexCard';
 import ProjectHexConnector from './ProjectHexConnector';
 import type { ProjectWithTranslations } from './ProjectCard';
+import type { TranslatedProjects } from '@/lib/content/schema';
 
 interface ProjectHexGalleryProps {
     projects: ProjectWithTranslations[];
     selectedId: string | null;
     onSelect: (id: string) => void;
     onShockwave?: (position: { x: number; y: number }) => void;
+    translation: TranslatedProjects;
 }
 
 // Dimensões exatas do SVG do Card
@@ -26,6 +28,7 @@ export default function ProjectHexGallery({
     selectedId,
     onSelect,
     onShockwave,
+    translation,
 }: ProjectHexGalleryProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const { primaryRgb } = useTheme();
@@ -135,6 +138,7 @@ export default function ProjectHexGallery({
                                 technologies={techs}
                                 isSelected={selectedId === project.id}
                                 onClick={() => onSelect(project.id)}
+                                viewDetailsText={translation.viewDetailsText}
                             />
                         </div>
                     );

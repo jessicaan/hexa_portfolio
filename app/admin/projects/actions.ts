@@ -71,7 +71,9 @@ export async function autoTranslateProjects(base: {
       shortDescription: (p.shortDescription as string) ?? "",
       description: (p.description as string) ?? "",
       tags: Array.isArray(p.tags) ? p.tags : [],
-      highlights: Array.isArray(p.highlights) ? p.highlights : [],
+      highlights: Array.isArray(p.highlights)
+        ? (p.highlights as string[]).filter(h => typeof h === 'string' && h.trim() !== '')
+        : [],
       metrics: Array.isArray(p.metrics) ? p.metrics : [],
       images: Array.isArray(p.images)
         ? p.images.map((img: Record<string, unknown>) => ({
@@ -83,16 +85,35 @@ export async function autoTranslateProjects(base: {
 
   return {
     en: {
-      summary: result.en?.summary ?? "",
+      ...defaultProjectsContent.translations.en,
+      summary: result.en?.summary ?? defaultProjectsContent.translations.en.summary,
       projects: mapProjects(result.en?.projects, base.projects),
     },
     es: {
-      summary: result.es?.summary ?? "",
+      ...defaultProjectsContent.translations.es,
+      summary: result.es?.summary ?? defaultProjectsContent.translations.es.summary,
       projects: mapProjects(result.es?.projects, base.projects),
     },
     fr: {
-      summary: result.fr?.summary ?? "",
+      ...defaultProjectsContent.translations.fr,
+      summary: result.fr?.summary ?? defaultProjectsContent.translations.fr.summary,
       projects: mapProjects(result.fr?.projects, base.projects),
+    },
+    pt: {
+      ...defaultProjectsContent.translations.pt,
+      summary: base.summary,
+      projects: base.projects.map((p) => ({
+        id: p.id,
+        title: p.title,
+        shortDescription: p.shortDescription,
+        description: p.description,
+        tags: p.tags,
+        highlights: p.highlights ?? [],
+        metrics: p.metrics ?? [],
+        images: (p.images ?? []).map((img) => ({
+          description: img.description ?? "",
+        })),
+      })),
     },
   };
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactiveGridBackground from '@/components/Reactivegridbackground';
 import { useTheme } from '@/components/ThemeProvider';
@@ -16,13 +16,11 @@ import {
   SiFigma,
   SiGit,
 } from 'react-icons/si';
-import type { SkillsContent, SkillCategory } from '@/lib/content/schema';
-import type { LanguageCode } from '@/app/i18n';
+import type { SkillsContent, SkillCategory, LanguageCode } from '@/lib/content/schema';
+import { loadSkillsContent } from '@/lib/content/client';
+import { useTranslation } from 'react-i18next';
 
-interface SkillsSectionProps {
-  content: SkillsContent;
-  language: LanguageCode;
-}
+interface SkillsSectionProps {}
 
 type SkillLevel = 1 | 2 | 3 | 4 | 5;
 
@@ -54,6 +52,8 @@ const skillsCopy: Record<
     description: string;
     legendTitle: string;
     levels: Record<SkillLevel, string>;
+    nowText: string;
+    viewText: string;
   }
 > = {
   pt: {
@@ -69,6 +69,8 @@ const skillsCopy: Record<
       4: 'Expert',
       5: 'Mestre',
     },
+    nowText: 'Atual',
+    viewText: 'Ver',
   },
   en: {
     eyebrow: 'Skills',
@@ -83,6 +85,8 @@ const skillsCopy: Record<
       4: 'Expert',
       5: 'Master',
     },
+    nowText: 'Current',
+    viewText: 'View',
   },
   es: {
     eyebrow: 'Skills',
@@ -97,59 +101,132 @@ const skillsCopy: Record<
       4: 'Experto',
       5: 'Maestro',
     },
+    nowText: 'Actual',
+    viewText: 'Ver',
   },
   fr: {
     eyebrow: 'Compétences',
     title: 'Stack, craft et manière de penser',
     description:
       "Plus qu'une liste de technologies, voici ma façon de concevoir et construire des expériences numériques, du socle technique au soin visuel.",
-    legendTitle: 'Niveau de familiarité',
+    legendTitle: 'Niveau de familiaridade',
     levels: {
       1: 'Débutant',
       2: 'Intermédiaire',
-      3: 'Avancé',
+      3: 'Avançado',
       4: 'Expert',
       5: 'Maître',
     },
+    nowText: 'Actuel',
+    viewText: 'Voir',
   },
 };
 
-export default function SkillsSection({ content, language }: SkillsSectionProps) {
-  // Normalize categories/skills to avoid undefined crashes when data is missing
-  const normalizedCategories = Array.isArray(content.categories)
-    ? content.categories.map(category => ({
-        ...category,
-        skills: Array.isArray(category.skills) ? category.skills : [],
-      }))
-    : [];
+export default function SkillsSection({}: SkillsSectionProps) {
+  const { i18n } = useTranslation();
+  const language = i18n.language as LanguageCode;
 
+  const [skillsContent, setSkillsContent] = useState<SkillsContent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Moved these derivations/hooks to the top
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        const data = await loadSkillsContent();
+        setSkillsContent(data);
+      } catch (error) {
+        console.error("Failed to load skills content:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSkills();
+  }, []);
+
+  if (loading) {
+    return (
+      <main className="relative w-screen h-screen overflow-hidden">
+        <ReactiveGridBackground />
+        <div className="relative z-10 flex items-center justify-center w-full h-full px-6 text-center">
+          <p className="text-muted-foreground">Loading skills...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // If skillsContent is still null after loading, handle gracefully
+  if (!skillsContent) {
+    return (
+      <main className="relative w-screen h-screen overflow-hidden">
+        <ReactiveGridBackground />
+        <div className="relative z-10 flex items-center justify-center w-full h-full px-6 text-center">
+          <p className="text-muted-foreground">Failed to load skills data.</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Moved these derivations/hooks below the loading and error checks
+  const normalizedCategories = useMemo(() => {
+    return Array.isArray(skillsContent.categories)
+      ? skillsContent.categories.map(category => ({
+          ...category,
+          skills: Array.isArray(category.skills) ? category.skills : [],
+        }))
+      : [];
+  }, [skillsContent]);
+
+  // Use normalizedCategories here for initial activeCategoryId, as it's guaranteed to be an array
   const [activeCategoryId, setActiveCategoryId] = useState<string>(normalizedCategories[0]?.name ?? '');
-  
-  const copy = skillsCopy[language];
+
   const { primaryRgb, theme } = useTheme();
   const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
 
-  const translation = language === 'pt' ? null : content.translations[language];
-  const categories = normalizedCategories.map((c, i) => {
-    const translated = translation?.categories?.[i];
-    const baseSkills = Array.isArray(c.skills) ? c.skills : [];
-    const translatedSkills = Array.isArray(translated?.skills) ? translated.skills : [];
+  const translation = useMemo(() => {
+    // Attempt to get translation from skillsContent for the current language
+    const currentLangTranslation = skillsContent.translations[language];
+    // Attempt to get translation from skillsContent for English as a fallback
+    const englishTranslation = skillsContent.translations['en'];
 
-    return {
-      ...c,
-      name: translated?.name || c.name,
-      skills: baseSkills.map((s, j) => {
-        const translatedSkill = translatedSkills?.[j];
-        return {
-          ...s,
-          name: translatedSkill?.name || s.name,
-        };
-      }),
+    // Combine them, prioritizing current language, then English
+    const combinedTranslation = {
+      ...skillsCopy[language], // Start with skillsCopy for the current language as base defaults
+      ...skillsCopy['en'], // Override with English skillsCopy if language-specific is missing
+      ...(englishTranslation || {}), // Override with English from skillsContent if available
+      ...(currentLangTranslation || {}), // Override with current language from skillsContent if available
     };
-  });
 
-  const activeCategory = categories.find(category => category.name === activeCategoryId) ?? categories[0] ?? { name: '', skills: [] };
-  const summary = translation?.summary || content.summary;
+    return combinedTranslation;
+  }, [skillsContent, language]);
+
+  const categories = useMemo(() => {
+    return normalizedCategories.map((c, i) => {
+      const translated = translation?.categories?.[i];
+      const baseSkills = Array.isArray(c.skills) ? c.skills : [];
+      const translatedSkills = Array.isArray(translated?.skills) ? translated.skills : [];
+
+      return {
+        ...c,
+        name: translated?.name || c.name,
+        skills: baseSkills.map((s, j) => {
+          const translatedSkill = translatedSkills?.[j];
+          return {
+            ...s,
+            name: translatedSkill?.name || s.name,
+          };
+        }),
+      };
+    });
+  }, [normalizedCategories, translation]);
+
+  const activeCategory = useMemo(() => {
+    return categories.find(category => category.name === activeCategoryId) ?? categories[0] ?? { name: '', skills: [] };
+  }, [categories, activeCategoryId]);
+
+  const summary = useMemo(() => {
+    return translation?.summary || skillsContent.summary;
+  }, [translation, skillsContent]);
 
   // If there's no data, render a friendly placeholder instead of crashing
   if (!categories.length) {
@@ -175,13 +252,13 @@ export default function SkillsSection({ content, language }: SkillsSectionProps)
           className="max-w-xl text-center lg:text-left text-foreground"
         >
           <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground-subtle mb-4">
-            {copy.eyebrow} · Stack
+            {translation.eyebrow} · Stack
           </p>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-5">
-            {copy.title}
+            {translation.title}
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">
-            {summary}
+            {translation.description}
           </p>
 
           <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -201,7 +278,7 @@ export default function SkillsSection({ content, language }: SkillsSectionProps)
 
           <div className="mt-4">
             <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground-subtle mb-2">
-              {copy.legendTitle}
+              {translation.legendTitle}
             </p>
             <div className="flex flex-wrap gap-3 text-[10px] text-muted-foreground-subtle">
               {([1, 2, 3, 4, 5] as SkillLevel[]).map(level => (
@@ -215,7 +292,7 @@ export default function SkillsSection({ content, language }: SkillsSectionProps)
                       }}
                     />
                   </div>
-                  <span className="tracking-[0.18em] uppercase">{copy.levels[level]}</span>
+                  <span className="tracking-[0.18em] uppercase">{translation.levels[level]}</span>
                 </div>
               ))}
             </div>
@@ -264,7 +341,7 @@ export default function SkillsSection({ content, language }: SkillsSectionProps)
                           />
                         </div>
                         <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground-subtle">
-                          {copy.levels[skill.level as SkillLevel]}
+                          {translation.levels[skill.level as SkillLevel]}
                         </span>
                       </div>
                     </div>
@@ -282,13 +359,7 @@ export default function SkillsSection({ content, language }: SkillsSectionProps)
           className="w-full max-w-xl"
         >
           <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle mb-3 text-center lg:text-left">
-            {language === 'pt'
-              ? 'Áreas de foco'
-              : language === 'es'
-                ? 'Áreas de foco'
-                : language === 'fr'
-                  ? "Axes d'attention"
-                  : 'Focus areas'}
+            {translation.eyebrow} · Áreas de foco
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
@@ -334,21 +405,7 @@ export default function SkillsSection({ content, language }: SkillsSectionProps)
                           y: isActive ? 0 : 2,
                         }}
                       >
-                        {isActive
-                          ? language === 'pt'
-                            ? 'AGORA'
-                            : language === 'es'
-                              ? 'AHORA'
-                              : language === 'fr'
-                                ? 'ICI'
-                                : 'NOW'
-                          : language === 'pt'
-                            ? 'VER'
-                            : language === 'es'
-                              ? 'VER'
-                              : language === 'fr'
-                                ? 'VOIR'
-                                : 'VIEW'}
+                        {isActive ? translation.nowText : translation.viewText}
                       </motion.span>
                     </div>
 

@@ -12,9 +12,9 @@ import ExperienceSection from '@/components/ExperienceSection';
 import SkillsSection from '@/components/SkillsSection';
 import PersonalSection from '@/components/PersonalSection';
 import ContactSection from '@/components/ContactSection';
-import { ExperienceContent, EducationContent, ProjectsContent, SkillsContent } from '@/lib/content/schema';
+import { LanguageCode } from '@/lib/content/schema';
 
-import type { LanguageCode } from '@/app/i18n';
+
 
 const navItems = [
   { id: 'intro', label: 'INICIO' },
@@ -27,14 +27,9 @@ const navItems = [
   { id: 'contact', label: 'CONTATO' },
 ];
 
-interface HomeClientProps {
-    experienceContent: ExperienceContent;
-    educationContent: EducationContent;
-    projectsContent: ProjectsContent;
-    skillsContent: SkillsContent;
-}
+interface HomeClientProps {}
 
-export default function HomeClient({ experienceContent, educationContent, projectsContent, skillsContent }: HomeClientProps) {
+export default function HomeClient({}: HomeClientProps) {
   const { i18n } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode | null>(null);
   const [currentSection, setCurrentSection] = useState('intro');
@@ -42,9 +37,10 @@ export default function HomeClient({ experienceContent, educationContent, projec
   const [networkCommand, setNetworkCommand] = useState<{ name: 'zoomOut'; key: number } | null>(null);
 
   const handleLanguageSelect = useCallback(
-    (code: LanguageCode) => {
-      setSelectedLanguage(code);
-      i18n.changeLanguage(code.toLowerCase());
+    (code: string) => {
+      const lowerCode = code.toLowerCase() as LanguageCode;
+      setSelectedLanguage(lowerCode);
+      i18n.changeLanguage(lowerCode);
       setCurrentSection('about');
       setTransitionTrigger(prev => prev + 1);
     },
@@ -52,9 +48,10 @@ export default function HomeClient({ experienceContent, educationContent, projec
   );
 
   const handleExplore = useCallback(
-    (code: LanguageCode) => {
-      setSelectedLanguage(code);
-      i18n.changeLanguage(code.toLowerCase());
+    (code: string) => {
+      const lowerCode = code.toLowerCase() as LanguageCode;
+      setSelectedLanguage(lowerCode);
+      i18n.changeLanguage(lowerCode);
       setNetworkCommand({ name: 'zoomOut', key: Date.now() });
     },
     [i18n]
@@ -138,7 +135,7 @@ export default function HomeClient({ experienceContent, educationContent, projec
 
     
 
-            content: <AboutSection language={selectedLanguage ?? 'en'} />,
+            content: <AboutSection />,
 
     
 
@@ -166,7 +163,7 @@ export default function HomeClient({ experienceContent, educationContent, projec
 
     
 
-            content: <EducationSection content={educationContent} language={selectedLanguage ?? 'en'} />,
+            content: <EducationSection />,
 
     
 
@@ -194,7 +191,7 @@ export default function HomeClient({ experienceContent, educationContent, projec
 
     
 
-            content: <ExperienceSection content={experienceContent} language={selectedLanguage ?? 'en'} />,
+            content: <ExperienceSection />,
 
     
 
@@ -222,7 +219,7 @@ export default function HomeClient({ experienceContent, educationContent, projec
 
     
 
-            content: <ProjectsSection content={projectsContent} language={selectedLanguage ?? 'en'} />,
+            content: <ProjectsSection />,
 
     
 
@@ -250,7 +247,7 @@ export default function HomeClient({ experienceContent, educationContent, projec
 
     
 
-            content: <SkillsSection content={skillsContent} language={selectedLanguage ?? 'en'} />,
+            content: <SkillsSection />,
 
     
 
@@ -278,7 +275,7 @@ export default function HomeClient({ experienceContent, educationContent, projec
 
     
 
-            content: <PersonalSection language={selectedLanguage ?? 'en'} />,
+            content: <PersonalSection />,
 
     
 
@@ -306,7 +303,7 @@ export default function HomeClient({ experienceContent, educationContent, projec
 
     
 
-            content: <ContactSection language={selectedLanguage ?? 'en'} />,
+            content: <ContactSection />,
 
     
 
@@ -314,7 +311,7 @@ export default function HomeClient({ experienceContent, educationContent, projec
 
     
 
-        ], [handleLanguageSelect, handleExplore, selectedLanguage, educationContent, experienceContent, projectsContent, skillsContent]);
+        ], [handleLanguageSelect, handleExplore, selectedLanguage]);
 
     
 

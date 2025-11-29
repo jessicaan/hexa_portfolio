@@ -1,65 +1,28 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactiveGridBackground from '@/components/Reactivegridbackground';
 import { useTheme } from '@/components/ThemeProvider';
-import type { EducationContent, EducationItem } from '@/lib/content/schema';
-import type { LanguageCode } from '@/app/i18n';
+import { loadEducationContent } from '@/lib/content/client';
+import { defaultEducationContent, type EducationContent, type EducationItem, type LanguageCode } from '@/lib/content/schema';
+import { useTranslation } from 'react-i18next';
 
-interface EducationSectionProps {
-  language: LanguageCode;
-  content: EducationContent;
-}
+interface EducationSectionProps {}
 
-const educationCopy: Record<LanguageCode, {
-  eyebrow: string;
-  title: string;
-  description: string;
-  listLabel: string;
-  highlightsLabel: string;
-}> = {
-  pt: {
-    eyebrow: 'Educacao & Cursos',
-    title: 'Onde aprendi e continuo aprendendo',
-    description: 'Um recorte da minha formacao e dos cursos que ajudam a construir minha forma de pensar produtos digitais.',
-    listLabel: 'Formacao e trilha',
-    highlightsLabel: 'O que marcou esse periodo',
-  },
-  en: {
-    eyebrow: 'Education & Courses',
-    title: 'Where I learned and keep learning',
-    description: 'A snapshot of my education and courses that shape how I think about digital products.',
-    listLabel: 'Education and learning path',
-    highlightsLabel: 'What stood out',
-  },
-  es: {
-    eyebrow: 'Educacion y cursos',
-    title: 'Donde aprendi y sigo aprendiendo',
-    description: 'Un recorte de mi formacion y de los cursos que influyen en como pienso productos digitales.',
-    listLabel: 'Formacion y ruta de aprendizaje',
-    highlightsLabel: 'Lo que destaco',
-  },
-  fr: {
-    eyebrow: 'Education & cours',
-    title: 'Ou jai appris et ou j apprends encore',
-    description: 'Un apercu de ma formation et des cours qui influencent ma maniere de penser les produits numeriques.',
-    listLabel: 'Parcours et etudes',
-    highlightsLabel: 'Points forts',
-  },
-};
+export default function EducationSection({}: EducationSectionProps) {
+  const { i18n } = useTranslation();
+  const language = i18n.language as LanguageCode;
 
-export default function EducationSection({ language, content }: EducationSectionProps) {
-  // Ensure we always have copy, falling back to EN for unknown codes
-  const copy = educationCopy[language] ?? educationCopy.en;
-  const [activeIndex, setActiveIndex] = useState(0);
-  const { primaryRgb, theme } = useTheme();
-  const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
+  const [content, setContent] = useState<EducationContent>(defaultEducationContent);
+  const [loading, setLoading] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0); // Moved
+  const { primaryRgb, theme } = useTheme();          // Moved
+  const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`; // Moved
 
-  const translation =
-    language === 'pt'
-      ? null
-      : content.translations[language as Exclude<LanguageCode, 'pt'>];
+  const translation = useMemo(() => {
+    return content.translations[language] || content.translations['en'];
+  }, [content.translations, language]);
 
   const education = useMemo(() => {
     const baseList = content.education?.length
@@ -82,7 +45,43 @@ export default function EducationSection({ language, content }: EducationSection
     });
   }, [content.education, translation]);
 
-  const summary = translation?.summary || content.summary || copy.description;
+  useEffect(() => {
+    const fetchEducation = async () => {
+      try {
+        const data = await loadEducationContent();
+        setContent(data);
+      } catch (error) {
+        console.error("Failed to load education content:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEducation();
+  }, []);
+
+  if (loading) {
+    return (
+      <main className="relative w-screen h-screen overflow-hidden">
+        <ReactiveGridBackground />
+        <div className="relative z-10 flex items-center justify-center w-full h-full px-6 text-center">
+          <p className="text-muted-foreground">Loading education information...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!content) {
+    return (
+      <main className="relative w-screen h-screen overflow-hidden">
+        <ReactiveGridBackground />
+        <div className="relative z-10 flex items-center justify-center w-full h-full px-6 text-center">
+          <p className="text-muted-foreground">Failed to load education data.</p>
+        </div>
+      </main>
+    );
+  }
+
+  const summary = translation?.summary || content.summary;
   const activeEducation = education[activeIndex] ?? education[0];
 
   return (
@@ -95,10 +94,10 @@ export default function EducationSection({ language, content }: EducationSection
           transition={{ duration: 0.8 }}
           className="max-w-xl text-center lg:text-left text-foreground"
         >
-          <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground-subtle mb-4">{copy.eyebrow}</p>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-4">{copy.title}</h2>
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">{summary}</p>
-          <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle mb-3">{copy.listLabel}</p>
+          <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground-subtle mb-4">{translation.eyebrow}</p>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-4">{translation.title}</h2>
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">{translation.summary}</p>
+          <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle mb-3">{translation.listLabel}</p>
           <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-1">
             {education.map((entry, index) => (
               <motion.button
@@ -147,14 +146,14 @@ export default function EducationSection({ language, content }: EducationSection
                 className="rounded-3xl border border-border-subtle bg-surface-soft backdrop-blur-md p-5 sm:p-6"
                 style={{ boxShadow: `0 18px 60px rgba(0,0,0,${theme === 'dark' ? 0.6 : 0.15})` }}
               >
-                <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground-subtle mb-2">{copy.listLabel}</p>
+                <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground-subtle mb-2">{translation.listLabel}</p>
                 <p className="text-sm sm:text-base text-foreground font-medium mb-1">{activeEducation.course}</p>
                 <p className="text-[11px] sm:text-xs text-muted-foreground mb-3">{activeEducation.institution} - {activeEducation.period}</p>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4">{activeEducation.description}</p>
 
                 {activeEducation.highlights && activeEducation.highlights.length > 0 && (
                   <div>
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground-subtle mb-2">{copy.highlightsLabel}</p>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground-subtle mb-2">{translation.highlightsLabel}</p>
                     <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground">
                       {activeEducation.highlights.map(highlight => (
                         <li key={highlight} className="flex gap-2">

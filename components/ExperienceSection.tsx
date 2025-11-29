@@ -1,55 +1,42 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactiveGridBackground from '@/components/Reactivegridbackground';
 import { useTheme } from '@/components/ThemeProvider';
-import type { ExperienceContent, ExperienceItem } from '@/lib/content/schema';
-import type { LanguageCode } from '@/app/i18n';
+import { loadExperienceContent } from '@/lib/content/client';
+import { defaultExperienceContent, type ExperienceContent, type ExperienceItem, type LanguageCode, type ExperienceTab } from '@/lib/content/schema';
+import { useTranslation } from 'react-i18next';
 
-type ExperienceTab = 'freelancer' | 'clt' | 'pj' | 'others';
+interface ExperienceSectionProps {}
 
-interface ExperienceSectionProps {
-    content: ExperienceContent;
-    language: LanguageCode;
-}
+export default function ExperienceSection({}: ExperienceSectionProps) {
+    const { i18n } = useTranslation();
+    const language = i18n.language as LanguageCode;
 
-const getTranslatedContent = (content: ExperienceContent, lang: LanguageCode) => {
-    if (lang === 'pt') {
-        return {
-            summary: content.summary,
-            experiences: content.experiences,
-        };
-    }
-
-    const translation = content.translations[lang];
-    const summary = translation?.summary?.trim() ? translation.summary : content.summary;
-
-    const experiences = content.experiences.map((baseExp, index) => {
-        const translated = translation?.experiences?.[index];
-        const achievements =
-            Array.isArray(translated?.achievements) && translated.achievements.length > 0
-                ? translated.achievements
-                : baseExp.achievements;
-
-        return {
-            ...baseExp,
-            role: translated?.role || baseExp.role,
-            description: translated?.description || baseExp.description,
-            achievements,
-        };
-    });
-
-    return { summary, experiences };
-};
-
-export default function ExperienceSection({ content, language }: ExperienceSectionProps) {
+    const [content, setContent] = useState<ExperienceContent>(defaultExperienceContent);
+    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<ExperienceTab>('freelancer');
 
-    const { summary, experiences } = useMemo(
-        () => getTranslatedContent(content, language),
-        [content, language]
-    );
+    const translation = useMemo(() => {
+        return content.translations[language] || content.translations['en'];
+    }, [content.translations, language]);
+
+    const experiences = useMemo(() => {
+        return content.experiences.map((exp, index) => {
+            const translated = translation.experiences?.[index];
+            const achievements =
+                Array.isArray(translated?.achievements) && translated.achievements.length > 0
+                    ? translated.achievements
+                    : exp.achievements;
+            return {
+                ...exp,
+                role: translated?.role || exp.role,
+                description: translated?.description || exp.description,
+                achievements,
+            };
+        });
+    }, [content.experiences, translation]);
 
     const initialId = useMemo(() => {
         const list = experiences.filter(exp => exp.contractType.toLowerCase() === activeTab);
@@ -76,6 +63,45 @@ export default function ExperienceSection({ content, language }: ExperienceSecti
     }, [activeId, filteredExperiences, experiences]);
 
 
+    useEffect(() => {
+        const fetchExperience = async () => {
+            try {
+                const data = await loadExperienceContent();
+                setContent(data);
+            } catch (error) {
+                console.error("Failed to load experience content:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchExperience();
+    }, []);
+
+    if (loading) {
+        return (
+            <main className="relative w-screen h-screen overflow-hidden">
+                <ReactiveGridBackground />
+                <div className="relative z-10 flex items-center justify-center w-full h-full px-6 text-center">
+                    <p className="text-muted-foreground">Loading experience information...</p>
+                </div>
+            </main>
+        );
+    }
+
+    if (!content) {
+        return (
+            <main className="relative w-screen h-screen overflow-hidden">
+                <ReactiveGridBackground />
+                <div className="relative z-10 flex items-center justify-center w-full h-full px-6 text-center">
+                    <p className="text-muted-foreground">Failed to load experience data.</p>
+                </div>
+            </main>
+        );
+    }
+
+    const summary = translation.summary || content.summary;
+
+
     const handleTabChange = (tab: ExperienceTab) => {
         setActiveTab(tab);
         const list = experiences.filter(exp => exp.contractType.toLowerCase() === tab);
@@ -86,20 +112,7 @@ export default function ExperienceSection({ content, language }: ExperienceSecti
         }
     };
 
-    const copy = {
-        eyebrow: 'Experiência profissional',
-        title: 'Minha trajetória',
-        description: summary,
-        tabs: {
-            freelancer: 'Freelancer',
-            pj: 'PJ',
-            clt: 'CLT',
-            others: 'Outros',
-        },
-        detailHeading: 'Detalhes',
-        highlightsHeading: 'Destaques',
-        stackHeading: 'Tecnologias',
-    };
+
 
     return (
         <main className="relative w-screen h-screen overflow-hidden">
@@ -113,13 +126,13 @@ export default function ExperienceSection({ content, language }: ExperienceSecti
                     className="max-w-xl text-center lg:text-left text-foreground"
                 >
                     <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground-subtle mb-4">
-                        {copy.eyebrow}
+                        {translation.eyebrow}
                     </p>
                     <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-5">
-                        {copy.title}
+                        {translation.title}
                     </h2>
                     <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">
-                        {copy.description}
+                        {translation.summary}
                     </p>
 
                     <div className="inline-flex items-center rounded-full border border-border-subtle bg-surface-soft p-1 mb-5">
@@ -140,14 +153,14 @@ export default function ExperienceSection({ content, language }: ExperienceSecti
                                         animate={{ opacity: isActive ? 1 : 0 }}
                                         transition={{ duration: 0.2 }}
                                     />
-                                    <span className="relative z-10">{copy.tabs[tab]}</span>
+                                    <span className="relative z-10">{translation.tabs[tab]}</span>
                                 </button>
                             );
                         })}
                     </div>
 
                     <p className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-muted-foreground-subtle mb-2">
-                        {copy.detailHeading}
+                        {translation.detailHeading}
                     </p>
 
                     <AnimatePresence mode="wait">
@@ -186,7 +199,7 @@ export default function ExperienceSection({ content, language }: ExperienceSecti
                                     {activeExperience.achievements?.length > 0 && (
                                         <div className="mb-4">
                                             <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground-subtle mb-2">
-                                                {copy.highlightsHeading}
+                                                {translation.highlightsHeading}
                                             </p>
                                             <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground">
                                                 {activeExperience.achievements.map(item => (
@@ -207,7 +220,7 @@ export default function ExperienceSection({ content, language }: ExperienceSecti
                                     {activeExperience.technologies?.length > 0 && (
                                         <div>
                                             <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground-subtle mb-2">
-                                                {copy.stackHeading}
+                                                {translation.stackHeading}
                                             </p>
                                             <div className="flex flex-wrap gap-2">
                                                 {activeExperience.technologies.map(tech => (

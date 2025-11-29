@@ -22,6 +22,7 @@ interface ProjectHexCardProps {
     technologies?: string[];
     isSelected: boolean;
     onClick: () => void;
+    viewDetailsText: string;
 }
 
 const STATUS_COLORS: Record<ProjectStatus, string> = {
@@ -81,6 +82,7 @@ export default function ProjectHexCard({
     technologies = [],
     isSelected,
     onClick,
+    viewDetailsText,
 }: ProjectHexCardProps) {
     const hexRef = useRef<HTMLDivElement>(null);
     const { primaryRgb, theme } = useTheme();
@@ -178,7 +180,7 @@ export default function ProjectHexCard({
 
                 {/* Título */}
                 <h3
-                    className="text-base font-bold leading-tight mb-2 text-white transition-colors duration-300"
+                    className="text-base font-light leading-2 mb-2 text-white transition-colors duration-300"
                     style={{
                         textShadow: isSelected ? `0 0 15px ${primaryColor}80` : 'none',
                         color: isSelected ? primaryColor : '#fff'
@@ -189,11 +191,11 @@ export default function ProjectHexCard({
 
                 {/* Descrição Curta (Margem reduzida para aproximar os ícones) */}
                 <p className="text-[10px] text-white/50 line-clamp-2 mb-3 leading-relaxed max-w-[140px]">
-                    {shortDesc || "Ver detalhes..."}
+                    {shortDesc || viewDetailsText}
                 </p>
 
                 {/* Área de Ícones (Removido mt-auto, adicionado mt-1) */}
-                <div className="flex items-center justify-center gap-1.5 mt-1 min-h-[28px]">
+                <div className="flex items-center justify-center gap-1.5 mt-1 min-h-7">
                     {displayTechs.map((tech, i) => (
                         tech.Icon ? (
                             <div

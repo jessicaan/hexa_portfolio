@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import * as SimpleIcons from 'simple-icons/icons';
-import { getTechById } from '@/lib/technologies';
+import { getTechById } from '@/lib/content/technologies';
 
 interface Props {
     techId: string;

@@ -4,66 +4,31 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
 import ReactiveGridBackground from '@/components/Reactivegridbackground';
-import type { LanguageCode, ProjectImage, ProjectsContent } from '@/lib/content/schema';
+import { loadProjectsContent } from '@/lib/content/client';
+import { defaultProjectsContent, type LanguageCode, type ProjectImage, type ProjectsContent } from '@/lib/content/schema';
 import ProjectHexGallery from '@/components/ProjectHexGallery';
 import ProjectDetailPanel from '@/components/ProjectDetailPanel';
+import type { TranslatedProjects } from '@/lib/content/schema';
 import type { ProjectWithTranslations } from '@/components/ProjectCard';
+import { useTranslation } from 'react-i18next';
 
-const i18n: Record<LanguageCode, {
-  eyebrow: string;
-  title: string;
-  empty: string;
-}> = {
-  pt: {
-    eyebrow: 'Portfolio',
-    title: 'Projetos Criativos',
-    empty: 'Nenhum projeto cadastrado no momento. Volte em breve!',
-  },
-  en: {
-    eyebrow: 'Portfolio',
-    title: 'Creative Projects',
-    empty: 'No projects listed at the moment. Check back soon!',
-  },
-  es: {
-    eyebrow: 'Portafolio',
-    title: 'Proyectos Creativos',
-    empty: 'No hay proyectos listados por el momento. ¡Vuelve pronto!',
-  },
-  fr: {
-    eyebrow: 'Portfolio',
-    title: 'Projets créatifs',
-    empty: 'Aucun projet répertorié pour le moment. Revenez bientôt !',
-  },
-};
 
-interface ProjectsSectionProps {
-  content: ProjectsContent;
-  language: LanguageCode;
-}
+interface ProjectsSectionProps { }
 
-export default function ProjectsSection({ content, language }: ProjectsSectionProps) {
-  const t = i18n[language] || i18n.pt;
-  const { primaryRgb, theme } = useTheme();
-  const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
-  const isDark = theme === 'dark';
+export default function ProjectsSection({ }: ProjectsSectionProps) {
+  const { i18n } = useTranslation();
+  const { primaryRgb } = useTheme();
+  const language = i18n.language as LanguageCode;
 
+  const [content, setContent] = useState<ProjectsContent>(defaultProjectsContent);
+  const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [shockwave, setShockwave] = useState<{ position: { x: number; y: number } } | null>(null);
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  const handleShockwave = useCallback((position: { x: number; y: number }) => {
-    setShockwave({ position });
-  }, []);
-
-  const translationLanguage = language === 'pt' ? null : (language as keyof ProjectsContent['translations']);
-  const translation = translationLanguage ? content.translations[translationLanguage] : null;
+  const translation = useMemo(() => {
+    return content.translations[language] || content.translations['en'];
+  }, [content.translations, language]);
 
   const projects = useMemo<ProjectWithTranslations[]>(() => {
     const sorted = [...content.projects].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -91,10 +56,69 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
   }, [projects, selectedId]);
 
   useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
+
+  const handleShockwave = useCallback((position: { x: number; y: number }) => {
+    setShockwave({ position });
+  }, []);
+
+  useEffect(() => {
+    if (shockwave) {
+      setTimeout(() => setShockwave(null), 50);
+    }
+  }, [shockwave]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await loadProjectsContent();
+        setContent(data);
+      } catch (error) {
+        console.error("Failed to load projects content:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  useEffect(() => {
     if (projects.length > 0 && !selectedId && !isMobile) {
       setSelectedId(projects[0].id);
     }
   }, [projects, selectedId, isMobile]);
+
+  if (loading) {
+    return (
+      <main className="relative w-screen h-screen overflow-hidden">
+        <ReactiveGridBackground />
+        <div className="relative z-10 flex items-center justify-center w-full h-full px-6 text-center">
+          <p className="text-muted-foreground">Loading projects...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!content) {
+    return (
+      <main className="relative w-screen h-screen overflow-hidden">
+        <ReactiveGridBackground />
+        <div className="relative z-10 flex items-center justify-center w-full h-full px-6 text-center">
+          <p className="text-muted-foreground">Failed to load projects data.</p>
+        </div>
+      </main>
+    );
+  }
 
   const handleSelect = (id: string) => {
     setSelectedId(id);
@@ -109,7 +133,7 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
       <main className="relative w-screen h-screen overflow-hidden">
         <ReactiveGridBackground />
         <div className="relative z-10 w-full h-full flex items-center justify-center">
-          <p className="text-muted-foreground">{t.empty}</p>
+          <p className="text-muted-foreground">{translation.empty}</p>
         </div>
       </main>
     );
@@ -128,10 +152,10 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
             className="mb-8 lg:mb-10 shrink-0"
           >
             <p className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground mb-2">
-              {t.eyebrow}
+              {translation.eyebrow}
             </p>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground">
-              {t.title}
+              {translation.title}
             </h1>
             {content.summary && (
               <p className="mt-3 text-base lg:text-lg text-muted-foreground leading-relaxed max-w-2xl">
@@ -156,7 +180,7 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
                         : 'border-border-subtle bg-background/50 hover:border-border'
                         }`}
                       style={{
-                        boxShadow: isSelected ? `0 0 20px ${primaryColor}30` : undefined,
+                        boxShadow: isSelected ? `0 0 20px rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.3)` : undefined,
                       }}
                     >
                       <p className={`text-sm font-medium ${isSelected ? 'text-primary' : 'text-foreground'}`}>
@@ -184,9 +208,9 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
                 >
                   <ProjectDetailPanel
                     project={selectedProject}
-                    language={language}
                     onClose={handleClosePanel}
                     isMobile
+                    translation={translation}
                   />
                 </motion.div>
               )}
@@ -205,6 +229,7 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
                 selectedId={selectedId}
                 onSelect={handleSelect}
                 onShockwave={handleShockwave}
+                translation={translation}
               />
             </motion.div>
 
@@ -219,8 +244,8 @@ export default function ProjectsSection({ content, language }: ProjectsSectionPr
                   <ProjectDetailPanel
                     key={selectedId || 'empty'}
                     project={selectedProject}
-                    language={language}
                     onClose={handleClosePanel}
+                    translation={translation}
                   />
                 )}
               </AnimatePresence>

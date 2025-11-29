@@ -12,15 +12,11 @@ import {
   type LanguageCode as ContentLanguageCode,
 } from '@/lib/content/schema';
 
-type UiLanguageCode = 'PT' | 'EN' | 'ES' | 'FR';
+interface AboutSectionProps {}
 
-interface AboutSectionProps {
-  language?: UiLanguageCode | null;
-}
-
-export default function AboutSection({ language = 'EN' }: AboutSectionProps) {
-  const { t } = useTranslation('common');
-  const safeLang: UiLanguageCode = (language ?? 'EN') as UiLanguageCode;
+export default function AboutSection({}: AboutSectionProps) {
+  const { i18n } = useTranslation();
+  const cmsLang = i18n.language as ContentLanguageCode;
 
   const [content, setContent] = useState<AboutContent>(defaultAboutContent);
   const { primaryRgb, theme } = useTheme();
@@ -43,16 +39,11 @@ export default function AboutSection({ language = 'EN' }: AboutSectionProps) {
     };
   }, []);
 
-  const cmsLang = safeLang.toLowerCase() as ContentLanguageCode;
-  const translation =
-    cmsLang === 'pt'
-      ? null
-      : content.translations[cmsLang as Exclude<ContentLanguageCode, 'pt'>];
+  const translation = content.translations[cmsLang] || content.translations['en'];
 
-  const title = content.title || t('about.heading');
-  const summary = translation?.summary || content.summary || t('about.summary');
-  const longDescription =
-    translation?.longDescription || content.longDescription || t('about.summary');
+  const title = content.title || translation.heading;
+  const summary = translation?.summary || content.summary;
+  const longDescription = translation?.longDescription || content.longDescription;
 
   const softSkills = useMemo(() => {
     const source =
@@ -89,7 +80,7 @@ export default function AboutSection({ language = 'EN' }: AboutSectionProps) {
             className="mb-16 lg:mb-20"
           >
             <p className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground-subtle mb-3">
-              {t('about.language')}
+              {translation.heading}
             </p>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-semibold tracking-tight text-foreground mb-6">
               {title}
@@ -115,8 +106,7 @@ export default function AboutSection({ language = 'EN' }: AboutSectionProps) {
                     }}
                   />
                   <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground-subtle">
-                    {t('about.myStory')}
-                  </p>
+                                          {translation.myStory}                  </p>
                 </div>
 
                 <div
@@ -150,7 +140,7 @@ export default function AboutSection({ language = 'EN' }: AboutSectionProps) {
                       }}
                     />
                     <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground-subtle">
-                      {t('about.highlights')}
+                      {translation.highlightsText}
                     </p>
                   </div>
 
@@ -213,7 +203,7 @@ export default function AboutSection({ language = 'EN' }: AboutSectionProps) {
                   }}
                 />
                 <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground-subtle">
-                  {t('about.videoPitch')}
+                  {translation.videoPitch}
                 </p>
               </div>
 
@@ -249,10 +239,10 @@ export default function AboutSection({ language = 'EN' }: AboutSectionProps) {
                         <div className="w-0 h-0 border-l-12 border-l-current border-t-8 border-t-transparent border-b-8 border-b-transparent ml-1 opacity-50" />
                       </div>
                       <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-2">
-                        {t('about.videoPlaceholder.title')}
+                        {translation.videoPlaceholderTitle}
                       </p>
                       <p className="text-[11px] text-muted-foreground-subtle leading-relaxed">
-                        {t('about.videoPlaceholder.description')}
+                        {translation.videoPlaceholderDescription}
                       </p>
                     </div>
                   </div>
@@ -275,7 +265,7 @@ export default function AboutSection({ language = 'EN' }: AboutSectionProps) {
                   }}
                 />
                 <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground-subtle">
-                  {t('about.skills')}
+                  {translation.skillsText}
                 </p>
               </div>
 
