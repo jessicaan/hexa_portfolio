@@ -40,6 +40,7 @@ export default function HexaNetworkWeb({
     const [activeNode, setActiveNode] = useState(initialNode || nodes[0]?.id);
     const [viewState, setViewState] = useState<ViewState>('focused');
     const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+
     const [shockwave, setShockwave] = useState<{ position: { x: number; y: number } } | null>(null);
 
     const transformState = useRef({ scale: 1, x: 0, y: 0 });
@@ -96,19 +97,29 @@ export default function HexaNetworkWeb({
         return d;
     }, []);
 
+    // Animate the line with a shockwave effect
     const animateLine = useCallback((key: string, start: { x: number; y: number }, end: { x: number; y: number }) => {
         const path = linesRef.current.get(key);
         if (!path) return;
         const state = { wave: 0 };
+
+
         gsap.to(state, {
-            wave: 15, duration: 0.15, ease: 'power2.out',
+            wave: 25,
+            duration: 0.1,
+            ease: 'power2.out',
             onUpdate: () => path.setAttribute('d', buildLinePath(start, end, state.wave, 0.5))
         });
         gsap.to(state, {
-            wave: 0, duration: 2, delay: 0.15, ease: 'elastic.out(1, 0.15)',
+            wave: 0,
+            duration: 1.5,
+            delay: 0.1,
+            ease: 'elastic.out(1.2, 0.2)',
             onUpdate: () => path.setAttribute('d', buildLinePath(start, end, state.wave, 0.5))
         });
     }, [buildLinePath]);
+
+    // Viewport and Zoom
 
     const calculateView = useCallback((targetNodeId?: string) => {
         const vw = window.innerWidth;
@@ -159,7 +170,7 @@ export default function HexaNetworkWeb({
         const tl = gsap.timeline({ onComplete: () => setViewState('network') });
         timelineRef.current = tl;
         tl.to(current, {
-            scale: target.scale, x: target.x, y: target.y, duration: 1.4, ease: 'power3.inOut',
+            scale: target.scale, x: target.x, y: target.y, duration: 1.2, ease: 'power4.inOut',
             onUpdate: () => applyTransform(current.scale, current.x, current.y)
         });
         if (contentContainerRef.current) tl.to(contentContainerRef.current, { opacity: 0, duration: 0.3 }, 0);
@@ -180,10 +191,10 @@ export default function HexaNetworkWeb({
         });
         timelineRef.current = tl;
         tl.to(current, {
-            scale: target.scale, x: target.x, y: target.y, duration: 1.4, ease: 'power3.inOut',
+            scale: target.scale, x: target.x, y: target.y, duration: 1.2, ease: 'power4.inOut',
             onUpdate: () => applyTransform(current.scale, current.x, current.y)
         });
-        if (contentContainerRef.current) tl.to(contentContainerRef.current, { opacity: 1, duration: 0.4 }, 1);
+        if (contentContainerRef.current) tl.to(contentContainerRef.current, { opacity: 1, duration: 0.4 }, 0.8);
     }, [viewState, calculateView, applyTransform, onNodeChange]);
 
     const zoomOutRef = useRef(zoomOut);
@@ -193,12 +204,24 @@ export default function HexaNetworkWeb({
         zoomInRef.current = zoomIn;
     });
 
-    const handleNodeClick = useCallback((nodeId: string) => {
+
+    const triggerShockwave = (e: React.MouseEvent | MouseEvent) => {
+
+        setShockwave({ position: { x: e.clientX, y: e.clientY } });
+    };
+
+    const handleNodeClick = useCallback((nodeId: string, e: React.MouseEvent) => {
+        e.stopPropagation(); // Avoid double click bugs
+        triggerShockwave(e);
+
         if (viewState === 'focused' && nodeId === activeNode) zoomOut();
         else if (viewState === 'network') zoomIn(nodeId);
     }, [viewState, activeNode, zoomOut, zoomIn]);
 
-    const handleLineClick = useCallback((key: string, from: NetworkNode, to: NetworkNode) => {
+    const handleLineClick = useCallback((key: string, from: NetworkNode, to: NetworkNode, e: React.MouseEvent) => {
+        e.stopPropagation();
+        triggerShockwave(e);
+
         const endpoints = getConnectionEndpoints(from, to);
         animateLine(key, endpoints.start, endpoints.end);
     }, [getConnectionEndpoints, animateLine]);
@@ -258,7 +281,9 @@ export default function HexaNetworkWeb({
 
     return (
         <div ref={containerRef} className="fixed inset-0 w-screen h-screen overflow-hidden bg-background transition-colors duration-500">
+
             <ReactiveParticlesBackground shockwave={shockwave} />
+
             <div ref={transformRef} style={{ transformOrigin: '0 0' }}>
                 <svg className="absolute overflow-visible" style={{ width: '1px', height: '1px', pointerEvents: viewState === 'network' || viewState === 'focused' ? 'auto' : 'none' }}>
                     <defs>
@@ -271,32 +296,86 @@ export default function HexaNetworkWeb({
                             <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
                         </filter>
                     </defs>
+
+                    {/* Ghost Connections (Synapses) */}
                     {synapseConnections.map(({ key, from, to }) => {
                         const { start, end } = getConnectionEndpoints(from, to);
-                        return <path key={key} d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`} stroke={colors.line} strokeWidth="0.8" opacity="0.18" fill="none" filter="url(#line-soft)" className="pointer-events-none transition-colors duration-300" />;
+                        return <path key={key} d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`} stroke={colors.line} strokeWidth="0.8" opacity="0.12" fill="none" filter="url(#line-soft)" className="pointer-events-none transition-colors duration-300" />;
                     })}
+
+                    {/* Principal meaninfull connections */}
                     {connections.map(({ key, from, to }) => {
                         const { start, end } = getConnectionEndpoints(from, to);
                         return (
                             <g key={key}>
-                                <path d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`} stroke="transparent" strokeWidth="20" fill="none" className="cursor-pointer" onClick={() => handleLineClick(key, from, to)} />
-                                <path ref={el => { if (el) linesRef.current.set(key, el); }} d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`} stroke={colors.line} strokeWidth="1.5" fill="none" filter="url(#line-soft)" className="pointer-events-none transition-colors duration-300" opacity="0.6" />
-                                <circle cx={start.x} cy={start.y} r="4" fill="transparent" stroke={colors.glow} strokeWidth="1" opacity="0.4" />
-                                <circle cx={end.x} cy={end.y} r="4" fill="transparent" stroke={colors.glow} strokeWidth="1" opacity="0.4" />
+                                {/* Click area expanded to make it easy to click*/}
+                                <path
+                                    d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`}
+                                    stroke="transparent"
+                                    strokeWidth="40"
+                                    fill="none"
+                                    className="cursor-pointer"
+                                    onClick={(e) => handleLineClick(key, from, to, e)}
+                                />
+                                {/*  Visible Line */}
+                                <path
+                                    ref={el => { if (el) linesRef.current.set(key, el); }}
+                                    d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`}
+                                    stroke={colors.line}
+                                    strokeWidth="2"
+                                    fill="none"
+                                    filter="url(#line-soft)"
+                                    className="pointer-events-none transition-colors duration-300"
+                                    opacity="0.8"
+                                />
+                                {/* Vertice dots */}
+                                <circle cx={start.x} cy={start.y} r="3" fill={colors.glow} opacity="0.6" />
+                                <circle cx={end.x} cy={end.y} r="3" fill={colors.glow} opacity="0.6" />
                             </g>
                         );
                     })}
+
+                    {/* Hexa Nodes */}
                     {nodes.map(node => {
                         const isActive = node.id === activeNode;
                         const isHovered = node.id === hoveredNode;
                         return (
-                            <g key={node.id} onClick={() => handleNodeClick(node.id)} onMouseEnter={() => setHoveredNode(node.id)} onMouseLeave={() => setHoveredNode(null)} className="cursor-pointer">
-                                <polygon points={hexPoints(node.position.x, node.position.y, nodeRadius)} fill={colors.nodeFill} stroke={isActive ? colors.activeGlow : isHovered ? colors.glow : colors.nodeStroke} strokeWidth={isActive ? 2 : isHovered ? 1.5 : 1} filter={isActive || isHovered ? 'url(#hex-glow)' : undefined} className="transition-all duration-300" />
-                                <text x={node.position.x} y={node.position.y} textAnchor="middle" dominantBaseline="middle" fill={colors.text} fontSize="16" fontWeight="300" letterSpacing="0.1em" opacity={viewState === 'network' || viewState === 'zooming-out' ? 1 : 0} className="pointer-events-none select-none transition-all duration-300">{node.label}</text>
+                            <g
+                                key={node.id}
+                                onClick={(e) => handleNodeClick(node.id, e)} // Passando o evento 'e'
+                                onMouseEnter={() => setHoveredNode(node.id)}
+                                onMouseLeave={() => setHoveredNode(null)}
+                                className="cursor-pointer"
+                                style={{ transition: 'transform 0.3s ease-out' }}
+                            >
+                                <polygon
+                                    points={hexPoints(node.position.x, node.position.y, nodeRadius)}
+                                    fill={colors.nodeFill}
+                                    stroke={isActive ? colors.activeGlow : isHovered ? colors.glow : colors.nodeStroke}
+                                    strokeWidth={isActive ? 3 : isHovered ? 2 : 1}
+                                    filter={isActive || isHovered ? 'url(#hex-glow)' : undefined}
+                                    className="transition-all duration-300"
+                                />
+                                <text
+                                    x={node.position.x}
+                                    y={node.position.y}
+                                    textAnchor="middle"
+                                    dominantBaseline="middle"
+                                    fill={colors.text}
+                                    fontSize="18"
+                                    fontWeight={isActive ? "600" : "300"}
+                                    letterSpacing="0.05em"
+                                    opacity={viewState === 'network' || viewState === 'zooming-out' ? 1 : 0}
+                                    className="pointer-events-none select-none transition-all duration-300"
+                                    style={{ textShadow: isActive ? `0 0 10px ${colors.glow}` : 'none' }}
+                                >
+                                    {node.label}
+                                </text>
                             </g>
                         );
                     })}
                 </svg>
+
                 <div ref={contentContainerRef}>
                     {nodes.map(node => (
                         <div key={`content-${node.id}`} className="absolute" style={{ left: node.position.x, top: node.position.y, transform: 'translate(-50%, -50%)', opacity: node.id === activeNode && viewState === 'focused' ? 1 : 0, pointerEvents: node.id === activeNode && viewState === 'focused' ? 'auto' : 'none', transition: 'opacity 0.3s' }}>

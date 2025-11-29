@@ -11,7 +11,9 @@ interface Particle {
   vx: number;
   vy: number;
   size: number;
+  baseSize: number;
   opacity: number;
+  baseOpacity: number;
 }
 
 interface ReactiveParticlesBackgroundProps {
@@ -20,9 +22,10 @@ interface ReactiveParticlesBackgroundProps {
 }
 
 export default function ReactiveParticlesBackground({
-  particleCount = 60,
+  particleCount = 70,
   shockwave
 }: ReactiveParticlesBackgroundProps) {
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const animationFrameRef = useRef<number | null>(null);
@@ -63,6 +66,9 @@ export default function ReactiveParticlesBackground({
       for (let i = 0; i < particleCount; i++) {
         const x = Math.random() * canvas.width;
         const y = Math.random() * canvas.height;
+        const size = Math.random() * 2 + 0.5;
+        const opacity = Math.random() * 0.3 + 0.1;
+
         particlesRef.current.push({
           x,
           y,
@@ -70,8 +76,10 @@ export default function ReactiveParticlesBackground({
           baseY: y,
           vx: (Math.random() - 0.5) * 0.2,
           vy: (Math.random() - 0.5) * 0.2,
-          size: Math.random() * 1.5 + 0.5,
-          opacity: Math.random() * 0.2 + 0.1
+          size: size,
+          baseSize: size,
+          opacity: opacity,
+          baseOpacity: opacity
         });
       }
     };
@@ -80,8 +88,7 @@ export default function ReactiveParticlesBackground({
       colors = getThemeColors();
       const { r, g, b } = colors.particle;
 
-      ctx.fillStyle = colors.bg;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const currentTime = Date.now() / 1000;
 
@@ -89,43 +96,45 @@ export default function ReactiveParticlesBackground({
         particle.x += particle.vx;
         particle.y += particle.vy;
 
-        const returnForce = 0.008;
+        const returnForce = 0.005;
         particle.vx += (particle.baseX - particle.x) * returnForce;
         particle.vy += (particle.baseY - particle.y) * returnForce;
 
-        particle.vx *= 0.98;
-        particle.vy *= 0.98;
+        particle.vx *= 0.96;
+        particle.vy *= 0.96;
+
+        particle.size += (particle.baseSize - particle.size) * 0.1;
+        particle.opacity += (particle.baseOpacity - particle.opacity) * 0.1;
 
         if (shockwaveDataRef.current && shockwaveDataRef.current.active) {
           const sw = shockwaveDataRef.current;
           const elapsed = currentTime - sw.time;
 
-          if (elapsed < 2.5) {
+          if (elapsed < 2.0) {
             const dx = particle.x - sw.x;
             const dy = particle.y - sw.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            const waveSpeed = 180;
-            const waveWidth = 120;
+            const waveSpeed = 250;
+            const waveWidth = 100;
             const waveFront = elapsed * waveSpeed;
 
             if (distance < waveFront && distance > waveFront - waveWidth) {
               const falloff = (waveWidth - (waveFront - distance)) / waveWidth;
-              const strength = Math.pow(falloff, 2) * 8;
+              const strength = Math.pow(falloff, 2) * 2;
 
               const angle = Math.atan2(dy, dx);
               particle.vx += Math.cos(angle) * strength;
               particle.vy += Math.sin(angle) * strength;
+
+              const visualBoost = strength * 0.5;
+              particle.size = particle.baseSize + (visualBoost * 3);
+              particle.opacity = Math.min(1, particle.baseOpacity + visualBoost);
             }
           } else {
             shockwaveDataRef.current.active = false;
           }
         }
-
-        if (particle.x < 0) particle.x = canvas.width;
-        if (particle.x > canvas.width) particle.x = 0;
-        if (particle.y < 0) particle.y = canvas.height;
-        if (particle.y > canvas.height) particle.y = 0;
 
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
@@ -140,9 +149,10 @@ export default function ReactiveParticlesBackground({
           const dx = p1.x - p2.x;
           const dy = p1.y - p2.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
+          const maxDistance = 180;
 
-          if (distance < 180) {
-            const opacity = (1 - distance / 180) * 0.06;
+          if (distance < maxDistance) {
+            const opacity = (1 - distance / maxDistance) * 0.15 * Math.min(p1.opacity, p2.opacity);
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
@@ -182,7 +192,7 @@ export default function ReactiveParticlesBackground({
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full transition-opacity duration-500"
+      className="absolute inset-0 w-full h-full pointer-events-none transition-opacity duration-500"
       style={{ background: 'transparent' }}
     />
   );
