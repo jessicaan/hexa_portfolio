@@ -13,7 +13,7 @@ import {
   FiCheckCircle,
   FiLoader,
 } from "react-icons/fi";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/components/layout/AuthProvider";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -92,7 +92,7 @@ export default function LoginPage() {
 
   if (isLoadingStatus || isAuthenticated) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-background via-surface to-background text-muted-foreground-subtle">
+      <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-background via-surface to-background text-muted-foreground-subtle">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
             <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl" />
@@ -110,7 +110,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-surface to-background text-foreground">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-background via-surface to-background text-foreground">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(155,92,255,0.18),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(79,70,229,0.12),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(17,94,89,0.14),transparent_25%)]" />
       <div className="pointer-events-none absolute inset-0" style={{ maskImage: "radial-gradient(circle at center, black 40%, transparent 70%)", background: "linear-gradient(120deg, rgba(155,92,255,0.08), rgba(17,24,39,0.4), rgba(79,70,229,0.08))" }} />
 
@@ -126,28 +126,12 @@ export default function LoginPage() {
               Acesso privado
             </p>
             <h1 className="text-4xl font-semibold tracking-tight text-foreground">
-              Login seguro para o CMS imersivo
+              Login seguro para o CMS
             </h1>
             <p className="text-base text-muted-foreground leading-relaxed">
-              Gerencie seções, textos, mídias e lançamentos do portfólio. Uma camada glassmorphism
-              com neon roxo mantém a vibe futurista enquanto protege seus dados.
+              Gerencie seções, textos, mídias e lançamentos do portfólio.
             </p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                "Firebase Auth com sessão persistente",
-                "Redirecionamento automático ao logar",
-                "Proteção de rota /admin ativa",
-                "Reset de senha com link mágico",
-              ].map(item => (
-                <div
-                  key={item}
-                  className="flex items-center gap-2 rounded-xl border border-border-subtle/60 bg-surface-soft/60 px-3 py-2 text-sm text-foreground"
-                >
-                  <span className="inline-flex size-2 rounded-full bg-primary shadow-glow-sm" />
-                  {item}
-                </div>
-              ))}
-            </div>
+
           </motion.div>
 
           <motion.div
@@ -156,7 +140,7 @@ export default function LoginPage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="relative overflow-hidden rounded-2xl border border-border-subtle/70 bg-surface/70 backdrop-blur-2xl p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)]"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-secondary/10 pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-br from-primary/15 via-transparent to-secondary/10 pointer-events-none" />
             <div className="relative space-y-5">
               <div className="flex items-start justify-between">
                 <div>
@@ -167,10 +151,7 @@ export default function LoginPage() {
                     {mode === "login" ? "Entre na área autenticada" : "Recupere o acesso"}
                   </h2>
                 </div>
-                <div className="flex items-center gap-2 text-[11px] text-muted-foreground-subtle">
-                  <span className="size-2 rounded-full bg-emerald-400 shadow-glow-sm" />
-                  Sessão segura
-                </div>
+
               </div>
 
               <AnimatePresence mode="wait">
@@ -243,7 +224,7 @@ export default function LoginPage() {
 
                     <motion.button
                       type="submit"
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-secondary px-4 py-3 text-sm font-semibold text-foreground shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-60"
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-secondary px-4 py-3 text-sm font-semibold text-foreground shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-60"
                       whileHover={{ scale: isSubmitting ? 1 : 1.01 }}
                       whileTap={{ scale: 0.98 }}
                       disabled={isSubmitting}
@@ -307,7 +288,7 @@ export default function LoginPage() {
 
                     <motion.button
                       type="submit"
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-secondary px-4 py-3 text-sm font-semibold text-foreground shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-60"
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-secondary px-4 py-3 text-sm font-semibold text-foreground shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-60"
                       whileHover={{ scale: isSubmitting ? 1 : 1.01 }}
                       whileTap={{ scale: 0.98 }}
                       disabled={isSubmitting}
@@ -354,15 +335,7 @@ export default function LoginPage() {
                 )}
               </AnimatePresence>
 
-              <div className="rounded-xl border border-border-subtle/50 bg-background/40 px-4 py-3 text-xs text-muted-foreground-subtle">
-                <p className="uppercase tracking-[0.2em] text-[10px] mb-1 text-muted-foreground">Próximos upgrades</p>
-                <div className="flex items-center justify-between gap-3">
-                  <span>2FA com TOTP ou login por link mágico</span>
-                  <span className="rounded-full bg-surface-soft px-3 py-1 text-[10px] uppercase tracking-[0.2em] border border-border-subtle/60">
-                    Em breve
-                  </span>
-                </div>
-              </div>
+
             </div>
           </motion.div>
         </div>

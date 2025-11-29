@@ -13,7 +13,7 @@ import {
     FiMove,
     FiTag,
 } from 'react-icons/fi';
-import TechBadge from './TechBadge';
+import TechBadge from './TechBadgeEditor';
 import TechnologyPickerModal from './ThecnologyPickerModal';
 import { autoTranslateSkills, saveSkillsContent } from '@/app/admin/skills/actions';
 import type { SkillsContent, SkillCategory, Skill } from '@/lib/content/schema';

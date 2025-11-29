@@ -21,7 +21,7 @@ import {
     FiEye,
 } from 'react-icons/fi';
 import FileUploader from './FileUploader';
-import TechSelector from './TechSelector';
+import TechSelector from './TechSelectorAdmin';
 import ImageGalleryEditor from './ImageGalleryEditor';
 import MetricsEditor from './MetricsEditor';
 import {

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import I18nProvider from "./i18n-provider";
-import SiteHeader from "@/components/SiteHeader";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { AuthProvider } from "@/components/AuthProvider";
+import I18nProvider from "./i18n/i18n-provider";
+import SiteControls from "@/components/layout/SiteControls";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { AuthProvider } from "@/components/layout/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +34,7 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <I18nProvider>
-              <SiteHeader />
+              <SiteControls />
               {children}
             </I18nProvider>
           </AuthProvider>

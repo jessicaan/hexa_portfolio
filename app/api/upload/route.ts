@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
-import { adminStorage } from "@/lib/firebase-admin";
+import { NextRequest, NextResponse } from 'next/server';
+import { adminStorage } from '@/lib/firebase/firebase-admin';
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File;
-    const folder = (formData.get("folder") as string) || "media";
+    const file = formData.get('file') as File;
+    const folder = (formData.get('folder') as string) || 'media';
 
     if (!file) {
       return NextResponse.json(
-        { error: "Nenhum arquivo enviado" },
-        { status: 400 }
+        { error: 'Nenhum arquivo enviado' },
+        { status: 400 },
       );
     }
 
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     const timestamp = Date.now();
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const filename = `${folder}/${timestamp}_${sanitizedName}`;
 
     const bucket = adminStorage.bucket();
@@ -36,10 +36,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: publicUrl });
   } catch (error) {
-    console.error("Upload error:", error);
+    console.error('Upload error:', error);
     return NextResponse.json(
-      { error: "Falha ao fazer upload" },
-      { status: 500 }
+      { error: 'Falha ao fazer upload' },
+      { status: 500 },
     );
   }
 }

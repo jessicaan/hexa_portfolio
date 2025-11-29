@@ -1,1 +1,0 @@
-// This file was part of a previous i18n setup and can now be safely deleted.

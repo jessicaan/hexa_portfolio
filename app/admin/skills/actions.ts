@@ -1,15 +1,15 @@
-"use server";
+'use server';
 
-import { adminDb } from "@/lib/firebase-admin";
-import { translateWithGemini } from "@/lib/ai/translate";
+import { adminDb } from '@/lib/firebase/firebase-admin';
+import { translateWithGemini } from '@/lib/ai/translate';
 import {
   type SkillsContent,
   type SkillCategory,
   defaultSkillsContent,
   mergeSkillsContent,
-} from "@/lib/content/schema";
+} from '@/lib/content/schema';
 
-const docRef = adminDb.collection("content").doc("skills");
+const docRef = adminDb.collection('content').doc('skills');
 
 export async function getSkillsContent(): Promise<SkillsContent> {
   const snapshot = await docRef.get();
@@ -24,41 +24,57 @@ export async function saveSkillsContent(payload: SkillsContent) {
       ...payload,
       updatedAt: new Date().toISOString(),
     },
-    { merge: true }
+    { merge: true },
   );
 }
 
 export async function autoTranslateSkills(base: {
   summary: string;
   categories: SkillCategory[];
-}): Promise<SkillsContent["translations"]> {
-  const result = await translateWithGemini(base);
+}): Promise<SkillsContent['translations']> {
+  const result = await translateWithGemini({
+    summary: base.summary,
+    categories: base.categories.map((c) => ({
+      name: c.name,
+      skills: c.skills.map((s) => ({ name: s.name })),
+    })),
+  });
 
-  const mapCategories = (arr?: any) => {
-    if (!Array.isArray(arr)) return [];
-    return arr.map((cat: any) => ({
-      name: cat.name ?? "",
-      skills: Array.isArray(cat.skills)
-        ? cat.skills.map((s: any) => ({
-            name: s.name ?? "",
-            level: s.level ?? 0,
-          }))
-        : [],
-    }));
+  const mapCategories = (
+    translatedCategories?: { name: string; skills: { name: string }[] }[],
+  ) => {
+    if (!Array.isArray(translatedCategories)) {
+      return base.categories.map((c) => ({
+        name: c.name,
+        skills: c.skills.map((s) => ({ name: s.name })),
+      }));
+    }
+    return translatedCategories;
   };
 
   return {
     en: {
-      summary: result.en?.summary ?? "",
+      ...defaultSkillsContent.translations.en,
+      summary: result.en?.summary ?? '',
       categories: mapCategories(result.en?.categories),
     },
     es: {
-      summary: result.es?.summary ?? "",
+      ...defaultSkillsContent.translations.es,
+      summary: result.es?.summary ?? '',
       categories: mapCategories(result.es?.categories),
     },
     fr: {
-      summary: result.fr?.summary ?? "",
+      ...defaultSkillsContent.translations.fr,
+      summary: result.fr?.summary ?? '',
       categories: mapCategories(result.fr?.categories),
+    },
+    pt: {
+      ...defaultSkillsContent.translations.pt,
+      summary: base.summary,
+      categories: base.categories.map((c) => ({
+        name: c.name,
+        skills: c.skills.map((s) => ({ name: s.name })),
+      })),
     },
   };
 }

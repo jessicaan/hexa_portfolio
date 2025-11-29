@@ -128,7 +128,7 @@ import {
     SiMarkdown,
 } from 'react-icons/si';
 import { FaJava } from 'react-icons/fa';
-import { useTheme } from '@/components/ThemeProvider';
+import { useTheme } from '@/components/theme/ThemeProvider';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
     SiTypescript,

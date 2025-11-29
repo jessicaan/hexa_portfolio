@@ -1,16 +1,16 @@
-"use server";
+'use server';
 
-import { adminDb } from "@/lib/firebase-admin";
-import { translateWithGemini } from "@/lib/ai/translate";
+import { adminDb } from '@/lib/firebase/firebase-admin';
+import { translateWithGemini } from '@/lib/ai/translate';
 import {
   type ProjectsContent,
   type ProjectItem,
   defaultProjectsContent,
   mergeProjectsContent,
   generateProjectImageId,
-} from "@/lib/content/schema";
+} from '@/lib/content/schema';
 
-const docRef = adminDb.collection("content").doc("projects");
+const docRef = adminDb.collection('content').doc('projects');
 
 export async function getProjectsContent(): Promise<ProjectsContent> {
   const snapshot = await docRef.get();
@@ -29,8 +29,8 @@ export async function saveProjectsContent(payload: ProjectsContent) {
       images: (p.images ?? [])
         .map((img, imgIndex) => ({
           id: img.id ?? generateProjectImageId(p.id, imgIndex),
-          url: img.url ?? "",
-          description: img.description ?? "",
+          url: img.url ?? '',
+          description: img.description ?? '',
           translations: img.translations ?? {},
         }))
         .filter((img) => !!img.url),
@@ -47,7 +47,7 @@ export async function saveProjectsContent(payload: ProjectsContent) {
 export async function autoTranslateProjects(base: {
   summary: string;
   projects: ProjectItem[];
-}): Promise<ProjectsContent["translations"]> {
+}): Promise<ProjectsContent['translations']> {
   const result = await translateWithGemini({
     summary: base.summary,
     projects: base.projects.map((p) => ({
@@ -58,7 +58,7 @@ export async function autoTranslateProjects(base: {
       highlights: p.highlights,
       metrics: p.metrics,
       images: (p.images ?? []).map((img) => ({
-        description: img.description ?? "",
+        description: img.description ?? '',
       })),
     })),
   });
@@ -66,18 +66,20 @@ export async function autoTranslateProjects(base: {
   const mapProjects = (arr?: unknown, baseProjects?: ProjectItem[]) => {
     if (!Array.isArray(arr) || !baseProjects) return [];
     return arr.map((p: Record<string, unknown>, index: number) => ({
-      id: baseProjects[index]?.id ?? "",
-      title: (p.title as string) ?? "",
-      shortDescription: (p.shortDescription as string) ?? "",
-      description: (p.description as string) ?? "",
+      id: baseProjects[index]?.id ?? '',
+      title: (p.title as string) ?? '',
+      shortDescription: (p.shortDescription as string) ?? '',
+      description: (p.description as string) ?? '',
       tags: Array.isArray(p.tags) ? p.tags : [],
       highlights: Array.isArray(p.highlights)
-        ? (p.highlights as string[]).filter(h => typeof h === 'string' && h.trim() !== '')
+        ? (p.highlights as string[]).filter(
+            (h) => typeof h === 'string' && h.trim() !== '',
+          )
         : [],
       metrics: Array.isArray(p.metrics) ? p.metrics : [],
       images: Array.isArray(p.images)
         ? p.images.map((img: Record<string, unknown>) => ({
-            description: (img?.description as string) ?? "",
+            description: (img?.description as string) ?? '',
           }))
         : [],
     }));
@@ -86,17 +88,20 @@ export async function autoTranslateProjects(base: {
   return {
     en: {
       ...defaultProjectsContent.translations.en,
-      summary: result.en?.summary ?? defaultProjectsContent.translations.en.summary,
+      summary:
+        result.en?.summary ?? defaultProjectsContent.translations.en.summary,
       projects: mapProjects(result.en?.projects, base.projects),
     },
     es: {
       ...defaultProjectsContent.translations.es,
-      summary: result.es?.summary ?? defaultProjectsContent.translations.es.summary,
+      summary:
+        result.es?.summary ?? defaultProjectsContent.translations.es.summary,
       projects: mapProjects(result.es?.projects, base.projects),
     },
     fr: {
       ...defaultProjectsContent.translations.fr,
-      summary: result.fr?.summary ?? defaultProjectsContent.translations.fr.summary,
+      summary:
+        result.fr?.summary ?? defaultProjectsContent.translations.fr.summary,
       projects: mapProjects(result.fr?.projects, base.projects),
     },
     pt: {
@@ -111,7 +116,7 @@ export async function autoTranslateProjects(base: {
         highlights: p.highlights ?? [],
         metrics: p.metrics ?? [],
         images: (p.images ?? []).map((img) => ({
-          description: img.description ?? "",
+          description: img.description ?? '',
         })),
       })),
     },

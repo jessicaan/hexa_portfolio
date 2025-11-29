@@ -354,7 +354,7 @@ function TranslatedExperienceEditor({ translations, expIndex, onExperienceChange
                 <Input label="Cargo" value={currentTranslation.role ?? ''} onChange={v => onExperienceChange(lang, expIndex, 'role', v)} />
                 <Input label="Descrição" value={currentTranslation.description ?? ''} onChange={v => onExperienceChange(lang, expIndex, 'description', v)} multiline />
             </div>
-             <div className="space-y-2">
+            <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle">Conquistas</span>
                 </div>

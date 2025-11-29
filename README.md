@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# My Portfolio
 
-## Getting Started
+This is my personal portfolio website built with Next.js, TypeScript, and Tailwind CSS. It showcases my projects, skills, and experience.
 
-First, run the development server:
+![Portfolio Screenshot](<PLACEHOLDER: Add a screenshot of your portfolio here>)
+
+## ✨ Features
+
+-   **Dynamic Content:** Content is managed through a custom admin panel and stored in Firebase.
+-   **Internationalization:** Supports multiple languages (English, Spanish, French, Portuguese).
+-   **Interactive 3D animations:** Using React Three Fiber and Drei.
+-   **Responsive Design:** Fully responsive and works on all devices.
+
+## 🛠️ Tech Stack
+
+-   **Framework:** [Next.js](https://nextjs.org/)
+-   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+-   **Animation:** [Framer Motion](https://www.framer.com/motion/), [GSAP](https://greensock.com/gsap/), [React Three Fiber](https://docs.pmnd.rs/react-three-fiber/getting-started/introduction)
+-   **Internationalization:** [i18next](https://www.i18next.com/)
+-   **Database:** [Firebase](https://firebase.google.com/)
+-   **Linting:** [ESLint](https://eslint.org/)
+-   **Testing:** [Jest](https://jestjs.io/)
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+-   Node.js (v20 or higher)
+-   npm, yarn, or pnpm
+
+### Installation
+
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/<YOUR_GITHUB_USERNAME>/portfolio.git
+    cd portfolio
+    ```
+
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+
+### Environment Variables
+
+This project requires some environment variables to be set. Create a `.env.local` file in the root of the project and add the following variables. You can refer to `.env.example` for a template.
+
+```
+# Firebase configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+
+# Firebase Admin SDK (for server-side operations)
+FIREBASE_PROJECT_ID=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
+```
+*Note: The `FIREBASE_PRIVATE_KEY` needs to be Base64 encoded.*
+
+### Firebase Firestore Rules
+
+For the website to function correctly, you need to set up security rules in Firestore to allow public read access while restricting write access to administrators.
+
+Go to your **Firebase Console -> Firestore Database -> Rules** and paste the following rules:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Only you can write
+    function isAdmin() {
+      // Important: Replace "YOUR_UUID" with your actual Firebase User ID.
+      // You can find your UID in the Firebase Console under Authentication -> Users.
+      return request.auth != null &&
+             request.auth.uid == "YOUR_UUID";
+    }
+
+    match /{document=**} {
+
+      // Public Read for all documents
+      allow read: if true;
+
+      // Write restricted to Admin
+      allow write: if isAdmin();
+    }
+  }
+}
+```
+
+### Running the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The admin panel is available at [http://localhost:3000/admin](http://localhost:3000/admin).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ✅ Running Tests
 
-## Learn More
+To run the tests, use the following command:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run test
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Linter
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To run the linter, use the following command:
 
-## Deploy on Vercel
+```bash
+npm run lint
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🤝 Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Contributions, issues, and feature requests are welcome!
+
+## 📄 License
+
+This project is licensed under the MIT License.

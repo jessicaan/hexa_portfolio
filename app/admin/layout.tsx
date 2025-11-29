@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import RequireAuth from "@/components/RequireAuth";
+import RequireAuth from "@/components/layout/RequireAuth";
 
 export const metadata: Metadata = {
   title: "Admin | Portfolio CMS",
