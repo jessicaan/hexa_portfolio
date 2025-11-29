@@ -3,10 +3,10 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import HexaNetworkAdvanced from '@/components/hexagrid/HexaNetwork';
-import InitialSection from '@/components/sections/InitialSection';
+import InitialSection from '@/components/sections/initial/InitialSection';
 import AboutSection from '@/components/sections/AboutSection';
 import SectionNav from '@/components/layout/SectionNav';
-import ProjectsSection from '@/components/project/ProjectsSection';
+import ProjectsSection from '@/components/sections/projects/ProjectsSection';
 import EducationSection from '@/components/sections/EducationSection';
 import ExperienceSection from '@/components/sections/ExperienceSection';
 import SkillsSection from '@/components/sections/SkillsSection';
@@ -186,17 +186,7 @@ export default function HomeClient({ }: HomeClientProps) {
         nodeRadius={80}
         onNodeChange={handleNodeChange}
         command={networkCommand}
-        colors={{
-          line: '#9b5cff',
 
-          node: '#3b1d72',
-
-          nodeFill: 'rgba(7, 5, 16, 0.95)',
-
-          glow: '#9b5cff',
-
-          activeGlow: '#d0a6ff',
-        }}
         transitionToNode={
           transitionTrigger > 0
             ? {

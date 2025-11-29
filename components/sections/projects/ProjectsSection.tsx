@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/components/theme/ThemeProvider';
-import ReactiveGridBackground from '../background/ReactiveGridBackground';
+import ReactiveGridBackground from '@/components/background/ReactiveGridBackground';
 import { loadProjectsContent } from '@/lib/content/client';
 import { defaultProjectsContent, type LanguageCode, type ProjectImage, type ProjectsContent } from '@/lib/content/schema';
 import ProjectHexGallery from './ProjectHexGallery';

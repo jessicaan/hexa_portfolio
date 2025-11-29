@@ -13,7 +13,7 @@ import {
 } from 'react-icons/hi2';
 import { SiGithub } from 'react-icons/si';
 import { useTheme } from '@/components/theme/ThemeProvider';
-import TechBadge from '../TechBadge';
+import TechBadge from '@/components/TechBadge';
 import { getTechById, type Technology } from '@/lib/content/technologies';
 import type { ProjectStatus, ProjectType, LanguageCode, TranslatedProjects } from '@/lib/content/schema';
 import type { ProjectWithTranslations } from './ProjectCard';
