@@ -51,8 +51,8 @@ export function useIntroAnimation({
       gsap.set(descriptionRef.current, { opacity: 1 });
     }
 
-    tl.call(onShowTip, [], 3.8);
-    tl.call(onShowExplore, [], 4.8);
+    tl.call(onShowTip, [], 0.7);
+    tl.call(onShowExplore, [], 0.7);
 
     return () => {
       tl.kill();

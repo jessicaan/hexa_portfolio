@@ -8,7 +8,7 @@ const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
-        transition: { staggerChildren: 0.12, delayChildren: 2.8 },
+        transition: { staggerChildren: 0.12, delayChildren: 0.8 },
     },
 };
 
@@ -104,7 +104,7 @@ export default function LanguageSelector({
                 className="flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 3.8, duration: 0.8 }}
+                transition={{ delay: 1.8, duration: 0.8 }}
             >
                 {languages.map((_, index) => (
                     <motion.div
