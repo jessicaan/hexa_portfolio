@@ -21,49 +21,8 @@ interface SectionNavProps {
     visible?: boolean;
 }
 
-const navLabels: Record<string, Record<string, string>> = {
-    en: {
-        home: 'Home',
-        about: 'About',
-        experience: 'Experience',
-        education: 'Education',
-        projects: 'Projects',
-        personal: 'Personal',
-        contact: 'Contact',
-    },
-    pt: {
-        home: 'Início',
-        about: 'Sobre',
-        experience: 'Experiência',
-        education: 'Formação',
-        projects: 'Projetos',
-        personal: 'Pessoal',
-        contact: 'Contato',
-    },
-    es: {
-        home: 'Inicio',
-        about: 'Sobre mí',
-        experience: 'Experiencia',
-        education: 'Educación',
-        projects: 'Proyectos',
-        personal: 'Personal',
-        contact: 'Contacto',
-    },
-    fr: {
-        home: 'Accueil',
-        about: 'À propos',
-        experience: 'Expérience',
-        education: 'Formation',
-        projects: 'Projets',
-        personal: 'Personnel',
-        contact: 'Contact',
-    },
-};
-
 export default function SectionNav({ items, activeId, onNavigate, visible = true }: SectionNavProps) {
-    const { i18n } = useTranslation();
-    const language = i18n.language || 'en';
-    const labels = navLabels[language] || navLabels.en;
+    const { t } = useTranslation();
 
     const labelRefs = useRef<Map<string, HTMLSpanElement>>(new Map());
     const prevActiveRef = useRef(activeId);
@@ -86,11 +45,11 @@ export default function SectionNav({ items, activeId, onNavigate, visible = true
         if (prevActiveRef.current !== activeId) {
             const labelEl = labelRefs.current.get(activeId);
             if (labelEl) {
-                const label = labels[activeId] || items.find(n => n.id === activeId)?.label || activeId;
+                const translatedLabel = t(`sections.${activeId}`);
                 gsap.to(labelEl, {
                     duration: 0.5,
                     scrambleText: {
-                        text: label,
+                        text: translatedLabel,
                         chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
                         revealDelay: 0.2,
                         speed: 0.5,
@@ -100,7 +59,7 @@ export default function SectionNav({ items, activeId, onNavigate, visible = true
             }
             prevActiveRef.current = activeId;
         }
-    }, [activeId, items, labels]);
+    }, [activeId, items, t]);
 
     const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
     const primaryColorSoft = `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.2)`;
@@ -184,7 +143,7 @@ export default function SectionNav({ items, activeId, onNavigate, visible = true
                         const isActive = item.id === activeId;
                         const isPast = index < activeIndex;
                         const isLast = index === items.length - 1;
-                        const label = labels[item.id] || item.label;
+                        const label = item.label; // item.label is already translated via props
 
                         return (
                             <div key={item.id} className="flex flex-col items-end">

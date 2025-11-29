@@ -21,5 +21,15 @@
     },
     "skills": "Compétences",
     "language": "Français"
+  },
+  "sections": {
+    "intro": "Intro",
+    "about": "À propos",
+    "education": "Éducation",
+    "experience": "Expérience",
+    "projects": "Projets",
+    "skills": "Compétences",
+    "personal": "Personnel",
+    "contact": "Contact"
   }
 }

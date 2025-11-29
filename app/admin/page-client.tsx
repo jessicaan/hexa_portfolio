@@ -14,21 +14,10 @@ import PersonalSection from '@/components/sections/PersonalSection';
 import ContactSection from '@/components/sections/ContactSection';
 import { LanguageCode } from '@/lib/content/schemas/common';
 
-const navItems = [
-  { id: 'intro', label: 'INICIO' },
-  { id: 'about', label: 'SOBRE' },
-  { id: 'education', label: 'EDUCACAO' },
-  { id: 'experience', label: 'EXPERIENCE' },
-  { id: 'projects', label: 'PROJETOS' },
-  { id: 'skills', label: 'SKILLS' },
-  { id: 'personal', label: 'PESSOAL' },
-  { id: 'contact', label: 'CONTATO' },
-];
-
 interface HomeClientProps { }
 
 export default function HomeClient({ }: HomeClientProps) {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode | null>(
     null,
   );
@@ -38,6 +27,17 @@ export default function HomeClient({ }: HomeClientProps) {
     name: 'zoomOut';
     key: number;
   } | null>(null);
+
+  const navItems = useMemo(() => [
+    { id: 'intro', label: t('sections.intro') },
+    { id: 'about', label: t('sections.about') },
+    { id: 'education', label: t('sections.education') },
+    { id: 'experience', label: t('sections.experience') },
+    { id: 'projects', label: t('sections.projects') },
+    { id: 'skills', label: t('sections.skills') },
+    { id: 'personal', label: t('sections.personal') },
+    { id: 'contact', label: t('sections.contact') },
+  ], [t]);
 
   const handleLanguageSelect = useCallback(
     (code: string) => {
@@ -74,13 +74,9 @@ export default function HomeClient({ }: HomeClientProps) {
     () => [
       {
         id: 'intro',
-
-        label: 'INICIO',
-
+        label: t('sections.intro'),
         position: { x: 0, y: 0 },
-
         connections: ['about'],
-
         content: (
           <InitialSection
             onLanguageSelect={handleLanguageSelect}
@@ -91,89 +87,61 @@ export default function HomeClient({ }: HomeClientProps) {
 
       {
         id: 'about',
-
-        label: 'SOBRE',
-
+        label: t('sections.about'),
         position: { x: 420, y: 0 },
-
         connections: ['intro', 'education'],
-
         content: <AboutSection />,
       },
 
       {
         id: 'education',
-
-        label: 'EDUCACAO',
-
+        label: t('sections.education'),
         position: { x: 720, y: -200 },
-
         connections: ['about', 'experience'],
-
         content: <EducationSection />,
       },
 
       {
         id: 'experience',
-
-        label: 'EXPERIENCE',
-
+        label: t('sections.experience'),
         position: { x: 1020, y: 0 },
-
         connections: ['education', 'projects'],
-
         content: <ExperienceSection />,
       },
 
       {
         id: 'projects',
-
-        label: 'PROJETOS',
-
+        label: t('sections.projects'),
         position: { x: 720, y: 220 },
-
         connections: ['experience', 'skills'],
-
         content: <ProjectsSection />,
       },
 
       {
         id: 'skills',
-
-        label: 'SKILLS',
-
+        label: t('sections.skills'),
         position: { x: 420, y: 300 },
-
         connections: ['projects', 'personal'],
-
         content: <SkillsSection />,
       },
 
       {
         id: 'personal',
-
-        label: 'PESSOAL',
-
+        label: t('sections.personal'),
         position: { x: 270, y: 150 },
-
         connections: ['skills', 'contact'],
-
         content: <PersonalSection />,
       },
 
       {
         id: 'contact',
-
-        label: 'CONTATO',
-
+        label: t('sections.contact'),
         position: { x: 120, y: 260 },
-
         connections: ['personal', 'intro'],
-
         content: <ContactSection />,
       },
     ],
-    [handleLanguageSelect, handleExplore, selectedLanguage],
+    [handleLanguageSelect, handleExplore, selectedLanguage, t],
   );
 
   const showNav = currentSection !== 'intro';

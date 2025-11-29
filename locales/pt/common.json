@@ -21,5 +21,15 @@
     },
     "skills": "Competências",
     "language": "Portugues"
+  },
+  "sections": {
+    "intro": "Início",
+    "about": "Sobre",
+    "education": "Educação",
+    "experience": "Experiência",
+    "projects": "Projetos",
+    "skills": "Habilidades",
+    "personal": "Pessoal",
+    "contact": "Contato"
   }
 }
