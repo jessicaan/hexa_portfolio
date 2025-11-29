@@ -7,12 +7,18 @@ import { useTheme } from '../theme/ThemeProvider';
 
 interface HexaNodeProps {
   size?: number;
+  mobileSize?: number;
+  mobileStretch?: number;
+  mobileBreakpoint?: number;
   onLineClick?: (lineIndex: number, clickPosition: { x: number; y: number }) => void;
   children?: ReactNode;
 }
 
 export default function HexaNode({
   size = 90,
+  mobileSize,
+  mobileStretch = 1,
+  mobileBreakpoint = 640,
   onLineClick,
   children
 }: HexaNodeProps) {
@@ -50,21 +56,25 @@ export default function HexaNode({
   useEffect(() => {
     if (dimensions.width === 0 || dimensions.height === 0) return;
 
+    const isMobile = dimensions.width < mobileBreakpoint;
+    const effectiveSize = isMobile && mobileSize !== undefined ? mobileSize : size;
+    const verticalStretch = isMobile ? mobileStretch : 1;
+
     const centerX = dimensions.width / 2;
     const centerY = dimensions.height / 2;
-    const radius = Math.min(dimensions.width, dimensions.height) * (size / 75) * 0.5;
+    const baseRadius = Math.min(dimensions.width, dimensions.height) * (effectiveSize / 75) * 0.5;
 
     const calculatedVertices = [];
     for (let i = 0; i < 6; i++) {
       const angle = (Math.PI / 3) * i - Math.PI / 2;
       calculatedVertices.push({
-        x: centerX + radius * Math.cos(angle),
-        y: centerY + radius * Math.sin(angle)
+        x: centerX + baseRadius * Math.cos(angle),
+        y: centerY + baseRadius * Math.sin(angle) * verticalStretch
       });
     }
 
     setVertices(calculatedVertices);
-  }, [dimensions, size]);
+  }, [dimensions, size, mobileSize, mobileStretch, mobileBreakpoint]);
 
   useEffect(() => {
     if (!hexRef.current || !containerRef.current) return;

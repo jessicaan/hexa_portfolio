@@ -136,7 +136,7 @@ function StylizedFlag({ country, isHovered, primaryRgb }: { country: string; isH
   const innerGlow = `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.3)`;
 
   return (
-    <div className="relative w-16 h-16 sm:w-20 sm:h-20">
+    <div className="relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20">
       <motion.div
         className="absolute inset-0 rounded-2xl opacity-0"
         animate={{
@@ -152,7 +152,7 @@ function StylizedFlag({ country, isHovered, primaryRgb }: { country: string; isH
 
       <motion.svg
         viewBox="0 0 100 100"
-        className="w-full h-full rounded-2xl overflow-hidden"
+        className="w-full h-full rounded-xl sm:rounded-2xl overflow-hidden"
         style={{
           filter: isHovered
             ? `drop-shadow(0 0 30px ${glowColor})`
@@ -195,7 +195,7 @@ function StylizedFlag({ country, isHovered, primaryRgb }: { country: string; isH
       </motion.svg>
 
       <motion.div
-        className="absolute inset-0 rounded-2xl pointer-events-none"
+        className="absolute inset-0 rounded-xl sm:rounded-2xl pointer-events-none"
         animate={{
           boxShadow: isHovered
             ? `inset 0 0 30px ${innerGlow}`
@@ -524,10 +524,15 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
         className="w-full h-full"
       >
-        <HexaNode size={75} onLineClick={handleLineClick}>
-          <div className="text-foreground font-['Geist'] pointer-events-auto flex flex-col items-center justify-center">
+        <HexaNode
+          size={75}
+          mobileSize={85}
+          mobileStretch={1.35}
+          onLineClick={handleLineClick}
+        >
+          <div className="text-foreground font-['Geist'] pointer-events-auto flex flex-col items-center justify-center px-4 sm:px-0">
 
-            <div className="relative mb-8 sm:mb-10">
+            <div className="relative mb-4 sm:mb-8 md:mb-10">
               <motion.div
                 className="absolute -inset-20 opacity-30"
                 animate={{
@@ -542,7 +547,7 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
 
               <div
                 ref={el => { lineRefs.current[0] = el; }}
-                className="absolute -top-6 left-1/2 -translate-x-1/2 w-24 h-px origin-center"
+                className="absolute -top-3 sm:-top-6 left-1/2 -translate-x-1/2 w-16 sm:w-24 h-px origin-center"
                 style={{
                   background: `linear-gradient(to right, transparent, rgba(${primaryRgb.r},${primaryRgb.g},${primaryRgb.b},0.3), transparent)`
                 }}
@@ -550,7 +555,7 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
 
               <div
                 ref={greetingRef}
-                className="text-6xl sm:text-7xl md:text-8xl font-extralight tracking-tight text-center select-none"
+                className="text-6xl sm:text-6xl md:text-7xl lg:text-8xl font-extralight tracking-tight text-center select-none"
                 style={{
                   backgroundImage: theme === 'dark'
                     ? 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.7) 100%)'
@@ -566,7 +571,7 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
 
               <div
                 ref={el => { lineRefs.current[1] = el; }}
-                className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-36 h-px origin-center"
+                className="absolute -bottom-3 sm:-bottom-6 left-1/2 -translate-x-1/2 w-24 sm:w-36 h-px origin-center"
                 style={{
                   background: `linear-gradient(to right, transparent, rgba(${primaryRgb.r},${primaryRgb.g},${primaryRgb.b},0.2), transparent)`
                 }}
@@ -575,13 +580,13 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
 
             <motion.p
               ref={descriptionRef}
-              className="text-[10px] sm:text-xs tracking-[0.25em] uppercase text-muted-foreground-subtle mb-10 sm:mb-12 text-center max-w-xs sm:max-w-sm"
+              className="text-[9px] sm:text-[10px] md:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-muted-foreground-subtle mb-6 sm:mb-10 md:mb-12 text-center max-w-[280px] sm:max-w-xs md:max-w-sm"
             >
               {activeLanguage?.description ?? languageMeta[0].fallbackDescription}
             </motion.p>
 
             <motion.div
-              className="flex items-center gap-5 sm:gap-8 md:gap-10 mb-10"
+              className="flex items-center gap-3 sm:gap-5 md:gap-8 lg:gap-10 mb-6 sm:mb-10"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -606,7 +611,7 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
                     <AnimatePresence>
                       {selectedLang === index && (
                         <motion.div
-                          className="absolute -inset-2 rounded-3xl border-2"
+                          className="absolute -inset-1.5 sm:-inset-2 rounded-2xl sm:rounded-3xl border-2"
                           style={{ borderColor: primaryColor }}
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
@@ -617,23 +622,23 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
                   </div>
 
                   <motion.div
-                    className="mt-4 flex flex-col items-center gap-0.5"
+                    className="mt-2 sm:mt-4 flex flex-col items-center gap-1"
                     animate={{
                       opacity: hoveredLang === index || activeGreeting === index ? 1 : 0.4,
                       y: hoveredLang === index ? -3 : 0,
                     }}
                     transition={{ duration: 0.25 }}
                   >
-                    <span className="text-[10px] tracking-[0.3em] font-medium">
+                    <span className="text-[9px] sm:text-[10px] tracking-[0.3em] font-medium">
                       {lang.code}
                     </span>
-                    <span className="text-[8px] tracking-[0.15em] text-muted-foreground-subtle font-light">
+                    <span className="text-[10px] sm:text-[10px] tracking-[0.15em] text-muted-foreground-subtle font-light">
                       {lang.name}
                     </span>
                   </motion.div>
 
                   <motion.div
-                    className="mt-2 w-5 h-px"
+                    className="mt-1.5 sm:mt-2 w-4 sm:w-5 h-px"
                     style={{ backgroundColor: primaryColor }}
                     initial={{ scaleX: 0 }}
                     animate={{
@@ -646,7 +651,7 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
             </motion.div>
 
             <motion.div
-              className="flex items-center gap-2 mb-6"
+              className="flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 3.8, duration: 0.8 }}
@@ -673,7 +678,7 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.5 }}
-                  className="text-[9px] sm:text-[10px] tracking-[0.2em] text-muted-foreground-subtle text-center max-w-xs"
+                  className="text-[10px] sm:text-xs md:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] text-muted-foreground-subtle text-center max-w-[260px] sm:max-w-xs"
                 >
                   {activeLanguage.tip}
                 </motion.p>
@@ -684,7 +689,7 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
               {showExplore && activeLanguage && (
                 <motion.button
                   ref={exploreRef}
-                  className="mt-8 px-8 py-3 bg-transparent border border-primary/30 text-muted-foreground text-xs tracking-[0.3em] rounded-sm hover:border-primary hover:text-foreground hover:bg-primary/10 transition-all duration-300"
+                  className="mt-4 sm:mt-8 px-6 sm:px-8 py-2.5 sm:py-3 bg-transparent border border-primary/30 text-muted-foreground text-xs sm:text-md tracking-[0.25em] sm:tracking-[0.3em] rounded-sm hover:border-primary hover:text-foreground hover:bg-primary/10 transition-all duration-300"
                   onClick={() => {
                     const index = selectedLang ?? activeGreeting;
                     const lang = languages[index] ?? languages[0];
