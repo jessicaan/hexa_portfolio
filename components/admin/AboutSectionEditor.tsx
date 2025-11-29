@@ -7,9 +7,141 @@ import FileUploader from '@/components/admin/FileUploader';
 import {
   autoTranslateContent,
   saveAboutContent,
-  type AboutContent,
-  type SoftSkill,
 } from '@/app/admin/about/actions';
+
+// --- Interfaces defined first for usage in component ---
+
+export interface SoftSkill {
+  name: string;
+  description: string;
+}
+
+export interface AboutTranslation {
+  summary: string;
+  longDescription: string;
+  heading: string;
+  myStory: string;
+  highlightsText: string;
+  videoPitch: string;
+  videoPitchUrl?: string; // Added this field
+  videoPlaceholderTitle: string;
+  videoPlaceholderDescription: string;
+  skillsText: string;
+  softSkills: SoftSkill[];
+  highlights: string[];
+}
+
+export interface AboutContent {
+  title: string;
+  videoPitchUrl: string; // Top level acts as PT/Default
+  profileImage: string;
+  translations: {
+    en: AboutTranslation;
+    es: AboutTranslation;
+    fr: AboutTranslation;
+    pt: AboutTranslation;
+  };
+  updatedAt?: string;
+}
+
+export const defaultAboutContent: AboutContent = {
+  title: "",
+  videoPitchUrl: "",
+  profileImage: "",
+  translations: {
+    en: {
+      summary: "",
+      longDescription: "",
+      heading: "About",
+      myStory: "My Story",
+      highlightsText: "Highlights",
+      videoPitch: "Video Pitch",
+      videoPlaceholderTitle: "No video available",
+      videoPlaceholderDescription: "A personal video pitch will be added here soon.",
+      skillsText: "Skills",
+      softSkills: [],
+      highlights: [],
+    },
+    es: {
+      summary: "",
+      longDescription: "",
+      heading: "Sobre Mí",
+      myStory: "Mi Historia",
+      highlightsText: "Puntos Destacados",
+      videoPitch: "Video de Presentación",
+      videoPlaceholderTitle: "Video no disponible",
+      videoPlaceholderDescription: "Pronto se agregará un video de presentación personal.",
+      skillsText: "Habilidades",
+      softSkills: [],
+      highlights: [],
+    },
+    fr: {
+      summary: "",
+      longDescription: "",
+      heading: "À Propos",
+      myStory: "Mon Histoire",
+      highlightsText: "Faits Saillants",
+      videoPitch: "Présentation Vidéo",
+      videoPlaceholderTitle: "Aucune vidéo disponible",
+      videoPlaceholderDescription: "Une présentation vidéo personnelle sera ajoutée ici bientôt.",
+      skillsText: "Compétences",
+      softSkills: [],
+      highlights: [],
+    },
+    pt: {
+      summary: "",
+      longDescription: "",
+      heading: "Sobre Mim",
+      myStory: "Minha História",
+      highlightsText: "Destaques",
+      videoPitch: "Video de Apresentação",
+      videoPlaceholderTitle: "Nenhum vídeo disponível",
+      videoPlaceholderDescription: "Um vídeo de apresentação pessoal será adicionado aqui em breve.",
+      skillsText: "Habilidades",
+      softSkills: [],
+      highlights: [],
+    },
+  },
+};
+
+export function mergeAboutContent(data?: Partial<AboutContent>): AboutContent {
+  if (!data) return defaultAboutContent;
+
+  const merged: AboutContent = {
+    ...defaultAboutContent,
+    ...data,
+    translations: {
+      en: {
+        ...defaultAboutContent.translations.en,
+        ...(data.translations?.en ?? {}),
+        softSkills: data.translations?.en?.softSkills ?? defaultAboutContent.translations.en.softSkills,
+        highlights: data.translations?.en?.highlights ?? defaultAboutContent.translations.en.highlights,
+      },
+      es: {
+        ...defaultAboutContent.translations.es,
+        ...(data.translations?.es ?? {}),
+        softSkills: data.translations?.es?.softSkills ?? defaultAboutContent.translations.es.softSkills,
+        highlights: data.translations?.es?.highlights ?? defaultAboutContent.translations.es.highlights,
+      },
+      fr: {
+        ...defaultAboutContent.translations.fr,
+        ...(data.translations?.fr ?? {}),
+        softSkills: data.translations?.fr?.softSkills ?? defaultAboutContent.translations.fr.softSkills,
+        highlights: data.translations?.fr?.highlights ?? defaultAboutContent.translations.fr.highlights,
+      },
+      pt: {
+        ...defaultAboutContent.translations.pt,
+        ...(data.translations?.pt ?? {}),
+        softSkills: data.translations?.pt?.softSkills ?? defaultAboutContent.translations.pt.softSkills,
+        highlights: data.translations?.pt?.highlights ?? defaultAboutContent.translations.pt.highlights,
+      },
+    },
+  };
+
+  return merged;
+}
+
+// --- Component ---
 
 interface Props {
   initial: AboutContent;
@@ -23,41 +155,54 @@ export default function AboutSectionEditor({ initial }: Props) {
   const [isSaving, startSave] = useTransition();
   const [isTranslating, startTranslate] = useTransition();
 
+  // Helper to update PT translations specifically
+  const updatePt = (updater: (prevPt: AboutTranslation) => Partial<AboutTranslation>) => {
+    setForm(prev => {
+      const newPt = { ...prev.translations.pt, ...updater(prev.translations.pt) };
+      return {
+        ...prev,
+        translations: { ...prev.translations, pt: newPt }
+      };
+    });
+  };
+
   const addSoftSkill = () => {
-    setForm(prev => ({
-      ...prev,
-      softSkills: [...prev.softSkills, { name: '', description: '' }],
+    updatePt(prevPt => ({
+      softSkills: [...prevPt.softSkills, { name: '', description: '' }]
     }));
   };
 
   const removeSoftSkill = (index: number) => {
-    setForm(prev => ({
-      ...prev,
-      softSkills: prev.softSkills.filter((_, i) => i !== index),
+    updatePt(prevPt => ({
+      softSkills: prevPt.softSkills.filter((_, i) => i !== index)
     }));
   };
 
   const updateSoftSkill = (index: number, key: keyof SoftSkill, value: string) => {
-    setForm(prev => {
-      const softSkills = [...prev.softSkills];
+    updatePt(prevPt => {
+      const softSkills = [...prevPt.softSkills];
       softSkills[index] = { ...softSkills[index], [key]: value };
-      return { ...prev, softSkills };
+      return { softSkills };
     });
   };
 
   const addHighlight = () => {
-    setForm(prev => ({ ...prev, highlights: [...prev.highlights, ''] }));
+    updatePt(prevPt => ({
+      highlights: [...prevPt.highlights, '']
+    }));
   };
 
   const removeHighlight = (index: number) => {
-    setForm(prev => ({ ...prev, highlights: prev.highlights.filter((_, i) => i !== index) }));
+    updatePt(prevPt => ({
+      highlights: prevPt.highlights.filter((_, i) => i !== index)
+    }));
   };
 
   const updateHighlight = (index: number, value: string) => {
-    setForm(prev => {
-      const highlights = [...prev.highlights];
+    updatePt(prevPt => {
+      const highlights = [...prevPt.highlights];
       highlights[index] = value;
-      return { ...prev, highlights };
+      return { highlights };
     });
   };
 
@@ -79,18 +224,24 @@ export default function AboutSectionEditor({ initial }: Props) {
     setError(null);
     startTranslate(async () => {
       try {
+        // Source content from PT translations
+        const ptContent = form.translations.pt;
+
         const translations = await autoTranslateContent({
-          summary: form.summary,
-          longDescription: form.longDescription,
-          softSkills: form.softSkills,
-          highlights: form.highlights,
+          summary: ptContent.summary,
+          longDescription: ptContent.longDescription,
+          softSkills: ptContent.softSkills,
+          highlights: ptContent.highlights,
         });
+
         setForm(prev => ({
           ...prev,
           translations: {
+            ...prev.translations,
             en: { ...prev.translations.en, ...translations.en, videoPitchUrl: prev.translations.en.videoPitchUrl ?? "" },
             es: { ...prev.translations.es, ...translations.es, videoPitchUrl: prev.translations.es.videoPitchUrl ?? "" },
             fr: { ...prev.translations.fr, ...translations.fr, videoPitchUrl: prev.translations.fr.videoPitchUrl ?? "" },
+            pt: prev.translations.pt, // Preserve PT
           },
         }));
         setMessage('Traduções geradas com sucesso.');
@@ -131,10 +282,10 @@ export default function AboutSectionEditor({ initial }: Props) {
 
       <div className="rounded-xl border border-border-subtle/70 bg-surface/70 backdrop-blur-xl">
         <div className="flex gap-3 border-b border-border-subtle/60 px-4">
-          {['pt', 'translations'].map(value => (
+          {(['pt', 'translations'] as const).map(value => (
             <button
               key={value}
-              onClick={() => setTab(value as any)}
+              onClick={() => setTab(value)}
               className={`relative px-3 py-2.5 text-sm transition-colors ${tab === value ? 'text-foreground' : 'text-muted-foreground'}`}
             >
               {value === 'pt' ? 'Conteúdo PT' : 'Traduções'}
@@ -155,6 +306,7 @@ export default function AboutSectionEditor({ initial }: Props) {
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-4"
               >
+                {/* Profile Image is Global */}
                 <FileUploader
                   value={form.profileImage}
                   onChange={url => setForm(prev => ({ ...prev, profileImage: url }))}
@@ -163,6 +315,7 @@ export default function AboutSectionEditor({ initial }: Props) {
                   folder="profile"
                 />
 
+                {/* Video Pitch URL (PT) uses the top-level property */}
                 <FileUploader
                   value={form.videoPitchUrl}
                   onChange={url => setForm(prev => ({ ...prev, videoPitchUrl: url }))}
@@ -171,18 +324,19 @@ export default function AboutSectionEditor({ initial }: Props) {
                   folder="about/pt"
                 />
 
+                {/* Text fields map to translations.pt */}
                 <Input
                   label="Resumo"
-                  value={form.summary}
-                  onChange={(value: string) => setForm(prev => ({ ...prev, summary: value }))}
+                  value={form.translations.pt.summary}
+                  onChange={(value: string) => updatePt(() => ({ summary: value }))}
                   placeholder="Breve introdução sobre você"
                   multiline
                 />
 
                 <Input
                   label="Descrição longa"
-                  value={form.longDescription}
-                  onChange={(value: string) => setForm(prev => ({ ...prev, longDescription: value }))}
+                  value={form.translations.pt.longDescription}
+                  onChange={(value: string) => updatePt(() => ({ longDescription: value }))}
                   placeholder="Descrição detalhada sobre sua trajetória"
                   multiline
                 />
@@ -203,7 +357,7 @@ export default function AboutSectionEditor({ initial }: Props) {
                     </button>
                   </div>
 
-                  {form.softSkills.map((skill, index) => (
+                  {form.translations.pt.softSkills.map((skill: SoftSkill, index: number) => (
                     <div key={index} className="rounded-lg border border-border-subtle/70 bg-background/60 p-3 space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">#{index + 1}</span>
@@ -235,7 +389,7 @@ export default function AboutSectionEditor({ initial }: Props) {
                       + Adicionar
                     </button>
                   </div>
-                  {form.highlights.map((highlight, index) => (
+                  {form.translations.pt.highlights.map((highlight: string, index: number) => (
                     <div key={index} className="flex gap-2">
                       <input
                         value={highlight}
@@ -306,33 +460,53 @@ export default function AboutSectionEditor({ initial }: Props) {
                     />
                     <div className="space-y-2">
                       <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle">Soft skills</p>
-                      {form.softSkills.map((_, idx) => (
-                        <Input
-                          key={idx}
-                          label={`Descrição #${idx + 1}`}
-                          value={form.translations[lang]?.softSkills?.[idx]?.description ?? ''}
-                          onChange={value =>
-                            setForm(prev => {
-                              const current = prev.translations[lang]?.softSkills ?? [];
-                              const next = [...current];
-                              const target = next[idx] ?? { description: '' };
-                              next[idx] = { ...target, description: value };
-                              return {
-                                ...prev,
-                                translations: {
-                                  ...prev.translations,
-                                  [lang]: { ...prev.translations[lang], softSkills: next },
-                                },
-                              };
-                            })
-                          }
-                          multiline
-                        />
+                      {form.translations.pt.softSkills.map((_, idx: number) => (
+                        <div key={idx} className="space-y-2">
+                          <Input
+                            label={`Nome da soft skill #${idx + 1}`}
+                            value={form.translations[lang]?.softSkills?.[idx]?.name ?? ''}
+                            onChange={value =>
+                              setForm(prev => {
+                                const current = prev.translations[lang]?.softSkills ?? [];
+                                const next = [...current];
+                                const target = next[idx] ?? { name: '', description: '' };
+                                next[idx] = { ...target, name: value };
+                                return {
+                                  ...prev,
+                                  translations: {
+                                    ...prev.translations,
+                                    [lang]: { ...prev.translations[lang], softSkills: next },
+                                  },
+                                };
+                              })
+                            }
+                          />
+                          <Input
+                            label="Descrição"
+                            value={form.translations[lang]?.softSkills?.[idx]?.description ?? ''}
+                            onChange={value =>
+                              setForm(prev => {
+                                const current = prev.translations[lang]?.softSkills ?? [];
+                                const next = [...current];
+                                const target = next[idx] ?? { name: '', description: '' };
+                                next[idx] = { ...target, description: value };
+                                return {
+                                  ...prev,
+                                  translations: {
+                                    ...prev.translations,
+                                    [lang]: { ...prev.translations[lang], softSkills: next },
+                                  },
+                                };
+                              })
+                            }
+                            multiline
+                          />
+                        </div>
                       ))}
                     </div>
                     <div className="space-y-2">
                       <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle">Highlights</p>
-                      {form.highlights.map((_, idx) => (
+                      {form.translations.pt.highlights.map((_, idx: number) => (
                         <Input
                           key={idx}
                           label={`Highlight #${idx + 1}`}

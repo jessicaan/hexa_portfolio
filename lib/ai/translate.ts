@@ -2,28 +2,18 @@
 
 type TranslatePayload = Record<string, unknown>;
 
-const serializeValue = (value: unknown) => {
-  if (typeof value === "string") return value;
-  try {
-    const serialized = JSON.stringify(value);
-    return serialized ?? "";
-  } catch {
-    return String(value ?? "");
-  }
-};
+
 
 export async function translateWithGemini(content: TranslatePayload) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY está ausente.");
 
-  const fields = Object.entries(content)
-    .map(([k, v]) => `${k}: ${serializeValue(v)}`)
-    .join("\n");
+
 
   const prompt = `
 You are a precise multilingual localization engine.
 
-Translate the following content from Portuguese (pt-BR) into:
+Translate the following JSON content from Portuguese (pt-BR) into:
 - English (en)
 - Spanish (es)
 - French (fr)
@@ -33,7 +23,7 @@ Translate the following content from Portuguese (pt-BR) into:
 - Do NOT include comments, markdown, backticks, or explanations.
 - Do NOT change key names.
 - Do NOT add or remove fields.
-- Keep the same structure as the source object.
+- Keep the same structure as the input JSON.
 - Only translate the values.
 
 Format:
@@ -43,8 +33,8 @@ Format:
   "fr": { ... }
 }
 
-Content:
-${fields}
+Content JSON to translate:
+${JSON.stringify(content, null, 2)}
 `;
 
   const response = await fetch(

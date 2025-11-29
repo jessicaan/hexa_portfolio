@@ -890,14 +890,14 @@ export default function ProjectsSectionEditor({ initial }: Props) {
                             {data.projects.length > 0 && (
                                 <div className="space-y-3 pt-2">
                                     <h4 className="text-sm font-semibold text-foreground">Projetos Traduzidos</h4>
-                                    {data.projects.map((p, projectIndex) => (
+                                    {data.projects.map((project, projectIndex) => (
                                         <div
-                                            key={p.id} // Use p.id for a stable key
+                                            key={project.id}
                                             className="rounded border border-border-subtle/50 px-3 py-2 space-y-2"
                                         >
                                             <EditableTranslationInput
                                                 label="Título"
-                                                value={p.title || ''}
+                                                value={project.title || ''}
                                                 onChange={(newValue) => {
                                                     const newProjects = [...data.projects];
                                                     newProjects[projectIndex] = { ...newProjects[projectIndex], title: newValue };
@@ -913,7 +913,7 @@ export default function ProjectsSectionEditor({ initial }: Props) {
                                             />
                                             <EditableTranslationInput
                                                 label="Descrição Curta"
-                                                value={p.shortDescription || ''}
+                                                value={project.shortDescription || ''}
                                                 onChange={(newValue) => {
                                                     const newProjects = [...data.projects];
                                                     newProjects[projectIndex] = { ...newProjects[projectIndex], shortDescription: newValue };
@@ -931,7 +931,7 @@ export default function ProjectsSectionEditor({ initial }: Props) {
                                             />
                                             <EditableTranslationInput
                                                 label="Descrição Completa"
-                                                value={p.description || ''}
+                                                value={project.description || ''}
                                                 onChange={(newValue) => {
                                                     const newProjects = [...data.projects];
                                                     newProjects[projectIndex] = { ...newProjects[projectIndex], description: newValue };
@@ -971,7 +971,7 @@ export default function ProjectsSectionEditor({ initial }: Props) {
                                                         <FiPlus className="w-3 h-3" /> Adicionar
                                                     </button>
                                                 </div>
-                                                {(p.highlights || []).map((highlight, highlightIndex) => (
+                                                {(project.highlights || []).map((highlight, highlightIndex) => (
                                                     <div key={highlightIndex} className="flex gap-2 items-center">
                                                         <EditableTranslationInput
                                                             value={highlight}

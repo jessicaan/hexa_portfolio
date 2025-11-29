@@ -48,21 +48,42 @@ export async function autoTranslateContent(base: {
   const ptPayload = {
     summary: base.summary,
     longDescription: base.longDescription,
-    softSkills: base.softSkills.map((s) => s.description),
+    softSkillNames: base.softSkills.map((s) => s.name),
+    softSkillDescriptions: base.softSkills.map((s) => s.description),
     highlights: base.highlights,
   };
 
   const result = (await translateWithGemini(ptPayload)) as {
-    en: { summary: string; longDescription: string; softSkills: string[]; highlights: string[] };
-    es: { summary: string; longDescription: string; softSkills: string[]; highlights: string[] };
-    fr: { summary: string; longDescription: string; softSkills: string[]; highlights: string[] };
+    en: {
+      summary: string;
+      longDescription: string;
+      softSkillNames: string[];
+      softSkillDescriptions: string[];
+      highlights: string[];
+    };
+    es: {
+      summary: string;
+      longDescription: string;
+      softSkillNames: string[];
+      softSkillDescriptions: string[];
+      highlights: string[];
+    };
+    fr: {
+      summary: string;
+      longDescription: string;
+      softSkillNames: string[];
+      softSkillDescriptions: string[];
+      highlights: string[];
+    };
   };
 
-  const buildTranslatedSoftSkills = (translated: string[] | undefined): SoftSkill[] => {
-    if (!translated) return base.softSkills.map(s => ({...s, description: ''}));
+  const buildTranslatedSoftSkills = (
+    translatedNames: string[] | undefined,
+    translatedDescriptions: string[] | undefined,
+  ): SoftSkill[] => {
     return base.softSkills.map((skill, index) => ({
-      name: skill.name,
-      description: translated[index] ?? skill.description,
+      name: translatedNames?.[index] ?? skill.name,
+      description: translatedDescriptions?.[index] ?? skill.description,
     }));
   };
 
@@ -71,21 +92,30 @@ export async function autoTranslateContent(base: {
       ...defaultAboutContent.translations.en,
       summary: result.en?.summary ?? '',
       longDescription: result.en?.longDescription ?? '',
-      softSkills: buildTranslatedSoftSkills(result.en?.softSkills),
+      softSkills: buildTranslatedSoftSkills(
+        result.en?.softSkillNames,
+        result.en?.softSkillDescriptions,
+      ),
       highlights: result.en?.highlights ?? [],
     },
     es: {
       ...defaultAboutContent.translations.es,
       summary: result.es?.summary ?? '',
       longDescription: result.es?.longDescription ?? '',
-      softSkills: buildTranslatedSoftSkills(result.es?.softSkills),
+      softSkills: buildTranslatedSoftSkills(
+        result.es?.softSkillNames,
+        result.es?.softSkillDescriptions,
+      ),
       highlights: result.es?.highlights ?? [],
     },
     fr: {
       ...defaultAboutContent.translations.fr,
       summary: result.fr?.summary ?? '',
       longDescription: result.fr?.longDescription ?? '',
-      softSkills: buildTranslatedSoftSkills(result.fr?.softSkills),
+      softSkills: buildTranslatedSoftSkills(
+        result.fr?.softSkillNames,
+        result.fr?.softSkillDescriptions,
+      ),
       highlights: result.fr?.highlights ?? [],
     },
     pt: {
