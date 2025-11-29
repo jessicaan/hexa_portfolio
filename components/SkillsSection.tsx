@@ -15,28 +15,77 @@ import {
   SiGreensock,
   SiFigma,
   SiGit,
+  SiNodedotjs,
+  SiPrisma,
+  SiSupabase,
+  SiFirebase,
+  SiPostgresql,
+  SiMongodb,
+  SiDocker,
+  SiPython,
+  SiVuedotjs,
+  SiAngular,
+  SiGraphql,
+  SiRedis,
+  SiAmazonwebservices,
+  SiVercel,
+  SiGithub,
+  SiHtml5,
+  SiCss3,
+  SiSass,
 } from 'react-icons/si';
-import type { SkillsContent, SkillCategory, LanguageCode } from '@/lib/content/schema';
+import type { SkillsContent, LanguageCode } from '@/lib/content/schema';
 import { loadSkillsContent } from '@/lib/content/client';
 import { useTranslation } from 'react-i18next';
-
-interface SkillsSectionProps {}
 
 type SkillLevel = 1 | 2 | 3 | 4 | 5;
 
 const skillIconMap: Record<string, IconType> = {
-  TypeScript: SiTypescript,
-  JavaScript: SiJavascript,
-  React: SiReact,
-  'Next.js': SiNextdotjs,
-  'Tailwind CSS': SiTailwindcss,
-  'Framer Motion': SiFramer,
-  GSAP: SiGreensock,
-  Figma: SiFigma,
-  Git: SiGit,
+  typescript: SiTypescript,
+  javascript: SiJavascript,
+  react: SiReact,
+  'next.js': SiNextdotjs,
+  nextjs: SiNextdotjs,
+  'tailwind css': SiTailwindcss,
+  tailwindcss: SiTailwindcss,
+  tailwind: SiTailwindcss,
+  'framer motion': SiFramer,
+  framer: SiFramer,
+  gsap: SiGreensock,
+  figma: SiFigma,
+  git: SiGit,
+  'node.js': SiNodedotjs,
+  nodejs: SiNodedotjs,
+  prisma: SiPrisma,
+  supabase: SiSupabase,
+  firebase: SiFirebase,
+  postgresql: SiPostgresql,
+  postgres: SiPostgresql,
+  mongodb: SiMongodb,
+  docker: SiDocker,
+  python: SiPython,
+  vue: SiVuedotjs,
+  vuejs: SiVuedotjs,
+  angular: SiAngular,
+  graphql: SiGraphql,
+  redis: SiRedis,
+  aws: SiAmazonwebservices,
+  vercel: SiVercel,
+  github: SiGithub,
+  html: SiHtml5,
+  html5: SiHtml5,
+  css: SiCss3,
+  css3: SiCss3,
+  sass: SiSass,
+  scss: SiSass,
 };
 
-const levelVisual: Record<SkillLevel, string> = {
+const getSkillIcon = (name: string): IconType | null => {
+  const key = name.toLowerCase().trim();
+  return skillIconMap[key] || skillIconMap[key.replace(/\s+/g, '')] || skillIconMap[key.replace(/\./g, '')] || null;
+};
+
+const levelWidths: Record<SkillLevel, string> = {
   1: '20%',
   2: '40%',
   3: '60%',
@@ -44,99 +93,25 @@ const levelVisual: Record<SkillLevel, string> = {
   5: '100%',
 };
 
-const skillsCopy: Record<
-  LanguageCode,
-  {
-    eyebrow: string;
-    title: string;
-    description: string;
-    legendTitle: string;
-    levels: Record<SkillLevel, string>;
-    nowText: string;
-    viewText: string;
-  }
-> = {
-  pt: {
-    eyebrow: 'Skills',
-    title: 'Pilha, craft e forma de pensar',
-    description:
-      'Mais do que listar tecnologias, aqui está como eu gosto de projetar e construir experiências digitais – da base técnica ao cuidado visual.',
-    legendTitle: 'Nível de familiaridade',
-    levels: {
-      1: 'Iniciante',
-      2: 'Intermediário',
-      3: 'Avançado',
-      4: 'Expert',
-      5: 'Mestre',
-    },
-    nowText: 'Atual',
-    viewText: 'Ver',
-  },
-  en: {
-    eyebrow: 'Skills',
-    title: 'Stack, craft and mindset',
-    description:
-      'More than a list of technologies, this is how I like to design and build digital experiences – from technical foundation to visual polish.',
-    legendTitle: 'Level of familiarity',
-    levels: {
-      1: 'Beginner',
-      2: 'Intermediate',
-      3: 'Advanced',
-      4: 'Expert',
-      5: 'Master',
-    },
-    nowText: 'Current',
-    viewText: 'View',
-  },
-  es: {
-    eyebrow: 'Skills',
-    title: 'Stack, craft y forma de pensar',
-    description:
-      'Más que una lista de tecnologías, es como me gusta diseñar y construir experiencias digitales, de la base técnica al cuidado visual.',
-    legendTitle: 'Nivel de familiaridad',
-    levels: {
-      1: 'Principiante',
-      2: 'Intermedio',
-      3: 'Avanzado',
-      4: 'Experto',
-      5: 'Maestro',
-    },
-    nowText: 'Actual',
-    viewText: 'Ver',
-  },
-  fr: {
-    eyebrow: 'Compétences',
-    title: 'Stack, craft et manière de penser',
-    description:
-      "Plus qu'une liste de technologies, voici ma façon de concevoir et construire des expériences numériques, du socle technique au soin visuel.",
-    legendTitle: 'Niveau de familiaridade',
-    levels: {
-      1: 'Débutant',
-      2: 'Intermédiaire',
-      3: 'Avançado',
-      4: 'Expert',
-      5: 'Maître',
-    },
-    nowText: 'Actuel',
-    viewText: 'Voir',
-  },
-};
-
-export default function SkillsSection({}: SkillsSectionProps) {
+export default function SkillsSection() {
   const { i18n } = useTranslation();
   const language = i18n.language as LanguageCode;
 
   const [skillsContent, setSkillsContent] = useState<SkillsContent | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
 
-  // Moved these derivations/hooks to the top
+  const { primaryRgb, theme } = useTheme();
+  const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
+  const isDark = theme === 'dark';
+
   useEffect(() => {
     const fetchSkills = async () => {
       try {
         const data = await loadSkillsContent();
         setSkillsContent(data);
       } catch (error) {
-        console.error("Failed to load skills content:", error);
+        console.error('Failed to load skills content:', error);
       } finally {
         setLoading(false);
       }
@@ -144,300 +119,327 @@ export default function SkillsSection({}: SkillsSectionProps) {
     fetchSkills();
   }, []);
 
+  const translation = useMemo(() => {
+    if (!skillsContent) return null;
+    return skillsContent.translations[language] || skillsContent.translations['en'];
+  }, [skillsContent, language]);
+
+  const categories = useMemo(() => {
+    if (!skillsContent?.categories) return [];
+
+    return skillsContent.categories.map((category, idx) => {
+      const translatedCategory = translation?.categories?.[idx];
+      const skills = (category.skills || []).map((skill, skillIdx) => ({
+        ...skill,
+        name: translatedCategory?.skills?.[skillIdx]?.name || skill.name,
+      }));
+
+      return {
+        ...category,
+        name: translatedCategory?.name || category.name,
+        skills,
+      };
+    });
+  }, [skillsContent, translation]);
+
+  const activeCategory = categories[activeCategoryIndex] || categories[0];
+
   if (loading) {
     return (
       <main className="relative w-screen h-screen overflow-hidden">
         <ReactiveGridBackground />
-        <div className="relative z-10 flex items-center justify-center w-full h-full px-6 text-center">
-          <p className="text-muted-foreground">Loading skills...</p>
+        <div className="relative z-10 flex items-center justify-center w-full h-full">
+          <div
+            className="rounded-2xl border border-border-subtle backdrop-blur-md p-8"
+            style={{
+              background: isDark ? 'rgba(20, 20, 25, 0.7)' : 'rgba(255, 255, 255, 0.5)',
+            }}
+          >
+            <p className="text-muted-foreground">Loading skills...</p>
+          </div>
         </div>
       </main>
     );
   }
 
-  // If skillsContent is still null after loading, handle gracefully
-  if (!skillsContent) {
-    return (
-      <main className="relative w-screen h-screen overflow-hidden">
-        <ReactiveGridBackground />
-        <div className="relative z-10 flex items-center justify-center w-full h-full px-6 text-center">
-          <p className="text-muted-foreground">Failed to load skills data.</p>
-        </div>
-      </main>
-    );
-  }
-
-  // Moved these derivations/hooks below the loading and error checks
-  const normalizedCategories = useMemo(() => {
-    return Array.isArray(skillsContent.categories)
-      ? skillsContent.categories.map(category => ({
-          ...category,
-          skills: Array.isArray(category.skills) ? category.skills : [],
-        }))
-      : [];
-  }, [skillsContent]);
-
-  // Use normalizedCategories here for initial activeCategoryId, as it's guaranteed to be an array
-  const [activeCategoryId, setActiveCategoryId] = useState<string>(normalizedCategories[0]?.name ?? '');
-
-  const { primaryRgb, theme } = useTheme();
-  const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
-
-  const translation = useMemo(() => {
-    // Attempt to get translation from skillsContent for the current language
-    const currentLangTranslation = skillsContent.translations[language];
-    // Attempt to get translation from skillsContent for English as a fallback
-    const englishTranslation = skillsContent.translations['en'];
-
-    // Combine them, prioritizing current language, then English
-    const combinedTranslation = {
-      ...skillsCopy[language], // Start with skillsCopy for the current language as base defaults
-      ...skillsCopy['en'], // Override with English skillsCopy if language-specific is missing
-      ...(englishTranslation || {}), // Override with English from skillsContent if available
-      ...(currentLangTranslation || {}), // Override with current language from skillsContent if available
-    };
-
-    return combinedTranslation;
-  }, [skillsContent, language]);
-
-  const categories = useMemo(() => {
-    return normalizedCategories.map((c, i) => {
-      const translated = translation?.categories?.[i];
-      const baseSkills = Array.isArray(c.skills) ? c.skills : [];
-      const translatedSkills = Array.isArray(translated?.skills) ? translated.skills : [];
-
-      return {
-        ...c,
-        name: translated?.name || c.name,
-        skills: baseSkills.map((s, j) => {
-          const translatedSkill = translatedSkills?.[j];
-          return {
-            ...s,
-            name: translatedSkill?.name || s.name,
-          };
-        }),
-      };
-    });
-  }, [normalizedCategories, translation]);
-
-  const activeCategory = useMemo(() => {
-    return categories.find(category => category.name === activeCategoryId) ?? categories[0] ?? { name: '', skills: [] };
-  }, [categories, activeCategoryId]);
-
-  const summary = useMemo(() => {
-    return translation?.summary || skillsContent.summary;
-  }, [translation, skillsContent]);
-
-  // If there's no data, render a friendly placeholder instead of crashing
   if (!categories.length) {
     return (
       <main className="relative w-screen h-screen overflow-hidden">
         <ReactiveGridBackground />
-        <div className="relative z-10 flex items-center justify-center w-full h-full px-6 text-center">
-          <p className="text-muted-foreground">Nenhuma skill cadastrada ainda.</p>
+        <div className="relative z-10 flex items-center justify-center w-full h-full">
+          <div
+            className="rounded-2xl border border-border-subtle backdrop-blur-md p-8 text-center"
+            style={{
+              background: isDark ? 'rgba(20, 20, 25, 0.7)' : 'rgba(255, 255, 255, 0.5)',
+            }}
+          >
+            <p className="text-muted-foreground">No skills registered yet.</p>
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="relative w-screen h-screen overflow-hidden">
-      <ReactiveGridBackground />
+    <>
+      <style jsx global>{`
+        .skills-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .skills-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .skills-scrollbar::-webkit-scrollbar-thumb {
+          background-color: rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.3);
+          border-radius: 3px;
+        }
+        .skills-scrollbar::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.5);
+        }
+      `}</style>
 
-      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center w-full h-full px-6 sm:px-10 gap-10 lg:gap-16">
-        <motion.section
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="max-w-xl text-center lg:text-left text-foreground"
-        >
-          <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground-subtle mb-4">
-            {translation.eyebrow} · Stack
-          </p>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-5">
-            {translation.title}
-          </h2>
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-6">
-            {translation.description}
-          </p>
+      <main className="relative w-screen h-screen overflow-hidden">
+        <ReactiveGridBackground />
 
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            {activeCategory.skills.slice(0, 4).map(skill => {
-              const Icon = skillIconMap[skill.name];
-              return (
-                <span
-                  key={skill.name}
-                  className="px-3 py-1 rounded-full border border-border-subtle bg-surface-soft text-[10px] tracking-[0.18em] uppercase text-muted-foreground inline-flex items-center gap-1.5"
-                >
-                  {Icon && <Icon className="w-3.5 h-3.5" />}
-                  <span>{skill.name}</span>
-                </span>
-              );
-            })}
-          </div>
-
-          <div className="mt-4">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground-subtle mb-2">
-              {translation.legendTitle}
-            </p>
-            <div className="flex flex-wrap gap-3 text-[10px] text-muted-foreground-subtle">
-              {([1, 2, 3, 4, 5] as SkillLevel[]).map(level => (
-                <div key={level} className="flex items-center gap-2">
-                  <div className="w-10 h-[3px] rounded-full bg-surface-soft overflow-hidden">
-                    <div
-                      className="h-full"
-                      style={{
-                        width: levelVisual[level],
-                        background: `linear-gradient(to right, ${primaryColor}, hsl(var(--secondary)))`,
-                      }}
-                    />
-                  </div>
-                  <span className="tracking-[0.18em] uppercase">{translation.levels[level]}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeCategory.name}
-              initial={{ opacity: 0, y: 10 }}
+        <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden skills-scrollbar">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-8 md:py-12 lg:py-16">
+            <motion.header
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              className="mt-6 rounded-3xl border border-border-subtle bg-surface-soft backdrop-blur-md p-5 sm:p-6"
-              style={{
-                boxShadow: `0 18px 60px rgba(0,0,0,${theme === 'dark' ? 0.6 : 0.15})`,
-              }}
+              transition={{ duration: 0.5 }}
+              className="mb-10 lg:mb-14"
             >
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground-subtle mb-1">
-                    {activeCategory.name}
-                  </p>
-                </div>
+              <div className="flex items-center gap-3 mb-4">
+                <span
+                  className="h-px w-10"
+                  style={{
+                    background: `linear-gradient(to right, ${primaryColor}, transparent)`,
+                  }}
+                />
+                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                  {translation?.eyebrow || 'Skills'}
+                </p>
               </div>
+              <h1
+                className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight mb-4"
+                style={{ color: isDark ? '#fff' : 'var(--foreground)' }}
+              >
+                {translation?.title || 'Stack & Skills'}
+              </h1>
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-3xl">
+                {translation?.description || ''}
+              </p>
+            </motion.header>
 
-              <div className="space-y-3">
-                {activeCategory.skills.map(skill => {
-                  const Icon = skillIconMap[skill.name];
-                  return (
-                    <div
-                      key={skill.name}
-                      className="flex items-center justify-between gap-3 text-xs sm:text-sm"
-                    >
-                      <div className="flex items-center gap-2">
-                        {Icon && <Icon className="w-4 h-4" style={{ color: primaryColor }} />}
-                        <span className="text-foreground">{skill.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-[3px] rounded-full bg-surface-soft overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="lg:col-span-4"
+              >
+                <div
+                  className="rounded-2xl border border-border-subtle backdrop-blur-md p-5"
+                  style={{
+                    background: isDark ? 'rgba(20, 20, 25, 0.7)' : 'rgba(255, 255, 255, 0.5)',
+                    boxShadow: `0 8px 32px rgba(0,0,0,${isDark ? 0.3 : 0.1})`,
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <span
+                      className="w-1 h-4 rounded-full"
+                      style={{ backgroundColor: primaryColor }}
+                    />
+                    <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground">
+                      Categories
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    {categories.map((category, index) => {
+                      const isActive = index === activeCategoryIndex;
+
+                      return (
+                        <button
+                          key={category.name}
+                          onClick={() => setActiveCategoryIndex(index)}
+                          onMouseEnter={() => setActiveCategoryIndex(index)}
+                          className="w-full text-left group"
+                        >
                           <div
-                            className="h-full"
+                            className="relative rounded-xl border p-4 transition-all duration-300"
                             style={{
-                              width: levelVisual[skill.level as SkillLevel],
-                              background: `linear-gradient(to right, ${primaryColor}, hsl(var(--secondary)))`,
+                              background: isActive
+                                ? `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.1)`
+                                : isDark
+                                  ? 'rgba(30, 30, 35, 0.5)'
+                                  : 'rgba(255, 255, 255, 0.3)',
+                              borderColor: isActive
+                                ? `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.4)`
+                                : 'var(--border-subtle)',
+                            }}
+                          >
+                            <div
+                              className="absolute left-0 top-0 h-full w-1 rounded-l-xl transition-all duration-300"
+                              style={{
+                                background: isActive
+                                  ? `linear-gradient(to bottom, ${primaryColor}, hsl(var(--secondary)))`
+                                  : 'transparent',
+                              }}
+                            />
+
+                            <div className="pl-3">
+                              <p
+                                className="text-sm font-medium mb-1 transition-colors"
+                                style={{ color: isActive ? primaryColor : 'var(--foreground)' }}
+                              >
+                                {category.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {category.skills.length} skills
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-border-subtle">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">
+                      {translation?.legendTitle || 'Proficiency'}
+                    </p>
+                    <div className="space-y-2">
+                      {([1, 2, 3, 4, 5] as SkillLevel[]).map(level => (
+                        <div key={level} className="flex items-center gap-3">
+                          <div
+                            className="w-16 h-1.5 rounded-full overflow-hidden"
+                            style={{
+                              background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                            }}
+                          >
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: levelWidths[level],
+                                background: `linear-gradient(to right, ${primaryColor}, hsl(var(--secondary)))`,
+                              }}
+                            />
+                          </div>
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                            {translation?.levels?.[level] || `Level ${level}`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="lg:col-span-8"
+              >
+                <AnimatePresence mode="wait">
+                  {activeCategory && (
+                    <motion.div
+                      key={activeCategory.name}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.3 }}
+                      className="rounded-2xl border border-border-subtle overflow-hidden backdrop-blur-md"
+                      style={{
+                        background: isDark ? 'rgba(20, 20, 25, 0.7)' : 'rgba(255, 255, 255, 0.5)',
+                        boxShadow: `0 8px 32px rgba(0,0,0,${isDark ? 0.3 : 0.1})`,
+                      }}
+                    >
+                      <div
+                        className="h-2 w-full"
+                        style={{
+                          background: `linear-gradient(to right, ${primaryColor}, hsl(var(--secondary)))`,
+                        }}
+                      />
+
+                      <div className="p-6 lg:p-8">
+                        <div className="flex items-center gap-3 mb-6">
+                          <span
+                            className="h-px w-8"
+                            style={{
+                              background: `linear-gradient(to right, ${primaryColor}, transparent)`,
                             }}
                           />
+                          <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground">
+                            {activeCategory.name}
+                          </p>
                         </div>
-                        <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground-subtle">
-                          {translation.levels[skill.level as SkillLevel]}
-                        </span>
+
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          {activeCategory.skills.map((skill, idx) => {
+                            const Icon = getSkillIcon(skill.name);
+                            const level = skill.level as SkillLevel;
+
+                            return (
+                              <motion.div
+                                key={skill.name}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3, delay: idx * 0.05 }}
+                                className="group rounded-xl border border-border-subtle p-4 transition-all duration-300 hover:border-border"
+                                style={{
+                                  background: isDark
+                                    ? 'rgba(30, 30, 35, 0.5)'
+                                    : 'rgba(255, 255, 255, 0.3)',
+                                }}
+                              >
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-2">
+                                    {Icon && (
+                                      <Icon
+                                        className="w-5 h-5 transition-colors"
+                                        style={{ color: primaryColor }}
+                                      />
+                                    )}
+                                    <span className="text-sm font-medium text-foreground">
+                                      {skill.name}
+                                    </span>
+                                  </div>
+                                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                                    {translation?.levels?.[level] || ''}
+                                  </span>
+                                </div>
+
+                                <div
+                                  className="w-full h-1.5 rounded-full overflow-hidden"
+                                  style={{
+                                    background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                                  }}
+                                >
+                                  <motion.div
+                                    className="h-full rounded-full"
+                                    style={{
+                                      background: `linear-gradient(to right, ${primaryColor}, hsl(var(--secondary)))`,
+                                    }}
+                                    initial={{ width: 0 }}
+                                    animate={{ width: levelWidths[level] }}
+                                    transition={{ duration: 0.6, delay: idx * 0.05 }}
+                                  />
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </motion.section>
-
-        <motion.section
-          initial={{ opacity: 0, y: 24, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.1 }}
-          className="w-full max-w-xl"
-        >
-          <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle mb-3 text-center lg:text-left">
-            {translation.eyebrow} · Áreas de foco
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-            {categories.map(category => {
-              const isActive = category.name === activeCategoryId;
-
-              return (
-                <motion.button
-                  key={category.name}
-                  type="button"
-                  onMouseEnter={() => setActiveCategoryId(category.name)}
-                  onFocus={() => setActiveCategoryId(category.name)}
-                  onClick={() => setActiveCategoryId(category.name)}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  transition={{ duration: 0.25 }}
-                  className="relative group text-left"
-                >
-                  <motion.div
-                    className="absolute -inset-0.5 rounded-2xl opacity-0 group-hover:opacity-100"
-                    style={{
-                      background: `linear-gradient(to bottom right, ${primaryColor}40, transparent, hsl(var(--secondary) / 0.4))`,
-                    }}
-                    animate={{ opacity: isActive ? 1 : 0 }}
-                    transition={{ duration: 0.25 }}
-                  />
-
-                  <div
-                    className="relative rounded-2xl border border-border-subtle bg-surface-soft backdrop-blur-md px-4 py-4 sm:px-4 sm:py-4 overflow-hidden"
-                    style={{
-                      boxShadow: `0 10px 40px rgba(0,0,0,${theme === 'dark' ? 0.75 : 0.15})`,
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <div className="flex-1">
-                        <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground-subtle mb-1">
-                          {category.name}
-                        </p>
-                      </div>
-                      <motion.span
-                        className="mt-0.5 text-[9px] uppercase tracking-[0.2em] text-muted-foreground-subtle"
-                        animate={{
-                          opacity: isActive ? 1 : 0.4,
-                          y: isActive ? 0 : 2,
-                        }}
-                      >
-                        {isActive ? translation.nowText : translation.viewText}
-                      </motion.span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1.5 mt-1">
-                      {category.skills.slice(0, 3).map(skill => {
-                        const Icon = skillIconMap[skill.name];
-                        return (
-                          <span
-                            key={skill.name}
-                            className="px-2 py-0.5 rounded-full bg-surface-soft text-[9px] tracking-[0.15em] uppercase text-muted-foreground-subtle inline-flex items-center gap-1"
-                          >
-                            {Icon && <Icon className="w-3 h-3" />}
-                            <span>{skill.name}</span>
-                          </span>
-                        );
-                      })}
-                    </div>
-
-                    <motion.div
-                      className="absolute inset-px rounded-2xl border pointer-events-none"
-                      style={{ borderColor: primaryColor }}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: isActive ? 0.35 : 0 }}
-                      transition={{ duration: 0.25 }}
-                    />
-                  </div>
-                </motion.button>
-              );
-            })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </div>
           </div>
-        </motion.section>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }
