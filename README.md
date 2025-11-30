@@ -15,9 +15,9 @@ This project is built upon a modern, robust, and scalable technology stack, care
 
 ## ✨ Visual Proof
 
+![HexaGrid Portfolio Preview](public/84612672-1A72-4AB2-A095-5EC92A92A703.gif)
 
-
-_Witness the HexaGrid Portfolio in action. This visual proof offers a concise yet comprehensive tour, highlighting the fluid user experience, responsive design, and core interactive features that define this project. It's designed to give you an immediate understanding of the application's capabilities and aesthetic._
+_Witness 5 seconds of the HexaGrid Portfolio in action. This visual proof offers a concise yet comprehensive tour, highlighting the fluid user experience, responsive design, and core interactive features that define this project. It's designed to give you an immediate understanding of the application's capabilities and aesthetic._
 
 ## 📐 Architecture Diagram
 
@@ -131,8 +131,8 @@ Ensure you have the following software installed on your system:
 
 I am actively seeking challenging **Product Engineering roles** where I can leverage my expertise to build innovative solutions and drive product success. Let's connect and discuss how my skills can contribute to your team.
 
-*   **LinkedIn**: 
-*   **Email**: 
+*   **LinkedIn**: https://www.linkedin.com/in/jessicaaneci
+*   **Email**:  jessicaaneci@gmail.com
 *   **Live Demo**: [Link to the Live Demo will come here] (Experience the HexaGrid Portfolio live!)
 
 Feel free to reach out with any questions, collaboration proposals, or career opportunities.
