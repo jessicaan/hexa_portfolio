@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { type PersonalContent, type Translation } from '@/lib/content/schema';
+import { type PersonalContent, type PersonalTranslation } from '@/lib/content/schema';
 
 interface PersonalHobbyCardsProps {
   hobbyCards: PersonalContent['hobbyCards'];
-  translatedHobbies?: Translation['personal']['translatedHobbies'];
+  translatedHobbies?: PersonalTranslation['translatedHobbies'];
   hobbiesLabel: string;
   primaryColor: string;
   isDark: boolean;

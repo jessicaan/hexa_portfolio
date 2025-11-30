@@ -236,25 +236,32 @@ export default function ExperienceSectionEditor({ initial }: Props) {
                                 className="space-y-4"
                             >
                                 <TranslationEditor
-                                    pt={{ summary: form.summary, experiences: form.experiences }}
+                                    pt={form.translations.pt}
                                     translations={{
-                                        en: { summary: form.translations.en.summary, experiences: form.translations.en.experiences },
-                                        es: { summary: form.translations.es.summary, experiences: form.translations.es.experiences },
-                                        fr: { summary: form.translations.fr.summary, experiences: form.translations.fr.experiences },
+                                        en: form.translations.en,
+                                        es: form.translations.es,
+                                        fr: form.translations.fr,
                                     }}
-                                    onChange={(translations) => {
+                                    onChange={(newTranslations) => {
                                         setForm(prev => ({
                                             ...prev,
                                             translations: {
                                                 ...prev.translations,
-                                                en: { ...prev.translations.en, ...translations.en },
-                                                es: { ...prev.translations.es, ...translations.es },
-                                                fr: { ...prev.translations.fr, ...translations.fr },
+                                                en: { ...prev.translations.en, ...newTranslations.en },
+                                                es: { ...prev.translations.es, ...newTranslations.es },
+                                                fr: { ...prev.translations.fr, ...newTranslations.fr },
                                             },
                                         }))
                                     }}
+                                    fields={[
+                                        { key: 'eyebrow', label: 'Eyebrow', placeholder: 'Ex: Minha Jornada' },
+                                        { key: 'title', label: 'Título', placeholder: 'Ex: Experiência Profissional' },
+                                        { key: 'summary', label: 'Resumo', placeholder: 'Ex: Breve descrição da sua experiência', multiline: true },
+                                        { key: 'detailHeading', label: 'Título Detalhes', placeholder: 'Ex: Detalhes do Cargo' },
+                                        { key: 'highlightsHeading', label: 'Título Destaques', placeholder: 'Ex: Principais Conquistas' },
+                                        { key: 'stackHeading', label: 'Título Tecnologias', placeholder: 'Ex: Tecnologias Utilizadas' },
+                                    ]}
                                     onAutoTranslate={translateWithGemini}
-                                    fields={[{ key: 'summary', label: 'Resumo traduzido' }]}
                                 />
 
                                 {form.experiences.map((exp, expIndex) => (

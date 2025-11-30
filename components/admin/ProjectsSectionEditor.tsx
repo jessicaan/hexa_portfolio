@@ -173,6 +173,10 @@ export default function ProjectsSectionEditor({ initial }: Props) {
         });
     };
 
+    const handleTranslationsChange = useCallback((newTranslations: ProjectsContent['translations']) => {
+        setForm(prev => ({ ...prev, translations: newTranslations }));
+    }, []);
+
     const handleAutoTranslate = () => {
         setMessage(null);
         setError(null);
@@ -189,203 +193,202 @@ export default function ProjectsSectionEditor({ initial }: Props) {
                 setError(err instanceof Error ? err.message : 'Erro ao traduzir.');
             }
         });
-        const handleTranslationsChange = useCallback((newTranslations: ProjectsContent['translations']) => {
-            setForm(prev => ({ ...prev, translations: newTranslations }));
-        }, []);
+    };
 
-        return (
-            <div className="space-y-4">
-                <div className="flex items-center justify-between gap-3">
-                    <div>
-                        <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground-subtle">
-                            Portfolio
-                        </p>
-                        <h1 className="text-xl font-semibold text-foreground">
-                            Projetos
-                        </h1>
-                    </div>
-                    <div className="flex gap-2">
+
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+                <div>
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground-subtle">
+                        Portfolio
+                    </p>
+                    <h1 className="text-xl font-semibold text-foreground">
+                        Projetos
+                    </h1>
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={handleAutoTranslate}
+                        className="inline-flex items-center gap-2 rounded-lg border border-border-subtle bg-surface-soft px-3 py-2 text-sm hover:border-primary/60 transition-colors disabled:opacity-60"
+                        disabled={isTranslating}
+                    >
+                        {isTranslating ? (
+                            <FiLoader className="w-4 h-4 animate-spin" />
+                        ) : (
+                            <FiRefreshCw className="w-4 h-4" />
+                        )}
+                        Traduzir
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleSave}
+                        className="inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-primary to-secondary px-3 py-2 text-sm font-semibold text-foreground shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-60"
+                        disabled={isSaving}
+                    >
+                        {isSaving ? (
+                            <FiLoader className="w-4 h-4 animate-spin" />
+                        ) : (
+                            <FiSave className="w-4 h-4" />
+                        )}
+                        Salvar
+                    </button>
+                </div>
+            </div>
+
+            <div className="rounded-xl border border-border-subtle/70 bg-surface/70 backdrop-blur-xl">
+                <div className="flex gap-3 border-b border-border-subtle/60 px-4">
+                    {['pt', 'translations'].map(value => (
                         <button
-                            type="button"
-                            onClick={handleAutoTranslate}
-                            className="inline-flex items-center gap-2 rounded-lg border border-border-subtle bg-surface-soft px-3 py-2 text-sm hover:border-primary/60 transition-colors disabled:opacity-60"
-                            disabled={isTranslating}
+                            key={value}
+                            onClick={() => setTab(value as 'pt' | 'translations')}
+                            className={`relative px-3 py-2.5 text-sm transition-colors ${tab === value ? 'text-foreground' : 'text-muted-foreground'
+                                }`}
                         >
-                            {isTranslating ? (
-                                <FiLoader className="w-4 h-4 animate-spin" />
-                            ) : (
-                                <FiRefreshCw className="w-4 h-4" />
+                            {value === 'pt' ? 'Conteúdo PT' : 'Traduções'}
+                            {tab === value && (
+                                <motion.div
+                                    layoutId="projects-tab"
+                                    className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary"
+                                />
                             )}
-                            Traduzir
                         </button>
-                        <button
-                            type="button"
-                            onClick={handleSave}
-                            className="inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-primary to-secondary px-3 py-2 text-sm font-semibold text-foreground shadow-glow hover:shadow-glow-lg transition-all disabled:opacity-60"
-                            disabled={isSaving}
-                        >
-                            {isSaving ? (
-                                <FiLoader className="w-4 h-4 animate-spin" />
-                            ) : (
-                                <FiSave className="w-4 h-4" />
-                            )}
-                            Salvar
-                        </button>
-                    </div>
+                    ))}
                 </div>
 
-                <div className="rounded-xl border border-border-subtle/70 bg-surface/70 backdrop-blur-xl">
-                    <div className="flex gap-3 border-b border-border-subtle/60 px-4">
-                        {['pt', 'translations'].map(value => (
-                            <button
-                                key={value}
-                                onClick={() => setTab(value as 'pt' | 'translations')}
-                                className={`relative px-3 py-2.5 text-sm transition-colors ${tab === value ? 'text-foreground' : 'text-muted-foreground'
-                                    }`}
+                <div className="p-4">
+                    <AnimatePresence mode="wait">
+                        {tab === 'pt' ? (
+                            <motion.div
+                                key="pt"
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -8 }}
+                                className="space-y-4"
                             >
-                                {value === 'pt' ? 'Conteúdo PT' : 'Traduções'}
-                                {tab === value && (
-                                    <motion.div
-                                        layoutId="projects-tab"
-                                        className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary"
+                                <label className="space-y-2 block">
+                                    <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle">
+                                        Introdução
+                                    </span>
+                                    <textarea
+                                        value={form.summary}
+                                        onChange={e =>
+                                            setForm(prev => ({
+                                                ...prev,
+                                                summary: e.target.value,
+                                            }))
+                                        }
+                                        placeholder="Apresentação geral sobre seus projetos..."
+                                        className="w-full rounded-lg border border-border-subtle/70 bg-background/60 px-3 py-2 text-sm min-h-20 resize-none"
                                     />
-                                )}
-                            </button>
-                        ))}
-                    </div>
+                                </label>
 
-                    <div className="p-4">
-                        <AnimatePresence mode="wait">
-                            {tab === 'pt' ? (
-                                <motion.div
-                                    key="pt"
-                                    initial={{ opacity: 0, y: 8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -8 }}
-                                    className="space-y-4"
-                                >
-                                    <label className="space-y-2 block">
-                                        <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle">
-                                            Introdução
-                                        </span>
-                                        <textarea
-                                            value={form.summary}
-                                            onChange={e =>
-                                                setForm(prev => ({
-                                                    ...prev,
-                                                    summary: e.target.value,
-                                                }))
-                                            }
-                                            placeholder="Apresentação geral sobre seus projetos..."
-                                            className="w-full rounded-lg border border-border-subtle/70 bg-background/60 px-3 py-2 text-sm min-h-20 resize-none"
-                                        />
-                                    </label>
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                            <FiFolder className="w-4 h-4" />
+                                            Projetos ({form.projects.length})
+                                        </h3>
+                                        <button
+                                            type="button"
+                                            onClick={addProject}
+                                            className="inline-flex items-center gap-2 rounded-lg border border-border-subtle px-3 py-1.5 text-sm hover:border-primary/60 transition-colors"
+                                        >
+                                            <FiPlus className="w-4 h-4" />
+                                            Novo Projeto
+                                        </button>
+                                    </div>
 
-                                    <div className="space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                                                <FiFolder className="w-4 h-4" />
-                                                Projetos ({form.projects.length})
-                                            </h3>
+                                    <Reorder.Group
+                                        axis="y"
+                                        values={form.projects}
+                                        onReorder={handleReorder}
+                                        className="space-y-3"
+                                    >
+                                        {form.projects.map((proj, index) => (
+                                            <Reorder.Item
+                                                key={proj.id}
+                                                value={proj}
+                                                className="cursor-grab active:cursor-grabbing"
+                                            >
+                                                <ProjectCard
+                                                    index={index}
+                                                    data={proj}
+                                                    expanded={expandedCards.has(proj.id)}
+                                                    onToggle={() => toggleCard(proj.id)}
+                                                    onChange={updates => updateProject(index, updates)}
+                                                    onRemove={() => removeProject(index)}
+                                                    onDuplicate={() => duplicateProject(index)}
+                                                />
+                                            </Reorder.Item>
+                                        ))}
+                                    </Reorder.Group>
+
+                                    {form.projects.length === 0 && (
+                                        <div className="rounded-lg border border-dashed border-border-subtle py-12 text-center">
+                                            <FiFolder className="w-8 h-8 mx-auto text-muted-foreground mb-3" />
+                                            <p className="text-sm text-muted-foreground mb-3">
+                                                Nenhum projeto cadastrado
+                                            </p>
                                             <button
                                                 type="button"
                                                 onClick={addProject}
-                                                className="inline-flex items-center gap-2 rounded-lg border border-border-subtle px-3 py-1.5 text-sm hover:border-primary/60 transition-colors"
+                                                className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-4 py-2 text-sm text-primary hover:bg-primary/20 transition-colors"
                                             >
                                                 <FiPlus className="w-4 h-4" />
-                                                Novo Projeto
+                                                Criar primeiro projeto
                                             </button>
                                         </div>
-
-                                        <Reorder.Group
-                                            axis="y"
-                                            values={form.projects}
-                                            onReorder={handleReorder}
-                                            className="space-y-3"
-                                        >
-                                            {form.projects.map((proj, index) => (
-                                                <Reorder.Item
-                                                    key={proj.id}
-                                                    value={proj}
-                                                    className="cursor-grab active:cursor-grabbing"
-                                                >
-                                                    <ProjectCard
-                                                        index={index}
-                                                        data={proj}
-                                                        expanded={expandedCards.has(proj.id)}
-                                                        onToggle={() => toggleCard(proj.id)}
-                                                        onChange={updates => updateProject(index, updates)}
-                                                        onRemove={() => removeProject(index)}
-                                                        onDuplicate={() => duplicateProject(index)}
-                                                    />
-                                                </Reorder.Item>
-                                            ))}
-                                        </Reorder.Group>
-
-                                        {form.projects.length === 0 && (
-                                            <div className="rounded-lg border border-dashed border-border-subtle py-12 text-center">
-                                                <FiFolder className="w-8 h-8 mx-auto text-muted-foreground mb-3" />
-                                                <p className="text-sm text-muted-foreground mb-3">
-                                                    Nenhum projeto cadastrado
-                                                </p>
-                                                <button
-                                                    type="button"
-                                                    onClick={addProject}
-                                                    className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-4 py-2 text-sm text-primary hover:bg-primary/20 transition-colors"
-                                                >
-                                                    <FiPlus className="w-4 h-4" />
-                                                    Criar primeiro projeto
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="translations"
-                                    initial={{ opacity: 0, y: 8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -8 }}
-                                    className="space-y-4"
-                                >
-                                    <TranslationsPreview
-                                        translations={form.translations}
-                                        onTranslationsChange={handleTranslationsChange}
-                                    />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="translations"
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -8 }}
+                                className="space-y-4"
+                            >
+                                <TranslationsPreview
+                                    translations={form.translations}
+                                    onTranslationsChange={handleTranslationsChange}
+                                />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
-
-                <AnimatePresence>
-                    {message && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -8 }}
-                            className="rounded-lg border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100"
-                        >
-                            {message}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                <AnimatePresence>
-                    {error && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -8 }}
-                            className="rounded-lg border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100"
-                        >
-                            {error}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
             </div>
-        );
-    }
+
+            <AnimatePresence>
+                {message && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        className="rounded-lg border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100"
+                    >
+                        {message}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {error && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        className="rounded-lg border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100"
+                    >
+                        {error}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
 
     interface ProjectCardProps {
         index: number;
@@ -1026,5 +1029,3 @@ export default function ProjectsSectionEditor({ initial }: Props) {
             </div>
         );
     }
-
-}

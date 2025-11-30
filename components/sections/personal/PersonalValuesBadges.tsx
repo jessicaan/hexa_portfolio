@@ -1,9 +1,9 @@
-import { type PersonalContent, type Translation } from '@/lib/content/schema';
-import { Rgb } from '@/types/custom';
+import { type PersonalContent, type PersonalTranslation } from '@/lib/content/schema';
+import { Rgb } from '@/lib/types/custom';
 
 interface PersonalValuesBadgesProps {
   values: PersonalContent['values'];
-  translatedValues?: Translation['personal']['values'];
+  translatedValues?: PersonalTranslation['values'];
   primaryColor: string;
   primaryRgb: Rgb;
   isDark: boolean;
