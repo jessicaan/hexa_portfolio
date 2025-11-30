@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/components/theme/ThemeProvider';
 import { FiMoon, FiSun, FiChevronDown, FiSettings } from 'react-icons/fi';
 import { HiOutlineSparkles } from 'react-icons/hi2';
+import { useTranslation } from 'react-i18next';
 
 function hslToHex(hslString: string): string {
   const parts = hslString.split(' ').map(v => parseFloat(v));
@@ -39,6 +40,7 @@ export default function CornerControls() {
   const [isExpanded, setIsExpanded] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const { t } = useTranslation();
   const isDark = theme === 'dark';
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
@@ -112,7 +114,7 @@ export default function CornerControls() {
                       <div className="flex items-center gap-2 text-muted-foreground-subtle">
                         <HiOutlineSparkles className="w-4 h-4" />
                         <span className="text-[10px] tracking-[0.2em] uppercase">
-                          Accent Color
+                          {t('siteControls.accentColor')}
                         </span>
                       </div>
                     </div>
@@ -173,7 +175,7 @@ export default function CornerControls() {
             <motion.button
               type="button"
               onClick={toggleTheme}
-              aria-label={isDark ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+              aria-label={isDark ? t('siteControls.switchToLight') : t('siteControls.switchToDark')}
               className="flex h-10 items-center justify-center gap-2 px-3 rounded-xl border border-border-subtle bg-surface-soft text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all duration-300"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -189,7 +191,7 @@ export default function CornerControls() {
                     className="flex items-center gap-2"
                   >
                     <FiSun className="h-4 w-4" />
-                    <span className="text-[10px] tracking-wider uppercase">Claro</span>
+                    <span className="text-[10px] tracking-wider uppercase">{t('siteControls.light')}</span>
                   </motion.div>
                 ) : (
                   <motion.div
@@ -201,7 +203,7 @@ export default function CornerControls() {
                     className="flex items-center gap-2"
                   >
                     <FiMoon className="h-4 w-4" />
-                    <span className="text-[10px] tracking-wider uppercase">Escuro</span>
+                    <span className="text-[10px] tracking-wider uppercase">{t('siteControls.dark')}</span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -231,7 +233,7 @@ export default function CornerControls() {
               >
                 {isDark ? <FiSun className="h-5 w-5" /> : <FiMoon className="h-5 w-5" />}
                 <span className="text-xs tracking-wider uppercase flex-1 text-left">
-                  {isDark ? 'Claro' : 'Escuro'}
+                  {isDark ? t('siteControls.light') : t('siteControls.dark')}
                 </span>
               </motion.button>
 
@@ -239,7 +241,7 @@ export default function CornerControls() {
 
               <div className="p-2">
                 <p className="text-[9px] tracking-wider uppercase text-muted-foreground-subtle mb-3 px-1">
-                  Accent Color
+                  {t('siteControls.accentColor')}
                 </p>
                 <div className="grid grid-cols-4 gap-2">
                   {presets.map((preset) => {

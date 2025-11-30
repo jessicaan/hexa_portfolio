@@ -31,5 +31,12 @@
     "skills": "Compétences",
     "personal": "Personnel",
     "contact": "Contact"
+  },
+  "siteControls": {
+    "accentColor": "Couleur d'accentuation",
+    "switchToLight": "Passer en mode clair",
+    "switchToDark": "Passer en mode sombre",
+    "light": "Clair",
+    "dark": "Sombre"
   }
 }

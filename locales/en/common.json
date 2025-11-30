@@ -31,5 +31,12 @@
     "skills": "Skills",
     "personal": "Personal",
     "contact": "Contact"
+  },
+  "siteControls": {
+    "accentColor": "Accent Color",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "light": "Light",
+    "dark": "Dark"
   }
 }

@@ -31,5 +31,12 @@
     "skills": "Habilidades",
     "personal": "Pessoal",
     "contact": "Contato"
+  },
+  "siteControls": {
+    "accentColor": "Cor de Destaque",
+    "switchToLight": "Mudar para modo claro",
+    "switchToDark": "Mudar para modo escuro",
+    "light": "Claro",
+    "dark": "Escuro"
   }
 }

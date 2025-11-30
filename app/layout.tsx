@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio | Frontend Developer",
+  title: "Jessica Vieira | Portfolio",
   description: "Immersive digital experiences with motion, microinteractions and thoughtful interfaces.",
 };
 
