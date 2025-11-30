@@ -17,7 +17,10 @@ This project is built upon a modern, robust, and scalable technology stack, care
 
 ![HexaGrid Portfolio Preview](public/84612672-1A72-4AB2-A095-5EC92A92A703.gif)
 
-_Witness 5 seconds of the HexaGrid Portfolio in action. This visual proof offers a concise yet comprehensive tour, highlighting the fluid user experience, responsive design, and core interactive features that define this project. It's designed to give you an immediate understanding of the application's capabilities and aesthetic._
+_Witness a few seconds of the HexaGrid Portfolio in action. This visual proof offers a concise yet comprehensive tour, highlighting the fluid user experience, responsive design, and core interactive features that define this project. It's designed to give you an immediate understanding of the application's capabilities and aesthetic._
+
+![HexaGrid Portfolio Preview](public/D4C933DE-86AD-41C1-80E4-622949BF0B00.gif)
+
 
 ## 📐 Architecture Diagram
 
