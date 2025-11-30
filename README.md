@@ -50,13 +50,17 @@ Instead of manually translating every content update into 4 languages, I enginee
 
   - **The Rationale:** As the sole user of the CMS, investing time in translating or over-engineering the admin interface would yield zero ROI. This reflects a Product Engineering mindset: **perfect the user experience, but be pragmatic with internal operations.**
 
+* **Pragmatic Approach to Internal Tools (The Admin Panel)**: Initially, this repository was intended to be private. As a result, the Administrative Panel (`/admin`) was built with a "Velocity First" mindset. Unlike the public-facing application—which is highly modular and fully internationalized—the Admin dashboard is hardcoded in **Portuguese (PT-BR)** and less strictly componentized.
+
+  - **The Rationale:** As the sole user of the CMS, investing time in translating or over-engineering the admin interface would yield zero ROI. This reflects a Product Engineering mindset: **perfect the user experience, but be pragmatic with internal operations.**
+
 This section highlights critical architectural and technical decisions, demonstrating a pragmatic and well-reasoned approach to software engineering that balances technical purity with real-world constraints and objectives. Each trade-off reflects a deep understanding of system design, performance optimization, and resource management.
 
-- **Firebase (NoSQL) for Speed & Cost-Efficiency**: Instead of traditional SQL databases that often suffer from "cold start" latencies on free tiers, Firebase's NoSQL solution was chosen to ensure near-instantaneous data retrieval. This decision was driven by a strategic focus on delivering an exceptionally fast user experience (UX) and optimizing cloud infrastructure costs, acknowledging that for a portfolio's specific data model, the benefits of relational integrity were outweighed by the need for immediate responsiveness and economic efficiency.
+- **Firebase (NoSQL) for Speed & Cost-Efficiency**: Instead of traditional SQL databases that often suffer from "cold start" latencies on free tiers, Firebase's NoSQL solution was chosen to ensure near-instantaneous data retrieval. This decision was driven by a strategic focus on delivering an exceptionally fast user experience (UX) and optimizing cloud infrastructure costs, acknowledging that for a portfolio's specific data model, the benefits of relational integrity were outweighed by the need for immediate responsiveness and economic efficiency. This showcases a keen awareness of cloud architecture, performance engineering, and cost-benefit analysis.
 
-- **Contextual O(N²) Complexity for Hexagonal Grid Rendering**: While the rendering of the hexagonal network, particularly the connections between nodes, theoretically presents an O(N²) complexity, this was a deliberate and optimized choice. For the intended visual scale of this portfolio (typically fewer than 50 interactive nodes), the performance impact is negligible.
+- **Contextual O(N²) Complexity for Hexagonal Grid Rendering**: While the rendering of the hexagonal network, particularly the connections between nodes, theoretically presents an O(N²) complexity, this was a deliberate and optimized choice. For the intended visual scale of this portfolio (typically fewer than 50 interactive nodes), the performance impact is negligible. This decision demonstrates an understanding that theoretical complexity must be evaluated within practical constraints and expected usage patterns, prioritizing rich visual interaction without compromising perceived performance, rather than over-engineering for hypothetical extreme scales.
 
-- **Proactive WebP Optimization on Frontend for Enhanced UX**: To guarantee superior loading times and reduced bandwidth consumption, images are dynamically converted and optimized to WebP format directly on the frontend. This proactive performance engineering measure significantly enhances the overall user experience, contributes positively to SEO rankings by improving Core Web Vitals, and ensures the portfolio remains fast and accessible across various network conditions.
+* **Proactive WebP Optimization on Frontend for Enhanced UX**: To guarantee superior loading times and reduced bandwidth consumption, images are dynamically converted and optimized to WebP format directly on the frontend. This proactive performance engineering measure significantly enhances the overall user experience, contributes positively to SEO rankings by improving Core Web Vitals, and ensures the portfolio remains fast and accessible across various network conditions.
 
 ## ⚙️ Custom Headless CMS: Elevating Content Management
 
@@ -65,6 +69,7 @@ Beyond the frontend, a powerful and highly customized administrative panel was d
 - **Tailored Content Structure**: Complete control over the data model, perfectly aligned with the portfolio's unique content requirements without unnecessary overhead.
 - **Enhanced Performance**: Optimized data fetching and management specifically for the application's needs, avoiding the bloat often associated with generic CMS platforms.
 - **Advanced Type Safety**: Utilizing TypeScript Generics significantly reduces runtime errors and improves developer experience, ensuring data consistency and integrity across the application.
+- **Demonstration of Advanced Engineering**: Building a custom CMS showcases not just proficiency in frontend frameworks, but also a deep understanding of full-stack architecture, data modeling, and robust software design principles.
 
 ## 🔒 Robust Security with Firestore Rules
 
@@ -133,9 +138,10 @@ Ensure you have the following software installed on your system:
 ## 📞 Connect & Explore Opportunities
 
 I am actively seeking challenging **Product Engineering roles** where I can leverage my expertise to build innovative solutions and drive product success. Let's connect and discuss how my skills can contribute to your team.
+I am actively seeking challenging **Product Engineering roles** where I can leverage my expertise to build innovative solutions and drive product success. Let's connect and discuss how my skills can contribute to your team.
 
-- **LinkedIn**: https://www.linkedin.com/in/jessicaaneci
-- **Email**: jessicaaneci@gmail.com
-- **Live Demo**: [\Experience the HexaGrid Portfolio live!\](https://www.jessicavieira.tech/)
+- **LinkedIn**: [Your LinkedIn Profile URL]
+- **Email**: [Your Email Address]
+- **Live Demo**: [Link to your Live Demo] (Experience the HexaGrid Portfolio live!)
 
 Feel free to reach out with any questions, collaboration proposals, or career opportunities.
