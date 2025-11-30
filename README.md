@@ -15,7 +15,7 @@ This project is built upon a modern, robust, and scalable technology stack, care
 
 ## ✨ Visual Proof
 
-(Insert a high-quality GIF or a short video here. It should dynamically showcase the interactive hexagonal navigation, smooth transitions between sections, and the seamless language switching functionality. This visual demonstration is crucial for conveying the project's polish and interactivity.)
+
 
 _Witness the HexaGrid Portfolio in action. This visual proof offers a concise yet comprehensive tour, highlighting the fluid user experience, responsive design, and core interactive features that define this project. It's designed to give you an immediate understanding of the application's capabilities and aesthetic._
 
