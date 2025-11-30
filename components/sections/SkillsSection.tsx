@@ -1,183 +1,114 @@
-'use client';
+'use client'
 
-import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import ReactiveGridBackground from '../background/ReactiveGridBackground';
-import { useTheme } from '../theme/ThemeProvider';
-import type { IconType } from 'react-icons';
-import {
-  SiTypescript,
-  SiJavascript,
-  SiReact,
-  SiNextdotjs,
-  SiTailwindcss,
-  SiFramer,
-  SiGreensock,
-  SiFigma,
-  SiGit,
-  SiNodedotjs,
-  SiPrisma,
-  SiSupabase,
-  SiFirebase,
-  SiPostgresql,
-  SiMongodb,
-  SiDocker,
-  SiPython,
-  SiVuedotjs,
-  SiAngular,
-  SiGraphql,
-  SiRedis,
-  SiAmazonwebservices,
-  SiVercel,
-  SiGithub,
-  SiHtml5,
-  SiCss3,
-  SiSass,
-} from 'react-icons/si';
-import type { SkillsContent, LanguageCode } from '@/lib/content/schema';
-import { loadSkillsContent } from '@/lib/content/client';
-import { useTranslation } from 'react-i18next';
+import { useMemo, useState, useEffect } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
+import * as SiIcons from 'react-icons/si'
 
-type SkillLevel = 1 | 2 | 3 | 4 | 5;
+import { loadSkillsContent } from '@/lib/content/client'
+import type { LanguageCode, SkillsContent } from '@/lib/content/schema'
+import { getTechById } from '@/lib/content/technologies'
 
-const skillIconMap: Record<string, IconType> = {
-  typescript: SiTypescript,
-  javascript: SiJavascript,
-  react: SiReact,
-  'next.js': SiNextdotjs,
-  nextjs: SiNextdotjs,
-  'tailwind css': SiTailwindcss,
-  tailwindcss: SiTailwindcss,
-  tailwind: SiTailwindcss,
-  'framer motion': SiFramer,
-  framer: SiFramer,
-  gsap: SiGreensock,
-  figma: SiFigma,
-  git: SiGit,
-  'node.js': SiNodedotjs,
-  nodejs: SiNodedotjs,
-  prisma: SiPrisma,
-  supabase: SiSupabase,
-  firebase: SiFirebase,
-  postgresql: SiPostgresql,
-  postgres: SiPostgresql,
-  mongodb: SiMongodb,
-  docker: SiDocker,
-  python: SiPython,
-  vue: SiVuedotjs,
-  vuejs: SiVuedotjs,
-  angular: SiAngular,
-  graphql: SiGraphql,
-  redis: SiRedis,
-  aws: SiAmazonwebservices,
-  vercel: SiVercel,
-  github: SiGithub,
-  html: SiHtml5,
-  html5: SiHtml5,
-  css: SiCss3,
-  css3: SiCss3,
-  sass: SiSass,
-  scss: SiSass,
-};
+import ReactiveGridBackground from '../background/ReactiveGridBackground'
+import { useTheme } from '../theme/ThemeProvider'
 
-const getSkillIcon = (name: string): IconType | null => {
-  const key = name.toLowerCase().trim();
-  return skillIconMap[key] || skillIconMap[key.replace(/\s+/g, '')] || skillIconMap[key.replace(/\./g, '')] || null;
-};
-
-const levelWidths: Record<SkillLevel, string> = {
-  1: '20%',
-  2: '40%',
-  3: '60%',
-  4: '80%',
-  5: '100%',
-};
+const proficiencyLevels = [
+  { name: 'Iniciante', width: '20%' },
+  { name: 'Intermediário', width: '50%' },
+  { name: 'Avançado', width: '100%' },
+]
 
 export default function SkillsSection() {
-  const { i18n } = useTranslation();
-  const language = i18n.language as LanguageCode;
+  const { i18n } = useTranslation()
+  const language = i18n.language as LanguageCode
 
-  const [skillsContent, setSkillsContent] = useState<SkillsContent | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
+  const [skillsContent, setSkillsContent] = useState<SkillsContent | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0)
 
-  const { primaryRgb, theme } = useTheme();
-  const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`;
-  const isDark = theme === 'dark';
+  const { primaryRgb, theme } = useTheme()
+  const primaryColor = `rgb(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b})`
+  const isDark = theme === 'dark'
 
   useEffect(() => {
     const fetchSkills = async () => {
       try {
-        const data = await loadSkillsContent();
-        setSkillsContent(data);
+        const data = await loadSkillsContent()
+        setSkillsContent(data)
       } catch (error) {
-        console.error('Failed to load skills content:', error);
+        console.error('Failed to load skills content:', error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-    fetchSkills();
-  }, []);
+    }
+    fetchSkills()
+  }, [])
 
   const translation = useMemo(() => {
-    if (!skillsContent) return null;
-    return skillsContent.translations[language] || skillsContent.translations['en'];
-  }, [skillsContent, language]);
+    if (!skillsContent) return null
+    return (
+      skillsContent.translations[language] || skillsContent.translations['en']
+    )
+  }, [skillsContent, language])
 
   const categories = useMemo(() => {
-    if (!skillsContent?.categories) return [];
+    if (!skillsContent?.categories) return []
 
     return skillsContent.categories.map((category, idx) => {
-      const translatedCategory = translation?.categories?.[idx];
+      const translatedCategory = translation?.categories?.[idx]
       const skills = (category.skills || []).map((skill, skillIdx) => ({
         ...skill,
         name: translatedCategory?.skills?.[skillIdx]?.name || skill.name,
-      }));
+      }))
 
       return {
         ...category,
         name: translatedCategory?.name || category.name,
         skills,
-      };
-    });
-  }, [skillsContent, translation]);
+      }
+    })
+  }, [skillsContent, translation])
 
-  const activeCategory = categories[activeCategoryIndex] || categories[0];
+  const activeCategory = categories[activeCategoryIndex] || categories[0]
 
   if (loading) {
     return (
-      <main className="relative w-screen h-screen overflow-hidden">
+      <main className="relative h-screen w-screen overflow-hidden">
         <ReactiveGridBackground />
-        <div className="relative z-10 flex items-center justify-center w-full h-full">
+        <div className="relative z-10 flex h-full w-full items-center justify-center">
           <div
-            className="rounded-2xl border border-border-subtle backdrop-blur-md p-8"
+            className="rounded-2xl border border-border-subtle p-8 backdrop-blur-md"
             style={{
-              background: isDark ? 'rgba(20, 20, 25, 0.7)' : 'rgba(255, 255, 255, 0.5)',
+              background: isDark
+                ? 'rgba(20, 20, 25, 0.7)'
+                : 'rgba(255, 255, 255, 0.5)',
             }}
           >
             <p className="text-muted-foreground">Loading skills...</p>
           </div>
         </div>
       </main>
-    );
+    )
   }
 
   if (!categories.length) {
     return (
-      <main className="relative w-screen h-screen overflow-hidden">
+      <main className="relative h-screen w-screen overflow-hidden">
         <ReactiveGridBackground />
-        <div className="relative z-10 flex items-center justify-center w-full h-full">
+        <div className="relative z-10 flex h-full w-full items-center justify-center">
           <div
-            className="rounded-2xl border border-border-subtle backdrop-blur-md p-8 text-center"
+            className="rounded-2xl border border-border-subtle p-8 text-center backdrop-blur-md"
             style={{
-              background: isDark ? 'rgba(20, 20, 25, 0.7)' : 'rgba(255, 255, 255, 0.5)',
+              background: isDark
+                ? 'rgba(20, 20, 25, 0.7)'
+                : 'rgba(255, 255, 255, 0.5)',
             }}
           >
             <p className="text-muted-foreground">No skills registered yet.</p>
           </div>
         </div>
       </main>
-    );
+    )
   }
 
   return (
@@ -190,26 +121,36 @@ export default function SkillsSection() {
           background: transparent;
         }
         .skills-scrollbar::-webkit-scrollbar-thumb {
-          background-color: rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.3);
+          background-color: rgba(
+            ${primaryRgb.r},
+            ${primaryRgb.g},
+            ${primaryRgb.b},
+            0.3
+          );
           border-radius: 3px;
         }
         .skills-scrollbar::-webkit-scrollbar-thumb:hover {
-          background-color: rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.5);
+          background-color: rgba(
+            ${primaryRgb.r},
+            ${primaryRgb.g},
+            ${primaryRgb.b},
+            0.5
+          );
         }
       `}</style>
 
-      <main className="relative w-screen h-screen overflow-hidden">
+      <main className="relative h-screen w-screen overflow-hidden">
         <ReactiveGridBackground />
 
-        <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden skills-scrollbar">
-          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-8 md:py-12 lg:py-16">
+        <div className="skills-scrollbar relative z-10 h-full w-full overflow-y-auto overflow-x-hidden">
+          <div className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 md:py-12 lg:px-12 lg:py-16">
             <motion.header
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               className="mb-10 lg:mb-14"
             >
-              <div className="flex items-center gap-3 mb-4">
+              <div className="mb-4 flex items-center gap-3">
                 <span
                   className="h-px w-10"
                   style={{
@@ -221,17 +162,17 @@ export default function SkillsSection() {
                 </p>
               </div>
               <h1
-                className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight mb-4"
+                className="mb-4 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl"
                 style={{ color: isDark ? '#fff' : 'var(--foreground)' }}
               >
                 {translation?.title || 'Stack & Skills'}
               </h1>
-              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-3xl">
+              <p className="max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
                 {translation?.description || ''}
               </p>
             </motion.header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -239,32 +180,35 @@ export default function SkillsSection() {
                 className="lg:col-span-4"
               >
                 <div
-                  className="rounded-2xl border border-border-subtle backdrop-blur-md p-5"
+                  className="rounded-2xl border border-border-subtle p-5 backdrop-blur-md"
                   style={{
-                    background: isDark ? 'rgba(20, 20, 25, 0.7)' : 'rgba(255, 255, 255, 0.5)',
-                    boxShadow: `0 8px 32px rgba(0,0,0,${isDark ? 0.3 : 0.1})`,
+                    background: isDark
+                      ? 'rgba(20, 20, 25, 0.7)'
+                      : 'rgba(255, 255, 255, 0.5)',
+                    boxShadow: `0 8px 32px rgba(0,0,0,${isDark ? 0.3 : 0.1
+                      })`,
                   }}
                 >
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="mb-4 flex items-center gap-2">
                     <span
-                      className="w-1 h-4 rounded-full"
+                      className="h-4 w-1 rounded-full"
                       style={{ backgroundColor: primaryColor }}
                     />
-                    <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground">
+                    <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
                       Categories
                     </p>
                   </div>
 
                   <div className="space-y-2">
                     {categories.map((category, index) => {
-                      const isActive = index === activeCategoryIndex;
+                      const isActive = index === activeCategoryIndex
 
                       return (
                         <button
                           key={category.name}
                           onClick={() => setActiveCategoryIndex(index)}
                           onMouseEnter={() => setActiveCategoryIndex(index)}
-                          className="w-full text-left group"
+                          className="group w-full text-left"
                         >
                           <div
                             className="relative rounded-xl border p-4 transition-all duration-300"
@@ -290,8 +234,12 @@ export default function SkillsSection() {
 
                             <div className="pl-3">
                               <p
-                                className="text-sm font-medium mb-1 transition-colors"
-                                style={{ color: isActive ? primaryColor : 'var(--foreground)' }}
+                                className="mb-1 text-sm font-medium transition-colors"
+                                style={{
+                                  color: isActive
+                                    ? primaryColor
+                                    : 'var(--foreground)',
+                                }}
                               >
                                 {category.name}
                               </p>
@@ -301,33 +249,35 @@ export default function SkillsSection() {
                             </div>
                           </div>
                         </button>
-                      );
+                      )
                     })}
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-border-subtle">
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">
+                  <div className="mt-6 border-t border-border-subtle pt-4">
+                    <p className="mb-3 text-[10px] uppercase tracking-widest text-muted-foreground">
                       {translation?.legendTitle || 'Proficiency'}
                     </p>
                     <div className="space-y-2">
-                      {([1, 2, 3, 4, 5] as SkillLevel[]).map(level => (
-                        <div key={level} className="flex items-center gap-3">
+                      {proficiencyLevels.map((level) => (
+                        <div key={level.name} className="flex items-center gap-3">
                           <div
-                            className="w-16 h-1.5 rounded-full overflow-hidden"
+                            className="h-1.5 w-16 overflow-hidden rounded-full"
                             style={{
-                              background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                              background: isDark
+                                ? 'rgba(255,255,255,0.1)'
+                                : 'rgba(0,0,0,0.08)',
                             }}
                           >
                             <div
                               className="h-full rounded-full"
                               style={{
-                                width: levelWidths[level],
+                                width: level.width,
                                 background: `linear-gradient(to right, ${primaryColor}, hsl(var(--secondary)))`,
                               }}
                             />
                           </div>
                           <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                            {translation?.levels?.[level] || `Level ${level}`}
+                            {level.name}
                           </span>
                         </div>
                       ))}
@@ -350,10 +300,13 @@ export default function SkillsSection() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.3 }}
-                      className="rounded-2xl border border-border-subtle overflow-hidden backdrop-blur-md"
+                      className="overflow-hidden rounded-2xl border border-border-subtle backdrop-blur-md"
                       style={{
-                        background: isDark ? 'rgba(20, 20, 25, 0.7)' : 'rgba(255, 255, 255, 0.5)',
-                        boxShadow: `0 8px 32px rgba(0,0,0,${isDark ? 0.3 : 0.1})`,
+                        background: isDark
+                          ? 'rgba(20, 20, 25, 0.7)'
+                          : 'rgba(255, 255, 255, 0.5)',
+                        boxShadow: `0 8px 32px rgba(0,0,0,${isDark ? 0.3 : 0.1
+                          })`,
                       }}
                     >
                       <div
@@ -364,29 +317,34 @@ export default function SkillsSection() {
                       />
 
                       <div className="p-6 lg:p-8">
-                        <div className="flex items-center gap-3 mb-6">
+                        <div className="mb-6 flex items-center gap-3">
                           <span
                             className="h-px w-8"
                             style={{
                               background: `linear-gradient(to right, ${primaryColor}, transparent)`,
                             }}
                           />
-                          <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground">
+                          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
                             {activeCategory.name}
                           </p>
                         </div>
 
                         <div className="grid gap-4 sm:grid-cols-2">
                           {activeCategory.skills.map((skill, idx) => {
-                            const Icon = getSkillIcon(skill.name);
-                            const level = skill.level as SkillLevel;
+                            const tech = getTechById(skill.name)
+                            const Icon = tech?.icon
+                              ? (SiIcons as any)[tech.icon]
+                              : null
 
                             return (
                               <motion.div
                                 key={skill.name}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3, delay: idx * 0.05 }}
+                                transition={{
+                                  duration: 0.3,
+                                  delay: idx * 0.05,
+                                }}
                                 className="group rounded-xl border border-border-subtle p-4 transition-all duration-300 hover:border-border"
                                 style={{
                                   background: isDark
@@ -394,41 +352,47 @@ export default function SkillsSection() {
                                     : 'rgba(255, 255, 255, 0.3)',
                                 }}
                               >
-                                <div className="flex items-center justify-between mb-3">
+                                <div className="mb-3 flex items-center justify-between">
                                   <div className="flex items-center gap-2">
                                     {Icon && (
                                       <Icon
-                                        className="w-5 h-5 transition-colors"
-                                        style={{ color: primaryColor }}
+                                        className="h-5 w-5 transition-colors"
+                                        style={{ color: tech?.color }}
                                       />
                                     )}
                                     <span className="text-sm font-medium text-foreground">
-                                      {skill.name}
+                                      {tech?.name || skill.name}
                                     </span>
                                   </div>
                                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                                    {translation?.levels?.[level] || ''}
+                                    {skill.level}%
                                   </span>
                                 </div>
 
                                 <div
-                                  className="w-full h-1.5 rounded-full overflow-hidden"
+                                  className="h-1.5 w-full overflow-hidden rounded-full"
                                   style={{
-                                    background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                                    background: isDark
+                                      ? 'rgba(255,255,255,0.1)'
+                                      : 'rgba(0,0,0,0.08)',
                                   }}
                                 >
                                   <motion.div
                                     className="h-full rounded-full"
                                     style={{
-                                      background: `linear-gradient(to right, ${primaryColor}, hsl(var(--secondary)))`,
+                                      background: `linear-gradient(to right, ${tech?.color || primaryColor
+                                        }, hsl(var(--secondary)))`,
                                     }}
                                     initial={{ width: 0 }}
-                                    animate={{ width: levelWidths[level] }}
-                                    transition={{ duration: 0.6, delay: idx * 0.05 }}
+                                    animate={{ width: `${skill.level}%` }}
+                                    transition={{
+                                      duration: 0.6,
+                                      delay: idx * 0.05 + 0.1,
+                                    }}
                                   />
                                 </div>
                               </motion.div>
-                            );
+                            )
                           })}
                         </div>
                       </div>
@@ -441,5 +405,5 @@ export default function SkillsSection() {
         </div>
       </main>
     </>
-  );
+  )
 }

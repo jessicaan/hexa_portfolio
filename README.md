@@ -136,6 +136,6 @@ I am actively seeking challenging **Product Engineering roles** where I can leve
 
 - **LinkedIn**: https://www.linkedin.com/in/jessicaaneci
 - **Email**: jessicaaneci@gmail.com
-- **Live Demo**: [Link to the Live Demo will come here] (Experience the HexaGrid Portfolio live!)
+- **Live Demo**: [\Experience the HexaGrid Portfolio live!\](https://www.jessicavieira.tech/)
 
 Feel free to reach out with any questions, collaboration proposals, or career opportunities.

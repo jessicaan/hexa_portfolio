@@ -34,6 +34,25 @@ interface ExtendedCategory extends Omit<SkillCategory, 'skills'> {
     id: string;
 }
 
+// Mapa de valores numéricos para cada nível
+const levelValues: Record<SkillLevel, number> = {
+    beginner: 30,
+    intermediate: 70,
+    advanced: 100,
+};
+
+const levelLabels: Record<SkillLevel, string> = {
+    beginner: 'Iniciante',
+    intermediate: 'Intermediário',
+    advanced: 'Avançado',
+};
+
+const levelColors: Record<SkillLevel, string> = {
+    beginner: '#3b82f6',
+    intermediate: '#f59e0b',
+    advanced: '#10b981',
+};
+
 export default function ModernSkillsEditor({ initial }: Props) {
     const [categories, setCategories] = useState<ExtendedCategory[]>(
         initial.categories.map((cat, idx) => ({
@@ -99,7 +118,12 @@ export default function ModernSkillsEditor({ initial }: Props) {
                         ...c,
                         skills: [
                             ...c.skills,
-                            { name: '', level: 50, skillLevel: 'intermediate' },
+                            {
+                                name: '',
+                                // Inicializa com o valor numérico correto do mapa
+                                level: levelValues['intermediate'],
+                                skillLevel: 'intermediate'
+                            },
                         ],
                     }
                     : c
@@ -171,7 +195,17 @@ export default function ModernSkillsEditor({ initial }: Props) {
                             level: s.level,
                         })),
                     })),
-                    translations: initial.translations,
+                    translations: {
+                        ...initial.translations,
+                        pt: {
+                            ...initial.translations.pt,
+                            summary: summary,
+                            categories: categories.map(cat => ({
+                                name: cat.name,
+                                skills: cat.skills.map(s => ({ name: s.name })),
+                            })),
+                        }
+                    }
                 };
                 await saveSkillsContent(payload);
                 setMessage('Skills salvos com sucesso.');
@@ -186,30 +220,41 @@ export default function ModernSkillsEditor({ initial }: Props) {
         setError(null);
         startTranslate(async () => {
             try {
-                const translations = await autoTranslateSkills({
+                const newTranslations = await autoTranslateSkills({
                     summary,
                     categories: categories.map(cat => ({
                         name: cat.name,
-                        skills: cat.skills.map(s => ({ name: s.name, level: s.level })),
+                        skills: cat.skills.map(s => ({
+                            name: s.name,
+                            level: s.level,
+                            techId: s.techId,
+                            skillLevel: s.skillLevel
+                        })),
                     })),
                 });
-                setMessage('Traduções geradas com sucesso.');
+
+                const payload: SkillsContent = {
+                    summary,
+                    categories: categories.map(cat => ({
+                        name: cat.name,
+                        skills: cat.skills.map(s => ({
+                            name: s.name,
+                            level: s.level,
+                        })),
+                    })),
+                    translations: newTranslations,
+                };
+
+                await saveSkillsContent(payload);
+
+                // Atualiza o estado inicial para refletir as novas traduções na UI
+                initial.translations = newTranslations;
+
+                setMessage('Traduções geradas e salvas com sucesso.');
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Erro ao traduzir.');
             }
         });
-    };
-
-    const levelLabels: Record<SkillLevel, string> = {
-        beginner: 'Iniciante',
-        intermediate: 'Intermediário',
-        advanced: 'Avançado',
-    };
-
-    const levelColors: Record<SkillLevel, string> = {
-        beginner: '#3b82f6',
-        intermediate: '#f59e0b',
-        advanced: '#10b981',
     };
 
     return (
@@ -389,11 +434,14 @@ export default function ModernSkillsEditor({ initial }: Props) {
 
                                                                     <select
                                                                         value={skill.skillLevel || 'intermediate'}
-                                                                        onChange={e =>
+                                                                        onChange={e => {
+                                                                            const newLevel = e.target.value as SkillLevel;
                                                                             updateSkill(cat.id, skillIdx, {
-                                                                                skillLevel: e.target.value as SkillLevel,
-                                                                            })
-                                                                        }
+                                                                                skillLevel: newLevel,
+                                                                                // Atualiza também o valor numérico
+                                                                                level: levelValues[newLevel]
+                                                                            });
+                                                                        }}
                                                                         className="rounded-lg border border-border-subtle/70 bg-background/60 px-3 py-2 text-sm focus:outline-none focus:border-primary/60 transition-colors"
                                                                         style={{
                                                                             color: levelColors[skill.skillLevel || 'intermediate'],

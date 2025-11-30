@@ -437,7 +437,8 @@ function ExperienceCard({
                         <option value="">Selecione...</option>
                         <option value="CLT">CLT</option>
                         <option value="PJ">PJ</option>
-                        <option value="PJ">PJ - Full-time</option>
+                        <option value="Contractor">Independent Contractor</option>
+                        <option value="PJ-Integral">PJ - Full-time</option>
                         <option value="Part-time">Part-time</option>
                         <option value="Freelancer">Freelancer</option>
                         <option value="Estágio">Estágio</option>

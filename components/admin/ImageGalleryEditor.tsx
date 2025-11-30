@@ -195,7 +195,7 @@ export default function ImageGalleryEditor({ images, onChange, folder = 'project
                                 type="text"
                                 value={img.description ?? ''}
                                 onChange={(e) => handleDescriptionChange(img.id, e.target.value)}
-                                placeholder="Descri��ǜo da imagem"
+                                placeholder="Descrição da imagem"
                                 className="mt-2 w-full rounded-md border border-border-subtle bg-background/60 px-2 py-1 text-xs"
                             />
                         </Reorder.Item>

@@ -28,9 +28,18 @@ export async function saveSkillsContent(payload: SkillsContent) {
   );
 }
 
+interface SkillCategoryWithTech extends Omit<SkillCategory, 'skills'> {
+  skills: {
+    name: string;
+    level: number;
+    techId?: string;
+    skillLevel?: 'beginner' | 'intermediate' | 'advanced';
+  }[];
+}
+
 export async function autoTranslateSkills(base: {
   summary: string;
-  categories: SkillCategory[];
+  categories: SkillCategoryWithTech[];
 }): Promise<SkillsContent['translations']> {
   const result = await translateWithGemini({
     summary: base.summary,
@@ -46,10 +55,30 @@ export async function autoTranslateSkills(base: {
     if (!Array.isArray(translatedCategories)) {
       return base.categories.map((c) => ({
         name: c.name,
-        skills: c.skills.map((s) => ({ name: s.name })),
+        skills: c.skills.map((s) => ({
+          name: s.name,
+          level: s.level,
+          techId: s.techId,
+        })),
       }));
     }
-    return translatedCategories;
+
+    return translatedCategories.map((translatedCat, catIndex) => {
+      const originalCat = base.categories[catIndex];
+
+      return {
+        name: translatedCat.name,
+        skills: translatedCat.skills.map((translatedSkill, skillIndex) => {
+          const originalSkill = originalCat?.skills[skillIndex];
+
+          return {
+            name: translatedSkill.name,
+            level: originalSkill?.level ?? 0,
+            techId: originalSkill?.techId,
+          };
+        }),
+      };
+    });
   };
 
   return {
@@ -73,7 +102,11 @@ export async function autoTranslateSkills(base: {
       summary: base.summary,
       categories: base.categories.map((c) => ({
         name: c.name,
-        skills: c.skills.map((s) => ({ name: s.name })),
+        skills: c.skills.map((s) => ({
+          name: s.name,
+          level: s.level,
+          techId: s.techId,
+        })),
       })),
     },
   };

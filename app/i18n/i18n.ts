@@ -28,7 +28,7 @@ const config: InitOptions = {
   supportedLngs,
   ns: ['common'],
   defaultNS: 'common',
-  debug: true,
+  debug: false,
   interpolation: { escapeValue: true },
   react: { useSuspense: false },
 };
