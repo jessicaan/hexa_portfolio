@@ -2,19 +2,19 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useState, useMemo } from 'react';
-import ReactiveGridBackground from '../background/ReactiveGridBackground';
-import { useTheme } from '../theme/ThemeProvider';
+import ReactiveGridBackground from '@/components/background/ReactiveGridBackground';
+import { useTheme } from '@/components/theme/ThemeProvider';
 import { loadPersonalContent } from '@/lib/content/client';
 import {
   defaultPersonalContent,
   type PersonalContent,
   type LanguageCode,
-  type Trait,
 } from '@/lib/content/schema';
 import { useTranslation } from 'react-i18next';
-import PersonalSectionHeader from './personal/PersonalSectionHeader';
-import PersonalTraitsRadarChart from './personal/PersonalTraitsRadarChart';
-import PersonalValuesBadges from './personal/PersonalValuesBadges';
+import PersonalSectionHeader from './PersonalSectionHeader';
+import PersonalTraitsRadarChart from './PersonalTraitsRadarChart';
+import PersonalValuesBadges from './PersonalValuesBadges';
+import PersonalHobbyCards from './PersonalHobbyCards';
 
 export default function PersonalSection() {
   const { i18n } = useTranslation();
@@ -146,43 +146,13 @@ export default function PersonalSection() {
                     </div>
 
                     <div className="grid gap-8 grid-cols-1">
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        {content.hobbyCards.map((card, idx) => {
-                          const translatedHobby = translation.translatedHobbies?.[idx];
-
-                          return (
-                            <motion.div
-                              key={card.id}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.3, delay: 0.3 + idx * 0.08 }}
-                              className="group rounded-xl border border-border-subtle p-4 transition-all duration-300 hover:border-border"
-                              style={{
-                                background: isDark
-                                  ? 'rgba(30, 30, 35, 0.5)'
-                                  : 'rgba(255, 255, 255, 0.3)',
-                              }}
-                            >
-                              <div className="flex items-start gap-3">
-                                <div
-                                  className="w-1 h-8 rounded-full shrink-0 mt-0.5"
-                                  style={{
-                                    background: `linear-gradient(to bottom, ${primaryColor}, hsl(var(--secondary)))`,
-                                  }}
-                                />
-                                <div>
-                                  <p className="text-md font-medium text-foreground mb-1">
-                                    {translatedHobby?.title || card.title}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground leading-relaxed">
-                                    {translatedHobby?.description || card.description}
-                                  </p>
-                                </div>
-                              </div>
-                            </motion.div>
-                          );
-                        })}
-                      </div>
+                      <PersonalHobbyCards
+                        hobbyCards={content.hobbyCards}
+                        translatedHobbies={translation.translatedHobbies}
+                        hobbiesLabel={translation.hobbiesLabel}
+                        primaryColor={primaryColor}
+                        isDark={isDark}
+                      />
                       {content.values && content.values.length > 0 && (
                         <PersonalValuesBadges
                           values={content.values}

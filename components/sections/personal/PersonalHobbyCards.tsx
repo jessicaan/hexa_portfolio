@@ -22,17 +22,7 @@ export default function PersonalHobbyCards({
 
   return (
     <>
-      <div className="flex items-center gap-3 mb-5">
-        <span
-          className="h-px w-8"
-          style={{
-            background: `linear-gradient(to right, ${primaryColor}, transparent)`,
-          }}
-        />
-        <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground">
-          {hobbiesLabel}
-        </p>
-      </div>
+
 
       <div className="grid gap-4 sm:grid-cols-2">
         {hobbyCards.map((card, idx) => {
