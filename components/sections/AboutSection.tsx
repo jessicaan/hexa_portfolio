@@ -105,11 +105,9 @@ export default function AboutSection() {
                 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight mb-4"
                 style={{ color: isDark ? '#fff' : 'var(--foreground)' }}
               >
-                {title}
-              </h1>
-              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-3xl">
                 {summary}
-              </p>
+              </h1>
+
             </motion.header>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
