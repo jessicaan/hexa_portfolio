@@ -178,6 +178,7 @@ export default function HexaNetworkWeb({
 
     const zoomIn = useCallback((nodeId: string) => {
         if (viewState !== 'network') return;
+        setActiveNode(nodeId);
         setViewState('zooming-in');
         timelineRef.current?.kill();
         const target = calculateView(nodeId);
@@ -185,7 +186,6 @@ export default function HexaNetworkWeb({
         const tl = gsap.timeline({
             onComplete: () => {
                 setViewState('focused');
-                setActiveNode(nodeId);
                 onNodeChange?.(nodeId);
             }
         });
@@ -365,7 +365,7 @@ export default function HexaNetworkWeb({
                                     fontSize="18"
                                     fontWeight={isActive ? "600" : "300"}
                                     letterSpacing="0.05em"
-                                    opacity={viewState === 'network' || viewState === 'zooming-out' ? 1 : 0}
+                                    opacity={viewState === 'focused' ? 0 : 1}
                                     className="pointer-events-none select-none transition-all duration-300 text-md font-light font-sans"
                                     style={{ textShadow: isActive ? `0 0 10px ${colors.glow}` : 'none' }}
                                 >

@@ -199,7 +199,7 @@ export default function ProjectHexCard({
                                 title={tech.id}
                             >
                                 <tech.Icon
-                                    className="w-4 h-4 md:w-5 md:h-5 transition-colors"
+                                    className="w-3 h-3 md:w-4 md:h-4 transition-colors"
                                     style={{ color: tech.color }}
                                 />
                             </div>
@@ -212,9 +212,9 @@ export default function ProjectHexCard({
                             </div>
                         )
                     ))}
-                    {technologies.length > 4 && (
+                    {technologies.length > 3 && (
                         <span className="text-[9px] text-white/30 font-medium ml-0.5">
-                            +{technologies.length - 4}
+                            +{technologies.length - 3}
                         </span>
                     )}
                 </div>

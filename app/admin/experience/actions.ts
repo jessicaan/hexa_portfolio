@@ -45,6 +45,7 @@ export async function autoTranslateExperience(base: {
       role: exp.role,
       description: exp.description,
       achievements: exp.achievements,
+      period: exp.period,
     })),
   };
 
@@ -74,6 +75,7 @@ export async function autoTranslateExperience(base: {
         role: translated?.role ?? baseExp.role,
         description: translated?.description ?? baseExp.description,
         achievements,
+        period: translated?.period ?? baseExp.period,
       };
     });
   };

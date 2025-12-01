@@ -359,8 +359,14 @@ function TranslatedExperienceEditor({ translations, expIndex, onExperienceChange
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
                 <Input label="Cargo" value={currentTranslation.role ?? ''} onChange={v => onExperienceChange(lang, expIndex, 'role', v)} />
-                <Input label="Descrição" value={currentTranslation.description ?? ''} onChange={v => onExperienceChange(lang, expIndex, 'description', v)} multiline />
+                <Input
+                    label="Período"
+                    value={currentTranslation.period ?? ''}
+                    onChange={v => onExperienceChange(lang, expIndex, 'period', v)}
+                    placeholder="Ex: Jan 2020 - Dez 2022"
+                />
             </div>
+            <Input label="Descrição" value={currentTranslation.description ?? ''} onChange={v => onExperienceChange(lang, expIndex, 'description', v)} multiline />
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground-subtle">Conquistas</span>

@@ -1,14 +1,4 @@
 {
-  "title": "To get started, edit the page.tsx file.",
-  "description": {
-    "part1": "Looking for a starting point or more instructions? Head over to",
-    "part2": "Templates",
-    "part3": "or the",
-    "part4": "Learning",
-    "part5": "center."
-  },
-  "deploy": "Deploy Now",
-  "docs": "Documentation",
   "about": {
     "heading": "About me",
     "summary": "I am a developer focused on crafting immersive digital experiences, combining motion, microinteractions and thoughtful interfaces to tell stories in any language.",
@@ -49,5 +39,9 @@
   "exploreCategories": {
     "title": "Explore Categories",
     "close": "Close"
+  },
+  "layout": {
+    "sectionsStatic": "Static Sections",
+    "hexaNetwork": "Hexa Network"
   }
 }

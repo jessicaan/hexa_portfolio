@@ -99,13 +99,14 @@ function padEducationTranslations(
     return arr.slice(0, baseEdu.length).map((item, idx) => {
       const baseHighlights = baseEdu[idx]?.highlights ?? [];
       const highlights = Array.isArray(item.highlights) ? [...item.highlights] : [];
-      while (highlights.length < baseHighlights.length) highlights.push("");
+      const targetLength = baseHighlights.length || highlights.length;
+      while (highlights.length < targetLength) highlights.push("");
       return {
         institution: item.institution ?? "",
         course: item.course ?? "",
         period: item.period ?? "",
         description: item.description ?? "",
-        highlights: highlights.slice(0, baseHighlights.length),
+        highlights: highlights.slice(0, targetLength),
       };
     });
   };

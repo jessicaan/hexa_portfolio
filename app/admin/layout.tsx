@@ -38,7 +38,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
 function AdminNav() {
   const links = [
-    { href: '/admin/initial', label: 'Início' },
     { href: '/admin/about', label: 'Sobre' },
     { href: '/admin/education', label: 'Educação' },
     { href: '/admin/experience', label: 'Experiência' },

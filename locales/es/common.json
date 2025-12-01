@@ -1,14 +1,4 @@
 {
-  "title": "Para comenzar, edita el archivo page.tsx.",
-  "description": {
-    "part1": "¿Buscas un punto de partida o más instrucciones? Dirígete a",
-    "part2": "Plantillas",
-    "part3": "o el",
-    "part4": "Aprendizaje",
-    "part5": "centro."
-  },
-  "deploy": "Desplegar ahora",
-  "docs": "Documentación",
   "about": {
     "heading": "Sobre mi",
     "summary": "Soy un desarrollador enfocado en crear experiencias digitales inmersivas, combinando animacion, microinteracciones e interfaces cuidadas para contar buenas historias en cualquier idioma.",
@@ -49,5 +39,9 @@
   "exploreCategories": {
     "title": "Explorar Categorías",
     "close": "Cerrar"
+  },
+  "layout": {
+    "sectionsStatic": "Secciones estáticas",
+    "hexaNetwork": "Red Hexa"
   }
 }

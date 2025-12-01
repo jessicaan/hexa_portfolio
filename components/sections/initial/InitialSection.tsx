@@ -21,8 +21,6 @@ import { useIntroAnimation } from './useIntroAnimation';
 
 gsap.registerPlugin(ScrambleTextPlugin);
 
-type UiLanguageCode = 'PT' | 'EN' | 'ES' | 'FR';
-
 export default function InitialSection({ onLanguageSelect, onExplore }: InitialSectionProps) {
   const [content, setContent] = useState<InitialSectionContent>(defaultInitialContent);
   const [shockwave, setShockwave] = useState<{ position: { x: number; y: number } } | null>(null);
@@ -33,6 +31,8 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
   const [showTip, setShowTip] = useState(false);
   const [showExplore, setShowExplore] = useState(false);
 
+
+  const roleRef = useRef<HTMLDivElement>(null);
   const greetingRef = useRef<HTMLDivElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const tipRef = useRef<HTMLParagraphElement>(null);
@@ -49,9 +49,6 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
     return () => { active = false; };
   }, []);
 
-
-
-
   const languages = useMemo<Language[]>(() => {
     const available = new Set(
       (content.languagesAvailable?.length ? content.languagesAvailable : ['pt']).map(c => c.toLowerCase())
@@ -66,6 +63,7 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
           code: meta.code,
           country: meta.country,
           name: meta.name,
+          role: meta.role, // Mapeando o Role
           greeting: translation?.headline || content.headline || meta.fallbackGreeting,
           description: translation?.subheadline || content.subheadline || meta.fallbackDescription,
           tip: translation?.description || content.description || meta.tip,
@@ -112,6 +110,10 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
     if (index !== null) {
       setDisplayLanguageIndex(index);
       const lang = languages[index];
+      const roleText = lang.role ?? languageMeta.find((meta) => meta.code === lang.code)?.role ?? '';
+
+      animateText(roleRef, roleText, 0.6, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ_#');
+
       animateText(greetingRef, lang.greeting, 0.6, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
       animateText(descriptionRef, lang.description, 0.6, 'abcdefghijklmnopqrstuvwxyz ');
       if (showTip) animateText(tipRef, lang.tip, 0.6, 'abcdefghijklmnopqrstuvwxyz ');
@@ -145,6 +147,28 @@ export default function InitialSection({ onLanguageSelect, onExplore }: InitialS
       >
         <HexaNode size={75} mobileSize={85} mobileStretch={1.35} onLineClick={handleLineClick}>
           <div className="text-foreground font-['Geist'] pointer-events-auto flex flex-col items-center justify-center px-4 sm:px-0">
+
+            <div className="flex flex-col items-center mb-6 sm:mb-8 opacity-80 z-10">
+              <div
+                className="text-[8px] sm:text-[9px] tracking-[0.3em] font-light text-muted-foreground/60 uppercase mb-2"
+              >
+                Portfolio
+              </div>
+
+
+              <h2 className="text-sm sm:text-lg tracking-[0.35em] font-thin text-foreground mb-2 uppercase text-center">
+                Jéssica Vieira
+              </h2>
+
+              <div
+                ref={roleRef}
+                className="text-[9px] sm:text-[10px] tracking-[0.25em] font-light text-primary uppercase"
+                style={{ textShadow: `0 0 15px rgba(${primaryRgb.r},${primaryRgb.g},${primaryRgb.b},0.6)` }}
+              >
+                {activeLanguage?.role ?? languageMeta[0].role}
+              </div>
+            </div>
+
 
             <div className="relative mb-4 sm:mb-8 md:mb-10">
               <motion.div

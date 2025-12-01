@@ -4,6 +4,7 @@ export interface Language {
   code: UiLanguageCode;
   country: string;
   name: string;
+  role?: string;
   greeting: string;
   description: string;
   tip: string;
@@ -14,6 +15,7 @@ export interface LanguageMeta {
   code: UiLanguageCode;
   country: string;
   name: string;
+  role?: string;
   fallbackGreeting: string;
   fallbackDescription: string;
   tip: string;

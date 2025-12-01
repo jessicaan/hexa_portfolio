@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { FaArrowLeft } from 'react-icons/fa';
 import HexaNetworkAdvanced from '@/components/hexagrid/HexaNetwork';
 import InitialSection from '@/components/sections/initial/InitialSection';
 import AboutSection from '@/components/sections/AboutSection';
@@ -14,7 +15,7 @@ import PersonalSection from '@/components/sections/PersonalSection';
 import ContactSection from '@/components/sections/ContactSection';
 import { LanguageCode } from '@/lib/content/schemas/common';
 import { useTheme } from '@/components/theme/ThemeProvider';
-import ExploreCategories from '@/components/hexagrid/ExploreCategories';
+import ExploreCategories from '@/components/layout/ExploreCategories';
 
 interface HomeClientProps { }
 
@@ -31,17 +32,21 @@ export default function HomeClient({ }: HomeClientProps) {
     key: number;
   } | null>(null);
   const [showCategoryNavigation, setShowCategoryNavigation] = useState(false);
+  const [showOverview, setShowOverview] = useState(false);
 
-  const navItems = useMemo(() => [
-    { id: 'intro', label: t('sections.intro') },
-    { id: 'about', label: t('sections.about') },
-    { id: 'education', label: t('sections.education') },
-    { id: 'experience', label: t('sections.experience') },
-    { id: 'projects', label: t('sections.projects') },
-    { id: 'skills', label: t('sections.skills') },
-    { id: 'personal', label: t('sections.personal') },
-    { id: 'contact', label: t('sections.contact') },
-  ], [t]);
+  const navItems = useMemo(
+    () => [
+      { id: 'intro', label: t('sections.intro') },
+      { id: 'about', label: t('sections.about') },
+      { id: 'education', label: t('sections.education') },
+      { id: 'experience', label: t('sections.experience') },
+      { id: 'projects', label: t('sections.projects') },
+      { id: 'skills', label: t('sections.skills') },
+      { id: 'personal', label: t('sections.personal') },
+      { id: 'contact', label: t('sections.contact') },
+    ],
+    [t],
+  );
 
   const handleLanguageSelect = useCallback(
     (code: string) => {
@@ -61,6 +66,7 @@ export default function HomeClient({ }: HomeClientProps) {
       i18n.changeLanguage(lowerCode);
       if (animationsEnabled) {
         setNetworkCommand({ name: 'zoomOut', key: Date.now() });
+        setShowOverview(true);
       } else {
         setShowCategoryNavigation(true);
       }
@@ -68,13 +74,17 @@ export default function HomeClient({ }: HomeClientProps) {
     [i18n, animationsEnabled],
   );
 
-  const handleNavigate = useCallback((sectionId: string) => {
-    setCurrentSection(sectionId);
-    setTransitionTrigger((prev) => prev + 1);
-    if (showCategoryNavigation) {
-      setShowCategoryNavigation(false);
-    }
-  }, [showCategoryNavigation]);
+  const handleNavigate = useCallback(
+    (sectionId: string) => {
+      setCurrentSection(sectionId);
+      setTransitionTrigger((prev) => prev + 1);
+      setShowOverview(false);
+      if (showCategoryNavigation) {
+        setShowCategoryNavigation(false);
+      }
+    },
+    [showCategoryNavigation],
+  );
 
   const handleCategorySelect = useCallback((categoryId: string) => {
     setCurrentSection(categoryId);
@@ -88,7 +98,17 @@ export default function HomeClient({ }: HomeClientProps) {
 
   const handleNodeChange = useCallback((nodeId: string) => {
     setCurrentSection(nodeId);
+    setShowOverview(false);
   }, []);
+
+  const handleBackToOverview = useCallback(() => {
+    if (animationsEnabled) {
+      setNetworkCommand({ name: 'zoomOut', key: Date.now() });
+      setShowOverview(true);
+    } else {
+      setShowCategoryNavigation(true);
+    }
+  }, [animationsEnabled]);
 
   const nodes = useMemo(
     () => [
@@ -165,14 +185,25 @@ export default function HomeClient({ }: HomeClientProps) {
   );
 
   const showNav = currentSection !== 'intro';
+  const showBackButton = currentSection !== 'intro' && !showOverview && !showCategoryNavigation;
 
   const currentSectionContent = useMemo(() => {
-    const node = nodes.find(node => node.id === currentSection);
+    const node = nodes.find((node) => node.id === currentSection);
     return node ? node.content : null;
   }, [currentSection, nodes]);
 
   return (
     <>
+      {showBackButton && (
+        <button
+          onClick={handleBackToOverview}
+          className="fixed left-6 top-6 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 text-foreground backdrop-blur-sm transition-all hover:bg-background hover:scale-105 border border-border/50"
+          aria-label={t('navigation.back')}
+        >
+          <FaArrowLeft className="h-5 w-5" />
+        </button>
+      )}
+
       {animationsEnabled ? (
         <HexaNetworkAdvanced
           nodes={nodes}
@@ -195,9 +226,7 @@ export default function HomeClient({ }: HomeClientProps) {
           onClose={handleCloseCategories}
         />
       ) : (
-        <div className="flex-1 overflow-auto">
-          {currentSectionContent}
-        </div>
+        <div className="flex-1 overflow-auto">{currentSectionContent}</div>
       )}
 
       <SectionNav

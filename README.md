@@ -1,6 +1,6 @@
 # HexaGrid Portfolio: A Dynamic & Interactive Product Engineering Showcase
 
-> "Is the PDF resume dead? Probably not, but I engineered a SaaS platform just in case."
+> "**Is the PDF resume dead? Probably not, but I engineered a SaaS platform just in case.**"
 
 Welcome to the HexaGrid Portfolio, a testament to modern product engineering, interactive design, and robust system architecture. This repository hosts a dynamic and visually engaging online portfolio, meticulously crafted to showcase my expertise and innovative approach to software development. It's more than just a collection of projects; it's an interactive experience built with a focus on performance, scalability, and maintainability.
 
@@ -159,10 +159,9 @@ Ensure you have the following software installed on your system:
 ## 📞 Connect & Explore Opportunities
 
 I am actively seeking challenging **Product Engineering roles** where I can leverage my expertise to build innovative solutions and drive product success. Let's connect and discuss how my skills can contribute to your team.
-I am actively seeking challenging **Product Engineering roles** where I can leverage my expertise to build innovative solutions and drive product success. Let's connect and discuss how my skills can contribute to your team.
 
-- **LinkedIn**: [Your LinkedIn Profile URL]
-- **Email**: [Your Email Address]
-- **Live Demo**: [Link to your Live Demo] (Experience the HexaGrid Portfolio live!)
+- **LinkedIn**: https://www.linkedin.com/in/jessicaaneci/
+- **Email**: jessicaaneci@gmail.com
+- **Live Demo**: https://www.jessicavieira.tech/
 
 Feel free to reach out with any questions, collaboration proposals, or career opportunities.

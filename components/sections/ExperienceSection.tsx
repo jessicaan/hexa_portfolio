@@ -40,6 +40,7 @@ export default function ExperienceSection() {
                 role: translated?.role || exp.role,
                 description: translated?.description || exp.description,
                 achievements,
+                period: translated?.period || exp.period,
             };
         });
     }, [content.experiences, translation]);

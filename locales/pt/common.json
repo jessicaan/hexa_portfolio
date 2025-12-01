@@ -1,17 +1,7 @@
 {
-  "title": "Para começar, edite o arquivo page.tsx.",
-  "description": {
-    "part1": "Procurando um ponto de partida или mais instruções? Vá para",
-    "part2": "Modelos",
-    "part3": "ou o",
-    "part4": "Aprendizagem",
-    "part5": "centro."
-  },
-  "deploy": "Implantar agora",
-  "docs": "Documentação",
   "about": {
     "heading": "Sobre mim",
-    "summary": "Sou um desenvolvedor focado em criar experiencias digitais imersivas, unindo animacao, microinteracoes e interfaces cuidadosas para contar boas historias em qualquer idioma.",
+    "summary": "Sou uma desenvolvedora focado em criar experiencias digitais imersivas, unindo animacao, microinteracoes e interfaces cuidadosas para contar boas historias em qualquer idioma.",
     "myStory": "Minha História",
     "highlights": "Destaques",
     "videoPitch": "Video Pitch",
@@ -49,5 +39,9 @@
   "exploreCategories": {
     "title": "Explorar Categorias",
     "close": "Fechar"
+  },
+  "layout": {
+    "sectionsStatic": "Seções estáticas",
+    "hexaNetwork": "Rede Hexa"
   }
 }

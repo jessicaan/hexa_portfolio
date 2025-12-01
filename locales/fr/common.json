@@ -1,14 +1,4 @@
 {
-  "title": "Pour commencer, modifiez le fichier page.tsx.",
-  "description": {
-    "part1": "Vous cherchez un point de départ ou plus d'instructions? Rendez-vous sur",
-    "part2": "Modèles",
-    "part3": "ou le",
-    "part4": "Apprentissage",
-    "part5": "centre."
-  },
-  "deploy": "Déployer maintenant",
-  "docs": "Documentation",
   "about": {
     "heading": "A propos de moi",
     "summary": "Je suis un developpeur concentre sur la creation d'experiences numeriques immersives, melant animation, microinteractions et interfaces soignees pour raconter de belles histoires dans toutes les langues.",
@@ -49,5 +39,9 @@
   "exploreCategories": {
     "title": "Explorer les Catégories",
     "close": "Fermer"
+  },
+  "layout": {
+    "sectionsStatic": "Sections statiques",
+    "hexaNetwork": "Réseau Hexa"
   }
 }

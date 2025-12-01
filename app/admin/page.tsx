@@ -1,5 +1,4 @@
 const sections = [
-  { id: 'about', title: 'About', description: 'Narrativa pessoal, manifesto e CTA inicial.' },
   { id: 'skills', title: 'Skills', description: 'Stacks, ferramentas e proficiência.' },
   { id: 'projects', title: 'Projects', description: 'Cases detalhados com mídia e links.' },
   { id: 'experience', title: 'Experience', description: 'Linha do tempo profissional e conquistas.' },

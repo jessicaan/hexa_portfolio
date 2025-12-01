@@ -249,7 +249,6 @@ export default function ProjectsSectionEditor({ initial }: Props) {
                             {value === 'pt' ? 'Conteúdo PT' : 'Traduções'}
                             {tab === value && (
                                 <motion.div
-                                    layoutId="projects-tab"
                                     className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary"
                                 />
                             )}
