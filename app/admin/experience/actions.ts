@@ -56,6 +56,7 @@ export async function autoTranslateExperience(base: {
       role?: string;
       description?: string;
       achievements?: unknown[];
+      period?: string;
     }[],
   ): ExperienceItem[] => {
     return base.experiences.map((baseExp, index) => {
