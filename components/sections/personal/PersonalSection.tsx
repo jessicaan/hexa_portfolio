@@ -85,7 +85,7 @@ export default function PersonalSection() {
         <ReactiveGridBackground />
 
         <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden personal-scrollbar">
-          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 py-8 md:py-12 lg:py-16">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 pt-8 pb-24 md:pt-12 md:pb-12 lg:pt-16 lg:pb-16">
             <PersonalSectionHeader
               primaryColor={primaryColor}
               eyebrow={translation.eyebrow}

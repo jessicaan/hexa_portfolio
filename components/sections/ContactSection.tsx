@@ -62,7 +62,7 @@ export default function ContactSection({ }: ContactSectionProps) {
   return (
     <main className="relative w-screen h-screen overflow-hidden">
       <ReactiveGridBackground />
-      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center w-full h-full px-6 sm:px-10 gap-10 lg:gap-16">
+      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center w-full h-full px-6 sm:px-10 gap-10 lg:gap-16 pb-24 lg:pb-0">
         <motion.section initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="max-w-xl text-center lg:text-left text-foreground">
           <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground-subtle mb-4">{translation.headline}</p>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-5">{translation.headline}</h2>

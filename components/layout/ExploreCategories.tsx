@@ -44,7 +44,7 @@ const ExploreCategories: React.FC<ExploreCategoriesProps> = ({
       <ReactiveGridBackground />
 
       <div className="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden">
-        <div className="min-h-full flex flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-16">
+        <div className="min-h-full flex flex-col px-4 pt-6 pb-32 sm:px-6 sm:pt-8 sm:pb-12 lg:px-12 lg:pt-16 lg:pb-12">
           <motion.header
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

@@ -129,7 +129,7 @@ export default function SkillsSection() {
         <ReactiveGridBackground />
 
         <div className="skills-scrollbar relative z-10 h-full w-full overflow-y-auto overflow-x-hidden">
-          <div className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 md:py-12 lg:px-12 lg:py-16">
+          <div className="mx-auto max-w-[1600px] px-4 pt-8 pb-24 sm:px-6 md:pt-12 md:pb-12 lg:px-12 lg:pt-16 lg:pb-16">
             <SkillsSectionHeader
               eyebrow={translation?.eyebrow || 'Skills'}
               title={translation?.title || 'Stack & Skills'}
