@@ -28,12 +28,15 @@ interface ThemeContextValue {
   setColorPreset: (preset: ColorPreset) => void;
   presets: ColorPreset[];
   primaryRgb: { r: number; g: number; b: number };
+  animationsEnabled: boolean;
+  toggleAnimations: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 const THEME_STORAGE_KEY = 'portfolio-theme';
 const COLOR_STORAGE_KEY = 'portfolio-color-preset';
+const ANIMATIONS_STORAGE_KEY = 'portfolio-animations-enabled';
 
 export const colorPresets: ColorPreset[] = [
   {
@@ -154,9 +157,15 @@ function applyColorPreset(preset: ColorPreset) {
   root.setAttribute('data-color-preset', preset.id);
 }
 
+function applyAnimations(enabled: boolean) {
+  if (typeof document === 'undefined') return;
+  document.documentElement.dataset.animationsEnabled = String(enabled);
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
   const [colorPreset, setColorPresetState] = useState<ColorPreset>(colorPresets[0]);
+  const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
   const primaryRgb = useMemo(() => {
     const { h, s, l } = parseHSL(colorPreset.primary);
@@ -187,6 +196,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } else {
       applyColorPreset(colorPresets[0]);
     }
+
+    const storedAnimations = window.localStorage.getItem(ANIMATIONS_STORAGE_KEY);
+    const initialAnimations = storedAnimations ? JSON.parse(storedAnimations) : true;
+    applyAnimations(initialAnimations);
+    setAnimationsEnabled(initialAnimations);
   }, []);
 
   const setTheme = useCallback((next: Theme) => {
@@ -216,6 +230,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const toggleAnimations = useCallback(() => {
+    setAnimationsEnabled(prev => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        applyAnimations(next);
+        window.localStorage.setItem(ANIMATIONS_STORAGE_KEY, JSON.stringify(next));
+      }
+      return next;
+    });
+  }, []);
+
   const value = useMemo(
     () => ({
       theme,
@@ -225,8 +250,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setColorPreset,
       presets: colorPresets,
       primaryRgb,
+      animationsEnabled,
+      toggleAnimations,
     }),
-    [theme, setTheme, toggleTheme, colorPreset, setColorPreset, primaryRgb]
+    [theme, setTheme, toggleTheme, colorPreset, setColorPreset, primaryRgb, animationsEnabled, toggleAnimations]
   );
 
   return (

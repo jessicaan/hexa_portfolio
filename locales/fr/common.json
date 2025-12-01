@@ -30,13 +30,24 @@
     "projects": "Projets",
     "skills": "Compétences",
     "personal": "Personnel",
-    "contact": "Contact"
+    "contact": "Contact",
+    "navigation": "Navigation"
   },
+  "openMenu": "Ouvrir le menu",
+  "closeMenu": "Fermer le menu",
   "siteControls": {
     "accentColor": "Couleur d'accentuation",
     "switchToLight": "Passer en mode clair",
     "switchToDark": "Passer en mode sombre",
     "light": "Clair",
-    "dark": "Sombre"
+    "dark": "Sombre",
+    "enableAnimations": "Activer les animations",
+    "disableAnimations": "Désactiver les animations",
+    "animated": "Animé",
+    "static": "Statique"
+  },
+  "exploreCategories": {
+    "title": "Explorer les Catégories",
+    "close": "Fermer"
   }
 }

@@ -62,6 +62,27 @@ This section highlights critical architectural and technical decisions, demonstr
 
 * **Proactive WebP Optimization on Frontend for Enhanced UX**: To guarantee superior loading times and reduced bandwidth consumption, images are dynamically converted and optimized to WebP format directly on the frontend. This proactive performance engineering measure significantly enhances the overall user experience, contributes positively to SEO rankings by improving Core Web Vitals, and ensures the portfolio remains fast and accessible across various network conditions.
 
+## 🧩 User Controls
+
+The platform offers a dedicated SiteControls component that allows users to fully personalize their browsing experience.
+Through this panel, users can adjust several preferences in real time, including:
+
+**🕹️ Animation Control**
+
+Enable or disable transition animations to match your preferred browsing speed and comfort level.
+
+**🎨 Theme Mode**
+
+Switch between Light and Dark mode for optimal visibility and personal style.
+
+**🌐 Language Selection**
+
+Choose the interface language for a more accessible and localized experience.
+
+**🌈 Accent Color**
+
+Customize the platform’s highlight color to match your personal aesthetic.
+
 ## ⚙️ Custom Headless CMS: Elevating Content Management
 
 Beyond the frontend, a powerful and highly customized administrative panel was developed from the ground up, serving as a bespoke Headless CMS. This solution leverages the full power of TypeScript Generics, enabling the creation of a type-safe, flexible, and highly extensible content management system. This approach offers several key advantages over off-the-shelf CMS solutions:

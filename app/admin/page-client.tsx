@@ -13,11 +13,14 @@ import SkillsSection from '@/components/sections/SkillsSection';
 import PersonalSection from '@/components/sections/PersonalSection';
 import ContactSection from '@/components/sections/ContactSection';
 import { LanguageCode } from '@/lib/content/schemas/common';
+import { useTheme } from '@/components/theme/ThemeProvider';
+import ExploreCategories from '@/components/hexagrid/ExploreCategories';
 
 interface HomeClientProps { }
 
 export default function HomeClient({ }: HomeClientProps) {
   const { i18n, t } = useTranslation();
+  const { animationsEnabled } = useTheme();
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode | null>(
     null,
   );
@@ -27,6 +30,7 @@ export default function HomeClient({ }: HomeClientProps) {
     name: 'zoomOut';
     key: number;
   } | null>(null);
+  const [showCategoryNavigation, setShowCategoryNavigation] = useState(false);
 
   const navItems = useMemo(() => [
     { id: 'intro', label: t('sections.intro') },
@@ -55,15 +59,31 @@ export default function HomeClient({ }: HomeClientProps) {
       const lowerCode = code.toLowerCase() as LanguageCode;
       setSelectedLanguage(lowerCode);
       i18n.changeLanguage(lowerCode);
-      setNetworkCommand({ name: 'zoomOut', key: Date.now() });
+      if (animationsEnabled) {
+        setNetworkCommand({ name: 'zoomOut', key: Date.now() });
+      } else {
+        setShowCategoryNavigation(true);
+      }
     },
-    [i18n],
+    [i18n, animationsEnabled],
   );
 
   const handleNavigate = useCallback((sectionId: string) => {
     setCurrentSection(sectionId);
-
     setTransitionTrigger((prev) => prev + 1);
+    if (showCategoryNavigation) {
+      setShowCategoryNavigation(false);
+    }
+  }, [showCategoryNavigation]);
+
+  const handleCategorySelect = useCallback((categoryId: string) => {
+    setCurrentSection(categoryId);
+    setTransitionTrigger((prev) => prev + 1);
+    setShowCategoryNavigation(false);
+  }, []);
+
+  const handleCloseCategories = useCallback(() => {
+    setShowCategoryNavigation(false);
   }, []);
 
   const handleNodeChange = useCallback((nodeId: string) => {
@@ -146,25 +166,39 @@ export default function HomeClient({ }: HomeClientProps) {
 
   const showNav = currentSection !== 'intro';
 
+  const currentSectionContent = useMemo(() => {
+    const node = nodes.find(node => node.id === currentSection);
+    return node ? node.content : null;
+  }, [currentSection, nodes]);
+
   return (
     <>
-      <HexaNetworkAdvanced
-        nodes={nodes}
-        initialNode="intro"
-        nodeRadius={80}
-        onNodeChange={handleNodeChange}
-        command={networkCommand}
-
-        transitionToNode={
-          transitionTrigger > 0
-            ? {
-              targetId: currentSection,
-
-              triggerKey: transitionTrigger,
-            }
-            : undefined
-        }
-      />
+      {animationsEnabled ? (
+        <HexaNetworkAdvanced
+          nodes={nodes}
+          initialNode="intro"
+          nodeRadius={80}
+          onNodeChange={handleNodeChange}
+          command={networkCommand}
+          transitionToNode={
+            transitionTrigger > 0
+              ? {
+                targetId: currentSection,
+                triggerKey: transitionTrigger,
+              }
+              : undefined
+          }
+        />
+      ) : showCategoryNavigation ? (
+        <ExploreCategories
+          onCategorySelect={handleCategorySelect}
+          onClose={handleCloseCategories}
+        />
+      ) : (
+        <div className="flex-1 overflow-auto">
+          {currentSectionContent}
+        </div>
+      )}
 
       <SectionNav
         items={navItems}

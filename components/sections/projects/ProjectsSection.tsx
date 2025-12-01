@@ -92,10 +92,10 @@ export default function ProjectsSection({ }: ProjectsSectionProps) {
   }, []);
 
   useEffect(() => {
-    if (projects.length > 0 && !selectedId && !isMobile) {
+    if (projects.length > 0 && !selectedId) {
       setSelectedId(projects[0].id);
     }
-  }, [projects, selectedId, isMobile]);
+  }, [projects, selectedId]);
 
   if (loading) {
     return (

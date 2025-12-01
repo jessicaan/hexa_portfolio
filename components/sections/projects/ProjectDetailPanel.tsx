@@ -188,7 +188,7 @@ export default function ProjectDetailPanel({
                         )}
                     </div>
 
-                    {/* Bottom Info: Caption & Dots (VISUAL LIMPO) */}
+                    {/* Bottom Info: Caption & Dots  */}
                     {allImages.length > 0 && (
                         <div className="w-full absolute bottom-0 left-0 flex flex-col items-center justify-end pointer-events-none pt-12 pb-6 bg-linear-to-t from-black/90 via-black/40 to-transparent">
 

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/components/theme/ThemeProvider';
-import { FiMoon, FiSun, FiChevronDown, FiSettings } from 'react-icons/fi';
+import { FiMoon, FiSun, FiChevronDown, FiSettings, FiZap, FiZapOff } from 'react-icons/fi';
 import { HiOutlineSparkles } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 
@@ -35,7 +35,7 @@ function hslToHex(hslString: string): string {
 }
 
 export default function CornerControls() {
-  const { theme, toggleTheme, colorPreset, setColorPreset, presets } = useTheme();
+  const { theme, toggleTheme, colorPreset, setColorPreset, presets, animationsEnabled, toggleAnimations } = useTheme();
   const [isColorMenuOpen, setIsColorMenuOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -174,6 +174,43 @@ export default function CornerControls() {
 
             <motion.button
               type="button"
+              onClick={toggleAnimations}
+              aria-label={animationsEnabled ? t('siteControls.disableAnimations') : t('siteControls.enableAnimations')}
+              className="flex h-10 items-center justify-center gap-2 px-3 rounded-xl border border-border-subtle bg-surface-soft text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all duration-300"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <AnimatePresence mode="wait">
+                {animationsEnabled ? (
+                  <motion.div
+                    key="zap"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center gap-2"
+                  >
+                    <FiZap className="h-4 w-4" />
+                    <span className="text-[10px] tracking-wider uppercase">{t('siteControls.animated')}</span>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="zap-off"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center gap-2"
+                  >
+                    <FiZapOff className="h-4 w-4" />
+                    <span className="text-[10px] tracking-wider uppercase">{t('siteControls.static')}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.button>
+
+            <motion.button
+              type="button"
               onClick={toggleTheme}
               aria-label={isDark ? t('siteControls.switchToLight') : t('siteControls.switchToDark')}
               className="flex h-10 items-center justify-center gap-2 px-3 rounded-xl border border-border-subtle bg-surface-soft text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all duration-300"
@@ -212,7 +249,7 @@ export default function CornerControls() {
         </motion.div>
       </div>
 
-      <div className="md:hidden fixed bottom-6 right-6 z-50" ref={menuRef}>
+      <div className="md:hidden fixed bottom-6 left-6 z-50" ref={menuRef}>
         <AnimatePresence>
           {isExpanded && (
             <motion.div
@@ -220,8 +257,23 @@ export default function CornerControls() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 20 }}
               transition={{ duration: 0.2 }}
-              className="absolute bottom-16 right-0 backdrop-blur-xl bg-surface/95 border border-border-subtle rounded-2xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.3)] min-w-[200px]"
+              className="absolute bottom-16 left-0 backdrop-blur-xl bg-surface/95 border border-border-subtle rounded-2xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.3)] min-w-[200px]"
             >
+              <motion.button
+                type="button"
+                onClick={() => {
+                  toggleAnimations();
+                  setIsExpanded(false);
+                }}
+                className="flex w-full items-center gap-3 h-12 px-4 rounded-xl border border-border-subtle bg-surface-soft text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all duration-300 mb-2"
+                whileTap={{ scale: 0.98 }}
+              >
+                {animationsEnabled ? <FiZap className="h-5 w-5" /> : <FiZapOff className="h-5 w-5" />}
+                <span className="text-xs tracking-wider uppercase flex-1 text-left">
+                  {animationsEnabled ? t('siteControls.animated') : t('siteControls.static')}
+                </span>
+              </motion.button>
+
               <motion.button
                 type="button"
                 onClick={() => {
@@ -285,17 +337,16 @@ export default function CornerControls() {
         <motion.button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center justify-center w-14 h-14 rounded-full backdrop-blur-xl bg-surface/90 border border-border-subtle shadow-[0_8px_30px_rgba(0,0,0,0.2)] text-muted-foreground hover:text-foreground transition-colors duration-300"
-          whileHover={{ scale: 1.05 }}
+          className="flex items-center justify-center w-12 h-12 rounded-full backdrop-blur-xl bg-surface/90 border border-border-subtle shadow-[0_8px_30px_rgba(0,0,0,0.2)] text-muted-foreground hover:text-foreground transition-colors duration-300"
           whileTap={{ scale: 0.95 }}
           animate={{ rotate: isExpanded ? 90 : 0 }}
           transition={{ duration: 0.3 }}
         >
           <div
-            className="w-2 h-2 rounded-full absolute top-2 right-2"
+            className="w-2 h-2 rounded-full absolute top-1.5 right-1.5"
             style={{ backgroundColor: hslToHex(colorPreset.primary) }}
           />
-          <FiSettings className="h-5 w-5" />
+          <FiSettings className="h-4 w-4" />
         </motion.button>
       </div>
     </>

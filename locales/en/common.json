@@ -30,13 +30,24 @@
     "projects": "Projects",
     "skills": "Skills",
     "personal": "Personal",
-    "contact": "Contact"
+    "contact": "Contact",
+    "navigation": "Navigation"
   },
+  "openMenu": "Open menu",
+  "closeMenu": "Close menu",
   "siteControls": {
     "accentColor": "Accent Color",
     "switchToLight": "Switch to light mode",
     "switchToDark": "Switch to dark mode",
     "light": "Light",
-    "dark": "Dark"
+    "dark": "Dark",
+    "enableAnimations": "Enable animations",
+    "disableAnimations": "Disable animations",
+    "animated": "Animated",
+    "static": "Static"
+  },
+  "exploreCategories": {
+    "title": "Explore Categories",
+    "close": "Close"
   }
 }
