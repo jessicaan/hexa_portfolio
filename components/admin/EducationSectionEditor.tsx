@@ -132,7 +132,7 @@ export default function EducationSectionEditor({ initial }: Props) {
             >
               {value === 'pt' ? 'Conteúdo PT' : 'Traduções'}
               {tab === value && (
-                <motion.div layoutId="education-tab" className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary" />
+                <motion.span layoutId="education-tab" className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary block" />
               )}
             </button>
           ))}

@@ -47,6 +47,12 @@ export default function AboutSection() {
 
   const translation = content.translations[cmsLang] || content.translations['en'];
 
+  const normalizeUrl = (value?: string | null) => {
+    if (!value) return undefined;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  };
+
   const title = content.title || translation.heading;
   const summary = translation.summary;
   const longDescription = translation.longDescription;
@@ -59,7 +65,7 @@ export default function AboutSection() {
     return translation.highlights ?? [];
   }, [translation.highlights]);
 
-  const videoUrl = content.videoPitchUrl;
+  const videoUrl = normalizeUrl(translation.videoPitchUrl) ?? normalizeUrl(content.videoPitchUrl);
   const profileImage = content.profileImage;
 
   return (

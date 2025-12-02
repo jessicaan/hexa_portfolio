@@ -147,13 +147,13 @@ export default function CornerControls() {
                                 }}
                               />
                               {isActive && (
-                                <motion.div
+                                <motion.span
                                   layoutId="active-color-ring-desktop"
-                                  className="absolute -inset-1 rounded-xl border-2 border-foreground"
+                                  className="absolute -inset-1 rounded-xl border-2 border-foreground block"
                                   transition={{ duration: 0.2 }}
                                 />
                               )}
-                              <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/20" />
+                              <span className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/20 block" />
                             </motion.button>
                           );
                         })}
@@ -319,9 +319,9 @@ export default function CornerControls() {
                           }}
                         />
                         {isActive && (
-                          <motion.div
+                          <motion.span
                             layoutId="active-color-ring-mobile"
-                            className="absolute -inset-0.5 rounded-lg border-2 border-foreground"
+                            className="absolute -inset-0.5 rounded-lg border-2 border-foreground block"
                             transition={{ duration: 0.2 }}
                           />
                         )}

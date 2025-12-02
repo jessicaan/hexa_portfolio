@@ -128,9 +128,9 @@ export default function ThemeCustomizer() {
                                                 whileTap={{ scale: 0.95 }}
                                             >
                                                 {isActive && (
-                                                    <motion.div
+                                                    <motion.span
                                                         layoutId="active-color"
-                                                        className="absolute inset-0 rounded-lg ring-2 ring-foreground ring-offset-2 ring-offset-surface"
+                                                        className="absolute inset-0 rounded-lg ring-2 ring-foreground ring-offset-2 ring-offset-surface block"
                                                     />
                                                 )}
                                             </motion.button>

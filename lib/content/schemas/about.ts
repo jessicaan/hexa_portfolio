@@ -10,6 +10,7 @@ export interface AboutTranslation {
   myStory: string;
   highlightsText: string;
   videoPitch: string;
+  videoPitchUrl?: string;
   videoPlaceholderTitle: string;
   videoPlaceholderDescription: string;
   skillsText: string;
@@ -42,6 +43,7 @@ export const defaultAboutContent: AboutContent = {
       myStory: 'My Story',
       highlightsText: 'Highlights',
       videoPitch: 'Video Pitch',
+      videoPitchUrl: '',
       videoPlaceholderTitle: 'No video available',
       videoPlaceholderDescription:
         'A personal video pitch will be added here soon.',
@@ -56,6 +58,7 @@ export const defaultAboutContent: AboutContent = {
       myStory: 'Mi Historia',
       highlightsText: 'Puntos Destacados',
       videoPitch: 'Video de Presentación',
+      videoPitchUrl: '',
       videoPlaceholderTitle: 'Video no disponible',
       videoPlaceholderDescription:
         'Pronto se agregará un video de presentación personal.',
@@ -70,6 +73,7 @@ export const defaultAboutContent: AboutContent = {
       myStory: 'Mon Histoire',
       highlightsText: 'Faits Saillants',
       videoPitch: 'Présentation Vidéo',
+      videoPitchUrl: '',
       videoPlaceholderTitle: 'Aucune vidéo disponible',
       videoPlaceholderDescription:
         'Une présentation vidéo personnelle sera ajoutée ici bientôt.',
@@ -84,6 +88,7 @@ export const defaultAboutContent: AboutContent = {
       myStory: 'Minha História',
       highlightsText: 'Destaques',
       videoPitch: 'Video de Apresentação',
+      videoPitchUrl: '',
       videoPlaceholderTitle: 'Nenhum vídeo disponível',
       videoPlaceholderDescription:
         'Um vídeo de apresentação pessoal será adicionado aqui em breve.',

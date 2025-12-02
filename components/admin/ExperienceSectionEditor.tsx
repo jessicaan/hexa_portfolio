@@ -170,7 +170,7 @@ export default function ExperienceSectionEditor({ initial }: Props) {
                         >
                             {value === 'pt' ? 'Conteúdo PT' : 'Traduções'}
                             {tab === value && (
-                                <motion.div layoutId="experience-tab" className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary" />
+                                <motion.span layoutId="experience-tab" className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary block" />
                             )}
                         </button>
                     ))}

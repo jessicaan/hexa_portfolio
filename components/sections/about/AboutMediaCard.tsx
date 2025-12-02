@@ -23,6 +23,9 @@ export default function AboutMediaCard({
   placeholderLabel,
   title,
 }: AboutMediaCardProps) {
+  const normalizedVideoUrl = videoUrl?.trim();
+  const hasVideo = Boolean(normalizedVideoUrl);
+
   return (
     <div
       className="relative rounded-2xl border border-border-subtle overflow-hidden backdrop-blur-md"
@@ -43,9 +46,9 @@ export default function AboutMediaCard({
           className="relative w-full max-w-[280px] sm:max-w-[300px] aspect-9/16 rounded-xl overflow-hidden shadow-2xl border border-white/10"
           style={{ backgroundColor: isDark ? primaryColorBg : '#f0f0f0' }}
         >
-          {videoUrl ? (
+          {hasVideo ? (
             <video
-              src={videoUrl}
+              src={normalizedVideoUrl ?? undefined}
               poster={profileImage || undefined}
               controls
               playsInline
@@ -80,7 +83,9 @@ export default function AboutMediaCard({
             {videoHeading}
           </p>
         </div>
-        <p className="text-sm text-foreground/80 leading-relaxed">{videoDescription}</p>
+        {!hasVideo && (
+          <p className="text-sm text-foreground/80 leading-relaxed">{videoDescription}</p>
+        )}
       </div>
     </div>
   );

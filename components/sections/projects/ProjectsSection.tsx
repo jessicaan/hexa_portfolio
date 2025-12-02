@@ -183,8 +183,8 @@ export default function ProjectsSection({ }: ProjectsSectionProps) {
     <main className="relative w-screen h-screen overflow-hidden">
       <ReactiveGridBackground shockwave={shockwave} />
 
-      <div className="relative z-10 w-full h-full overflow-hidden flex flex-col">
-        <div className="max-w-[1800px] w-full mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 pt-6 lg:pt-12 flex flex-col h-full">
+      <div className="relative z-10 w-full h-full overflow-hidden flex flex-col ">
+        <div className="max-w-[1800px] w-full mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 pt-6 lg:pt-12 flex flex-col h-full pb-20">
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -56,6 +56,7 @@ export const defaultAboutContent: AboutContent = {
       myStory: "My Story",
       highlightsText: "Highlights",
       videoPitch: "Video Pitch",
+      videoPitchUrl: "",
       videoPlaceholderTitle: "No video available",
       videoPlaceholderDescription: "A personal video pitch will be added here soon.",
       skillsText: "Skills",
@@ -69,6 +70,7 @@ export const defaultAboutContent: AboutContent = {
       myStory: "Mi Historia",
       highlightsText: "Puntos Destacados",
       videoPitch: "Video de Presentación",
+      videoPitchUrl: "",
       videoPlaceholderTitle: "Video no disponible",
       videoPlaceholderDescription: "Pronto se agregará un video de presentación personal.",
       skillsText: "Habilidades",
@@ -82,6 +84,7 @@ export const defaultAboutContent: AboutContent = {
       myStory: "Mon Histoire",
       highlightsText: "Faits Saillants",
       videoPitch: "Présentation Vidéo",
+      videoPitchUrl: "",
       videoPlaceholderTitle: "Aucune vidéo disponible",
       videoPlaceholderDescription: "Une présentation vidéo personnelle sera ajoutée ici bientôt.",
       skillsText: "Compétences",
@@ -95,6 +98,7 @@ export const defaultAboutContent: AboutContent = {
       myStory: "Minha História",
       highlightsText: "Destaques",
       videoPitch: "Video de Apresentação",
+      videoPitchUrl: "",
       videoPlaceholderTitle: "Nenhum vídeo disponível",
       videoPlaceholderDescription: "Um vídeo de apresentação pessoal será adicionado aqui em breve.",
       skillsText: "Habilidades",
@@ -210,8 +214,16 @@ export default function AboutSectionEditor({ initial }: Props) {
     setMessage(null);
     setError(null);
     startSave(async () => {
+      const payload: AboutContent = {
+        ...form,
+        translations: {
+          ...form.translations,
+          pt: { ...form.translations.pt, videoPitchUrl: form.videoPitchUrl },
+        },
+      };
+      setForm(payload);
       try {
-        await saveAboutContent(form);
+        await saveAboutContent(payload);
         setMessage('Conteúdo salvo com sucesso.');
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erro ao salvar.');
@@ -290,7 +302,7 @@ export default function AboutSectionEditor({ initial }: Props) {
             >
               {value === 'pt' ? 'Conteúdo PT' : 'Traduções'}
               {tab === value && (
-                <motion.div layoutId="about-tab" className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary" />
+                <motion.span layoutId="about-tab" className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary block" />
               )}
             </button>
           ))}
@@ -318,7 +330,16 @@ export default function AboutSectionEditor({ initial }: Props) {
                 {/* Video Pitch URL (PT) uses the top-level property */}
                 <FileUploader
                   value={form.videoPitchUrl}
-                  onChange={url => setForm(prev => ({ ...prev, videoPitchUrl: url }))}
+                  onChange={url =>
+                    setForm(prev => ({
+                      ...prev,
+                      videoPitchUrl: url,
+                      translations: {
+                        ...prev.translations,
+                        pt: { ...prev.translations.pt, videoPitchUrl: url },
+                      },
+                    }))
+                  }
                   accept="video/*"
                   label="Vídeo de apresentação (PT)"
                   folder="about/pt"
