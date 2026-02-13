@@ -4,7 +4,7 @@
 
 Welcome to the HexaGrid Portfolio, a testament to modern product engineering, interactive design, and robust system architecture. This repository hosts a dynamic and visually engaging online portfolio, meticulously crafted to showcase my expertise and innovative approach to software development. It's more than just a collection of projects; it's an interactive experience built with a focus on performance, scalability, and maintainability.
 
-## 🚀 Technology Stack
+##  Technology Stack
 
 This project is built upon a modern, robust, and scalable technology stack, carefully selected to deliver a high-performance and maintainable application.
 
@@ -13,11 +13,10 @@ This project is built upon a modern, robust, and scalable technology stack, care
 ![Tailwind CSS](https://img.shields.io/badge/tailwindcss-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![Firebase](https://img.shields.io/badge/firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
 
-## ✨ Visual Proof
+## Visual Proof
 
 ![HexaGrid Portfolio Preview](public/84612672-1A72-4AB2-A095-5EC92A92A703.gif)
 
-_Witness a few seconds of the HexaGrid Portfolio in action. This visual proof offers a concise yet comprehensive tour, highlighting the fluid user experience, responsive design, and core interactive features that define this project. It's designed to give you an immediate understanding of the application's capabilities and aesthetic._
 
 ![HexaGrid Portfolio Preview](public/D4C933DE-86AD-41C1-80E4-622949BF0B00.gif)
 
@@ -33,9 +32,9 @@ graph TD
     F -- Render UI --> A
 ```
 
-\_This Mermaid.js diagram provides a high-level overview of the application's architecture, specifically detailing the interaction flow for the HexaGrid navigation system. It visually demonstrates the separation of concerns, data flow from user interaction through animation logic and data fetching, highlighting a well-planned and modular system design.
+\_This diagram provides a high-level overview of the application's architecture, specifically detailing the interaction flow for the HexaGrid navigation system. It visually demonstrates the separation of concerns, data flow from user interaction through animation logic and data fetching, highlighting a well-planned and modular system design.
 
-## 🤖 AI Integration: Automated Localization
+##  AI Integration: Automated Localization
 
 One of the standout features of the CMS is the **AI-Powered Translation Engine**.
 
@@ -44,7 +43,7 @@ Instead of manually translating every content update into 4 languages, I enginee
 - **How it works:** The component accepts a generic content schema (JSON), sends it to Gemini with a strict system prompt to preserve tone and context, and returns the structured JSON translated into English, Spanish, and French almost instantly. (free tier)
 - **The Impact:** drastically reduced content management time, allowing for real-time updates across all international locales easily.
 
-## 💡 Strategic Trade-offs: Engineering Decisions with Business Impact
+##  Strategic Trade-offs: Engineering Decisions with Business Impact
 
 - **Pragmatic Approach to Internal Tools (The Admin Panel)**: Initially, this repository was intended to be private. As a result, the Administrative Panel (`/admin`) was built with a "Velocity First" mindset. Unlike the public-facing application—which is highly modular and fully internationalized—the Admin dashboard is hardcoded in **Portuguese (PT-BR)** and less strictly componentized.
 
@@ -62,28 +61,28 @@ This section highlights critical architectural and technical decisions, demonstr
 
 * **Proactive WebP Optimization on Frontend for Enhanced UX**: To guarantee superior loading times and reduced bandwidth consumption, images are dynamically converted and optimized to WebP format directly on the frontend. This proactive performance engineering measure significantly enhances the overall user experience, contributes positively to SEO rankings by improving Core Web Vitals, and ensures the portfolio remains fast and accessible across various network conditions.
 
-## 🧩 User Controls
+##  User Controls
 
 The platform offers a dedicated SiteControls component that allows users to fully personalize their browsing experience.
 Through this panel, users can adjust several preferences in real time, including:
 
-**🕹️ Animation Control**
+**Animation Control**
 
 Enable or disable transition animations to match your preferred browsing speed and comfort level.
 
-**🎨 Theme Mode**
+**Theme Mode**
 
 Switch between Light and Dark mode for optimal visibility and personal style.
 
-**🌐 Language Selection**
+**Language Selection**
 
 Choose the interface language for a more accessible and localized experience.
 
-**🌈 Accent Color**
+**Accent Color**
 
 Customize the platform’s highlight color to match your personal aesthetic.
 
-## ⚙️ Custom Headless CMS: Elevating Content Management
+##    Custom Headless CMS: Elevating Content Management
 
 Beyond the frontend, a powerful and highly customized administrative panel was developed from the ground up, serving as a bespoke Headless CMS. This solution leverages the full power of TypeScript Generics, enabling the creation of a type-safe, flexible, and highly extensible content management system. This approach offers several key advantages over off-the-shelf CMS solutions:
 
@@ -92,7 +91,7 @@ Beyond the frontend, a powerful and highly customized administrative panel was d
 - **Advanced Type Safety**: Utilizing TypeScript Generics significantly reduces runtime errors and improves developer experience, ensuring data consistency and integrity across the application.
 - **Demonstration of Advanced Engineering**: Building a custom CMS showcases not just proficiency in frontend frameworks, but also a deep understanding of full-stack architecture, data modeling, and robust software design principles.
 
-## 🔒 Robust Security with Firestore Rules
+##  Robust Security with Firestore Rules
 
 Security is paramount, especially for publicly accessible applications. This project implements stringent Firestore Security Rules to safeguard data integrity and prevent unauthorized modifications to the database. The embedded rules below demonstrate a foundational security posture:
 
@@ -108,9 +107,9 @@ service cloud.firestore {
 }
 ```
 
-_These rules are meticulously crafted to allow public read access for the portfolio's content, ensuring broad visibility. Crucially, write operations are restricted exclusively to authenticated users, typically administrators. This prevents malicious data injection or accidental corruption, underscoring a commitment to secure application development practices and protecting the integrity of the displayed information._
+_These rules are crafted to allow public read access for the portfolio's content, ensuring broad visibility. Crucially, write operations are restricted exclusively to authenticated users, typically administrators. This prevents malicious data injection or accidental corruption, underscoring a commitment to secure application development practices and protecting the integrity of the displayed information._
 
-## 🚀 Getting Started: Setting Up Your Local Environment
+##  Getting Started: Setting Up Your Local Environment
 
 To get a local copy of the HexaGrid Portfolio up and running, follow these detailed instructions. This will allow you to explore the codebase, contribute to its development, or customize it for your own use.
 
@@ -156,7 +155,7 @@ Ensure you have the following software installed on your system:
     ```
     The application will be accessible in your web browser at [http://localhost:3000](http://localhost:3000).
 
-## 📞 Connect & Explore Opportunities
+## Connect & Explore Opportunities
 
 I am actively seeking challenging **Product Engineering roles** where I can leverage my expertise to build innovative solutions and drive product success. Let's connect and discuss how my skills can contribute to your team.
 
