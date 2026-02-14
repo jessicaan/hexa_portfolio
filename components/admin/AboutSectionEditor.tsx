@@ -23,7 +23,7 @@ export interface AboutTranslation {
   myStory: string;
   highlightsText: string;
   videoPitch: string;
-  videoPitchUrl?: string; // Added this field
+  videoPitchUrl?: string;
   videoPlaceholderTitle: string;
   videoPlaceholderDescription: string;
   skillsText: string;
@@ -33,7 +33,7 @@ export interface AboutTranslation {
 
 export interface AboutContent {
   title: string;
-  videoPitchUrl: string; // Top level acts as PT/Default
+  videoPitchUrl: string;
   profileImage: string;
   translations: {
     en: AboutTranslation;
@@ -253,7 +253,7 @@ export default function AboutSectionEditor({ initial }: Props) {
             en: { ...prev.translations.en, ...translations.en, videoPitchUrl: prev.translations.en.videoPitchUrl ?? "" },
             es: { ...prev.translations.es, ...translations.es, videoPitchUrl: prev.translations.es.videoPitchUrl ?? "" },
             fr: { ...prev.translations.fr, ...translations.fr, videoPitchUrl: prev.translations.fr.videoPitchUrl ?? "" },
-            pt: prev.translations.pt, // Preserve PT
+            pt: prev.translations.pt,
           },
         }));
         setMessage('Traduções geradas com sucesso.');

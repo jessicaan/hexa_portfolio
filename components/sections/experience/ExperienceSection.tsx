@@ -120,7 +120,6 @@ export default function ExperienceSection() {
               title={translation.title}
               summary={translation.summary}
               primaryColor={primaryColor}
-              isDark={isDark}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">

@@ -5,7 +5,6 @@ interface ExperienceSectionHeaderProps {
   title: string;
   summary: string;
   primaryColor: string;
-  isDark: boolean;
 }
 
 export default function ExperienceSectionHeader({
@@ -13,7 +12,6 @@ export default function ExperienceSectionHeader({
   title,
   summary,
   primaryColor,
-  isDark,
 }: ExperienceSectionHeaderProps) {
   return (
     <motion.header
@@ -34,8 +32,7 @@ export default function ExperienceSectionHeader({
         </p>
       </div>
       <h1
-        className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight mb-4"
-        style={{ color: isDark ? '#fff' : 'var(--foreground)' }}
+        className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight mb-4 text-foreground"
       >
         {title}
       </h1>

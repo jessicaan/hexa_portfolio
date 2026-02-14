@@ -24,9 +24,7 @@ export default function ProjectInfoGrid({
 
     return (
         <section>
-            <p className="text-[11px] uppercase tracking-widest font-semibold text-muted-foreground">
-                {translation.otherInfoLabel}
-            </p>
+
             <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {metrics.map((metric, idx) => (
                     <div

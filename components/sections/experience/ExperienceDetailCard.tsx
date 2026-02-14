@@ -58,8 +58,7 @@ export default function ExperienceDetailCard({
         </div>
 
         <h2
-          className="text-xl sm:text-2xl font-semibold mb-2"
-          style={{ color: isDark ? '#fff' : 'var(--foreground)' }}
+          className="text-xl sm:text-2xl font-semibold mb-2 text-foreground"
         >
           {experience.role}
         </h2>
